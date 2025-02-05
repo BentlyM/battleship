@@ -1,20 +1,82 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-generator client {
-    provider = "prisma-client-js"
-}
+// schema.prisma
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+generator client {
+  provider = "prisma-client-js"
+}
 
-    @@index([name])
+model User {
+  id             Int       @id @default(autoincrement())
+  username       String    @unique
+  email          String    @unique
+  passwordHash   String
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  games          Game[]
+  statistics     UserStatistics?
+  achievements   Achievement[]
+  leaderboard     LeaderboardEntry[]
+
+  Move Move[]
+
+  player1Games Game[] @relation("Player1Games")
+  player2Games Game[] @relation("Player2Games")
+}
+
+model Game {
+  id             Int       @id @default(autoincrement())
+  player1Id      Int
+  player2Id      Int
+  winnerId       Int?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  player1        User      @relation("Player1Games", fields: [player1Id], references: [id])
+  player2        User      @relation("Player2Games", fields: [player2Id], references: [id])
+  moves          Move[]
+
+  User User[]
+}
+
+model Move {
+  id             Int       @id @default(autoincrement())
+  gameId         Int
+  playerId       Int
+  position       String    // e.g., "A1", "B2"
+  hit            Boolean
+  createdAt      DateTime  @default(now())
+  game           Game      @relation(fields: [gameId], references: [id])
+  player         User      @relation(fields: [playerId], references: [id])
+}
+
+model UserStatistics {
+  id             Int       @id @default(autoincrement())
+  userId         Int       @unique
+  totalGames     Int       @default(0)
+  wins           Int       @default(0)
+  losses         Int       @default(0)
+  draws          Int       @default(0)
+  averageDuration Float     @default(0) // Average game duration in seconds
+  user           User      @relation(fields: [userId], references: [id])
+}
+
+model Achievement {
+  id             Int       @id @default(autoincrement())
+  userId         Int
+  title          String
+  description    String
+  createdAt      DateTime  @default(now())
+  user           User      @relation(fields: [userId], references: [id])
+}
+
+model LeaderboardEntry {
+  id             Int       @id @default(autoincrement())
+  userId         Int
+  rank           Int
+  score          Int       // Could be based on wins, points, etc.
+  createdAt      DateTime  @default(now())
+  user           User      @relation(fields: [userId], references: [id])
 }
