@@ -20,6 +20,10 @@ export default {
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
+			"board-cell": {
+				DEFAULT: 'hsla(var(--board-cell))',
+				hover: 'hsla(var(--board-cell-hover))'
+			},
   			card: {
   				DEFAULT: 'hsl(var(--card))',
   				foreground: 'hsl(var(--card-foreground))'
