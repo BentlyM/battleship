@@ -3,11 +3,18 @@ import React from 'react';
 import Ship, { shipProps } from './Ship';
 
 interface BoardProps {
-  board: any; // Adjust this type according to your boardConfig structure
+  board: {
+    id: string;
+    boardData: any[][];
+    activeBoard: 'player' | 'bot';
+  };
+  onClick?: () => void;
 }
 
-const Board: React.FC<BoardProps> = ({ board }) => {
-  const { id, boardData } = board;
+const Board: React.FC<BoardProps> = ({ board, onClick }) => {
+  const { id, boardData, activeBoard } : BoardProps['board'] = board;
+  const isActive = (id === 'player-board' && activeBoard === 'player') || 
+                  (id === 'bot-board' && activeBoard === 'bot');
 
   // Column headers for the game board (A to J)
   const columnHeaders = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
@@ -25,47 +32,47 @@ const Board: React.FC<BoardProps> = ({ board }) => {
     e.preventDefault();
     
     try {
-        const target = e.target as HTMLElement;
-        const table = target.closest('table');
-        if (!table) return;
+      const target = e.target as HTMLElement;
+      const table = target.closest('table');
+      if (!table) return;
 
-        // Get the mouse position relative to the table
-        const rect = table.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
+      // Get the mouse position relative to the table
+      const rect = table.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
 
-        // Calculate cell size (including border spacing)
-        const cellSize = 32; // 32px for w-8 h-8, or 40px for sm:w-10 sm:h-10
-        const borderSpacing = 3; // From border-spacing-[3px]
+      // Calculate cell size (including border spacing)
+      const cellSize = 32; // 32px for w-8 h-8, or 40px for sm:w-10 sm:h-10
+      const borderSpacing = 3; // From border-spacing-[3px]
 
-        // Calculate the nearest grid cell
-        const x = Math.floor(mouseY / (cellSize + borderSpacing)) - 1; // -1 for header row
-        const y = Math.floor(mouseX / (cellSize + borderSpacing)) - 1; // -1 for header column
+      // Calculate the nearest grid cell
+      const x = Math.floor(mouseY / (cellSize + borderSpacing)) - 1; // -1 for header row
+      const y = Math.floor(mouseX / (cellSize + borderSpacing)) - 1; // -1 for header column
 
-        // Validate the position
-        if (x < 0 || x >= boardData.length || y < 0 || y >= boardData[0].length) {
-            console.error('Invalid drop position');
-            return;
-        }
+      // Validate the position
+      if (x < 0 || x >= boardData.length || y < 0 || y >= boardData[0]!.length) {
+        console.error('Invalid drop position');
+        return;
+      }
 
-        const shipDataStr = e.dataTransfer.getData('application/json');
-        if (!shipDataStr) {
-            console.error('No ship data received');
-            return;
-        }
+      const shipDataStr = e.dataTransfer.getData('application/json');
+      if (!shipDataStr) {
+        console.error('No ship data received');
+        return;
+      }
 
-        const shipData = JSON.parse(shipDataStr);
-        
-        // Handle ship placement logic here
-        console.log('Ship dropped at:', { ...shipData, x, y });
-        
+      const shipData = JSON.parse(shipDataStr);
+      
+      // Handle ship placement logic here
+      console.log('Ship dropped at:', { ...shipData, x, y });
+      
     } catch (error) {
-        console.error('Error handling ship drop:', error);
+      console.error('Error handling ship drop:', error);
     }
   };
 
   return (
-    <div className="flex flex-col items-center w-full max-w-[600px] mx-auto p-4">
+    <div className="flex flex-col items-center w-full max-w-[600px] mx-auto p-4" onClick={onClick}>
       <h3 className="text-xl font-semibold mb-6 text-center">
         {id === 'player-board' ? 'Player Board' : 'Bot Board'}
       </h3>
@@ -81,14 +88,21 @@ const Board: React.FC<BoardProps> = ({ board }) => {
               <tr>
                 <th className="w-8 h-8 sm:w-10 sm:h-10"></th>
                 {columnHeaders.map((header, index) => (
-                  <th key={index} className="w-8 h-8 sm:w-10 sm:h-10 text-center text-sm sm:text-base">
+                  <th 
+                    key={index} 
+                    className={`w-8 h-8 sm:w-10 sm:h-10 text-center text-sm sm:text-base
+                      ${isActive ? 'text-black' : 'text-transparent'} transition-colors duration-300`}
+                  >
                     {header}
                   </th>
                 ))}
               </tr>
               {boardData.map((row: any[], rowIndex: number) => (
                 <tr key={rowIndex}>
-                  <th className="w-8 h-8 sm:w-10 sm:h-10 text-center text-sm sm:text-base">
+                  <th 
+                    className={`w-8 h-8 sm:w-10 sm:h-10 text-center text-sm sm:text-base
+                      ${isActive ? 'text-black' : 'text-transparent'} transition-colors duration-300`}
+                  >
                     {rowIndex + 1}
                   </th>
                   {row.map((cell: any, columnIndex: number) => {
