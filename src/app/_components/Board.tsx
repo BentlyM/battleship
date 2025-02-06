@@ -5,7 +5,7 @@ import Ship, { shipProps } from './Ship';
 interface BoardProps {
   board: {
     id: string;
-    boardData: any[][];
+    boardData: string[][];
     activeBoard: 'player' | 'bot';
   };
   onClick?: () => void;
@@ -92,36 +92,54 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
       const target = e.target as HTMLElement;
       const table = target.closest('table');
       if (!table) return;
-
+  
       // Get the mouse position relative to the table
       const rect = table.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
-
+  
       // Calculate cell size (including border spacing)
       const cellSize = 32; // 32px for w-8 h-8, or 40px for sm:w-10 sm:h-10
       const borderSpacing = 3; // From border-spacing-[3px]
-
-      // Calculate the nearest grid cell
+  
+      // Calculate the nearest grid cell (same as handleDragOver)
       const x = Math.floor(mouseX / (cellSize + borderSpacing)) - 1; // -1 for header column
       const y = Math.floor(mouseY / (cellSize + borderSpacing)) - 1; // -1 for header row
-
+  
+      // Use the same adjustment logic as handleDragOver
+      const adjustedX = draggedShip?.orientation === 'horizontal' 
+        ? Math.max(0, Math.min(x, boardData.length - draggedShip.size))
+        : Math.max(0, Math.min(x, boardData.length - 1));
+  
+      const adjustedY = draggedShip?.orientation === 'vertical'
+        ? Math.max(0, Math.min(y, boardData[0]!.length - draggedShip.size))
+        : Math.max(0, Math.min(y, boardData[0]!.length - 1));
+  
       // Validate the position
-      if (x < 0 || x >= boardData.length || y < 0 || y >= boardData[0]!.length) {
+      if (adjustedX < 0 || adjustedX >= boardData.length || 
+          adjustedY < 0 || adjustedY >= boardData[0]!.length) {
         console.error('Invalid drop position');
         return;
       }
-
+  
       const shipDataStr = e.dataTransfer.getData('application/json');
       if (!shipDataStr) {
         console.error('No ship data received');
         return;
       }
-
+  
       const shipData = JSON.parse(shipDataStr);
       
-      // Handle ship placement logic here
-      console.log('Ship dropped at:', { ...shipData, x, y});
+      // Use the adjusted position for the drop
+      console.log('Ship dropped at:', { 
+        ...shipData, 
+        x: adjustedX, 
+        y: adjustedY,
+        orientation: draggedShip?.orientation || shipData.orientation
+      });
+      
+      // Here you would add your actual ship placement logic
+      // using the adjustedX and adjustedY positions
       
     } catch (error) {
       console.error('Error handling ship drop:', error);
@@ -154,7 +172,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
                   </th>
                 ))}
               </tr>
-              {boardData.map((row: any[], rowIndex: number) => (
+              {boardData.map((row: string[], rowIndex: number) => (
   <tr key={rowIndex}>
                   <th 
                     className={`w-8 h-8 sm:w-10 sm:h-10 text-center text-sm sm:text-base
@@ -162,7 +180,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
                   >
                     {rowIndex + 1}
                   </th>
-    {row.map((cell: any, columnIndex: number) => {
+    {row.map((_, columnIndex: number) => {
       // Calculate highlight area
       const isHighlighted = draggedShip && 
         ((draggedShip.orientation === 'horizontal' &&
