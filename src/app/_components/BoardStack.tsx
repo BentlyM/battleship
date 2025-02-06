@@ -8,32 +8,35 @@ export type Board = Array<Array<Cell>>;
 const BOARD_SIZE = 10;
 const createBoard = (): Board => Array.from({length: BOARD_SIZE}, () => Array(BOARD_SIZE).fill(''));
 
-
 export const BoardStack = () => {
   const [activeBoard, setActiveBoard] = useState<'player' | 'bot'>('player');
 
   return (
-    <div className="relative h-[440px] w-[340px]">
-      {/* Player Board */}
-      <div
-        className={`absolute transition-all duration-500 ease-in-out ${
-          activeBoard === 'player'
-            ? 'z-30 left-0 top-0'
-            : 'z-20 left-4 top-4 opacity-75'
-        }`}
-      >
-        <ShowBoard board={{ id: 'player-board', boardData: createBoard(), activeBoard }} />
-      </div>
+    <div className="flex items-center justify-center w-full h-full">
+      <div className="relative w-[545px] h-[600px]">
+        {/* Player Board */}
+        <div
+          className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 
+            transition-all duration-500 ease-in-out w-full
+            ${activeBoard === 'player'
+              ? 'z-30 translate-x-[-50%] translate-y-[-50%]'
+              : 'z-20 translate-x-[-45%] translate-y-[-47%] opacity-75'
+            }`}
+        >
+          <ShowBoard board={{ id: 'player-board', boardData: createBoard(), activeBoard }} />
+        </div>
 
-      {/* Bot Board */}
-      <div
-        className={`absolute transition-all duration-500 ease-in-out ${
-          activeBoard === 'bot'
-            ? 'z-30 left-0 top-0'
-            : 'z-10 left-8 top-8 opacity-75'
-        }`}
-      >
-        <ShowBoard board={{ id: 'bot-board', boardData: createBoard(), activeBoard }} />
+        {/* Bot Board */}
+        <div
+          className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 
+            transition-all duration-500 ease-in-out w-full
+            ${activeBoard === 'bot'
+              ? 'z-30 translate-x-[-50%] translate-y-[-72%]'
+              : 'z-20 translate-x-[-45%] translate-y-[-67%] opacity-75'
+            }`}
+        >
+          <ShowBoard board={{ id: 'bot-board', boardData: createBoard(), activeBoard }} />
+        </div>
       </div>
     </div>
   );

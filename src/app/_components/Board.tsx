@@ -125,7 +125,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
 
       {/* Ships section - only show for player board */}
       {id === 'player-board' && (
-        <div className="mt-8 p-4 w-full border-2 border-gray-200 rounded-lg">
+        <div className="p-4 w-full border-2 border-gray-200 rounded-lg">
           <h4 className="text-lg font-semibold mb-4">Your Ships</h4>
           <div className="flex flex-wrap gap-4 justify-center overflow-auto h-[176px] w-[440px]">
             {Object.entries(shipProps).map(([type, props]) => (
