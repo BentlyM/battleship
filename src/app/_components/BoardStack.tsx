@@ -12,7 +12,8 @@ export const BoardStack = () => {
   const [activeBoard, setActiveBoard] = useState<'player' | 'bot'>('player');
 
   return (
-    <div className="flex items-center justify-center w-full h-full">
+    <div className="flex items-center justify-evenly w-full h-full">
+      <div onClick={() => setActiveBoard('player')}>{'Coming Soon'}</div>
       <div className="relative w-[545px] h-[600px]">
         {/* Player Board */}
         <div
@@ -38,6 +39,7 @@ export const BoardStack = () => {
           <ShowBoard board={{ id: 'bot-board', boardData: createBoard(), activeBoard }} />
         </div>
       </div>
+      <div onClick={() => setActiveBoard('bot')}>{'Coming Soon'}</div>
     </div>
   );
 };

@@ -1,0 +1,25 @@
+features: 
+  - name: "Bot Board"
+    description: "The bot board is a grid that the player can find the bot's ships on."
+    status: "in progress"
+    dueDate: "before the end of this week"
+    priority: "medium"
+  - name: "Player Board"
+    description: "The player board is a grid that the player can see their ships on."
+    status: "in progress"
+    dueDate: "before the end of this week"
+    priority: "medium"
+    notes: "The player board should have a button to place the ship on the board. (undeveloped)",
+          "The player board should have a button to remove the ship from the board. (undeveloped)",
+          "The player board should have a button to rotate the ship. (completed)",
+          " the player board ships should be visible to the player (in progress)",
+  - name: "Game Logic"
+    description: "The game logic is the logic that the game follows."
+    status: "undeveloped"
+    dueDate: "before the end of this week"
+    priority: "high"
+  - name: "Game UI"
+    description: "The game UI is the UI of the game."
+    status: "in progress"
+    dueDate: "before the end of this week"
+    priority: "high"

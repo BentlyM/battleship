@@ -1,53 +1,25 @@
 import React, { useState } from 'react'
 
-export const shipProps: { [key: string]: { size: number; orientation: 'horizontal' | 'vertical'; position: { x: number; y: number }[] } } = {
+export const shipProps: { [key: string]: { size: number; orientation: 'horizontal' | 'vertical'; } } = {
     carrier: {
         size: 5,
         orientation: 'horizontal',
-        position: [
-            {x: 0, y: 0},
-            {x: 1, y: 0},
-            {x: 2, y: 0},
-            {x: 3, y: 0},
-            {x: 4, y: 0}
-        ]
     },
     battleship: {
         size: 4,
         orientation: 'horizontal',
-        position: [
-            {x: 0, y: 0},
-            {x: 1, y: 0},
-            {x: 2, y: 0},
-            {x: 3, y: 0}
-        ]
     },
     cruiser: {
         size: 3,
         orientation: 'horizontal',
-        position: [
-            {x: 0, y: 0},
-            {x: 1, y: 0},
-            {x: 2, y: 0}
-        ]
     },
     submarine: {
         size: 3,
         orientation: 'horizontal',
-        position: [
-            {x: 0, y: 0},
-            {x: 1, y: 0},
-            {x: 2, y: 0}
-        ]
     },
     destroyer: {
         size: 2,
-        orientation: 'horizontal',
-        position: [
-            {x: 0, y: 0},
-            {x: 1, y: 0}
-        ]
-        
+        orientation: 'horizontal',        
     }
 }
 
@@ -55,10 +27,9 @@ interface ShipProps {
     type: string;
     size: number;
     orientation: string;
-    position: {x: number; y: number}[];
 }
 
-const Ship: React.FC<ShipProps> = ({ type, size, orientation: initialOrientation, position }) => {
+const Ship: React.FC<ShipProps> = ({ type, size, orientation: initialOrientation }) => {
     const [orientation, setOrientation] = useState(initialOrientation);
 
     const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
@@ -67,7 +38,6 @@ const Ship: React.FC<ShipProps> = ({ type, size, orientation: initialOrientation
                 type,
                 size,
                 orientation,
-                position
             };
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.setData('application/json', JSON.stringify(shipData));
