@@ -2,6 +2,9 @@
 import React from "react";
 import Ship, { shipProps } from "./Ship";
 import { Button } from "~/components/ui/button";
+import ShipHead from './ship/ShipHead';
+import ShipBody from './ship/ShipBody';
+import ShipTail from './ship/ShipTail';
 
 interface BoardProps {
   board: {
@@ -21,6 +24,15 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
     x: number;
     y: number;
   } | null>(null);
+  const [placedShips, setPlacedShips] = React.useState<{
+    [key: string]: {
+      type: string;
+      size: number;
+      orientation: "horizontal" | "vertical";
+      x: number;
+      y: number;
+    };
+  }>({});
   const isActive =
     (id === "player-board" && activeBoard === "player") ||
     (id === "bot-board" && activeBoard === "bot");
@@ -88,28 +100,26 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
     y: number,
     size: number,
     orientation: "horizontal" | "vertical",
-  ) => {
-    if (orientation === "horizontal") {
-      if (x + size > boardData.length) {
-        return false;
-      }
-      for (let i = 0; i < size; i++) {
-        if (boardData[y]![x + i] !== "") {
+    shipType?: string
+  ): boolean => {
+    // Check boundaries
+    if (orientation === "horizontal" && x + size > boardData[0]!.length) return false;
+    if (orientation === "vertical" && y + size > boardData.length) return false;
+
+    // Check for collisions with other ships and adjacent cells
+    for (let row = Math.max(0, y - 1); row <= Math.min(boardData.length - 1, y + (orientation === "vertical" ? size : 1)); row++) {
+      for (let col = Math.max(0, x - 1); col <= Math.min(boardData[0]!.length - 1, x + (orientation === "horizontal" ? size : 1)); col++) {
+        const cell = boardData[row]![col];
+        if (cell) {
+          const [existingShipType] = cell.split('-');
+          // Allow overlap with the same ship (for repositioning)
+          if (shipType && existingShipType === shipType) continue;
           return false;
         }
       }
-      return true;
-    } else {
-      if (y + size > boardData[0]!.length) {
-        return false;
-      }
-      for (let i = 0; i < size; i++) {
-        if (boardData[y + i]![x] !== "") {
-          return false;
-        }
-      }
-      return true;
     }
+
+    return true;
   };
 
   const handleDrop = (e: React.DragEvent<HTMLElement>) => {
@@ -120,20 +130,16 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
       const table = target.closest("table");
       if (!table) return;
 
-      // Get the mouse position relative to the table
       const rect = table.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
 
-      // Calculate cell size (including border spacing)
-      const cellSize = 32; // 32px for w-8 h-8, or 40px for sm:w-10 sm:h-10
-      const borderSpacing = 3; // From border-spacing-[3px]
+      const cellSize = 32;
+      const borderSpacing = 3;
 
-      // Calculate the nearest grid cell (same as handleDragOver)
-      const x = Math.floor(mouseX / (cellSize + borderSpacing)) - 1; // -1 for header column
-      const y = Math.floor(mouseY / (cellSize + borderSpacing)) - 1; // -1 for header row
+      const x = Math.floor(mouseX / (cellSize + borderSpacing)) - 1;
+      const y = Math.floor(mouseY / (cellSize + borderSpacing)) - 1;
 
-      // Use the same adjustment logic as handleDragOver
       const adjustedX =
         draggedShip?.orientation === "horizontal"
           ? Math.max(0, Math.min(x, boardData.length - draggedShip.size))
@@ -144,65 +150,85 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
           ? Math.max(0, Math.min(y, boardData[0]!.length - draggedShip.size))
           : Math.max(0, Math.min(y, boardData[0]!.length - 1));
 
-      // Validate the position
       if (
         adjustedX < 0 ||
         adjustedX >= boardData.length ||
         adjustedY < 0 ||
         adjustedY >= boardData[0]!.length
       ) {
-        console.error("Invalid drop position");
         return;
       }
 
       const shipDataStr = e.dataTransfer.getData("application/json");
-      if (!shipDataStr) {
-        console.error("No ship data received");
-        return;
-      }
+      if (!shipDataStr) return;
 
-      const shipData: {
+      const shipData = JSON.parse(shipDataStr) as {
         type: string;
         size: number;
         orientation: "horizontal" | "vertical";
-      } = JSON.parse(shipDataStr);
-
+      };
 
       if (id === "player-board") {
-        if (
-          isPlacementValid(
-            adjustedX,
-            adjustedY,
-            shipData.size,
-            shipData.orientation,
-          )
-        ) {
-          // Place the ship on the board
-          if (shipData.orientation === "horizontal") {
-            for (let i = 0; i < shipData.size; i++) {
-              if (boardData[adjustedY]![adjustedX + i] === "") {
-                boardData[adjustedY]![adjustedX + i] = `${shipData.type}-${i}`;
-              } else {
-                throw new Error("Invalid placement");
-              }
+        // Remove existing ship of same type if it exists
+        if (placedShips[shipData.type]) {
+          const oldShip = placedShips[shipData.type]!;
+          if (oldShip.orientation === "horizontal") {
+            for (let i = 0; i < oldShip.size; i++) {
+              boardData[oldShip.y]![oldShip.x + i] = "";
             }
           } else {
-            for (let i = 0; i < shipData.size; i++) {
-              if (boardData[adjustedY + i]![adjustedX] === "") {
-                boardData[adjustedY + i]![adjustedX] = `${shipData.type}-${i}`;
-              } else {
-                throw new Error("Invalid placement");
-              }
+            for (let i = 0; i < oldShip.size; i++) {
+              boardData[oldShip.y + i]![oldShip.x] = "";
             }
           }
         }
+
+        if (isPlacementValid(adjustedX, adjustedY, shipData.size, shipData.orientation, shipData.type)) {
+          // Place the ship
+          if (shipData.orientation === "horizontal") {
+            for (let i = 0; i < shipData.size; i++) {
+              boardData[adjustedY]![adjustedX + i] = `${shipData.type}-${i}`;
+            }
+          } else {
+            for (let i = 0; i < shipData.size; i++) {
+              boardData[adjustedY + i]![adjustedX] = `${shipData.type}-${i}`;
+            }
+          }
+
+          // Update placed ships
+          setPlacedShips(prev => ({
+            ...prev,
+            [shipData.type]: {
+              ...shipData,
+              x: adjustedX,
+              y: adjustedY
+            }
+          }));
+        }
       }
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        console.error("Error handling ship drop:", error.message);
-      } else {
-        console.error("Error handling ship drop:", String(error));
-      }
+    } catch (error) {
+      console.error("Error handling ship drop:", error);
+    }
+  };
+
+  const renderShipPart = (cell: string) => {
+    if (!cell) return null;
+
+    const [shipType, partIndex] = cell.split('-');
+    if (!shipType || !partIndex) return null;
+
+    const ship = placedShips[shipType];
+    if (!ship) return null;
+
+    const index = parseInt(partIndex);
+    if (isNaN(index)) return null;
+    
+    if (index === 0) {
+      return <ShipHead orientation={ship.orientation} />;
+    } else if (index === ship.size - 1) {
+      return <ShipTail orientation={ship.orientation} />;
+    } else {
+      return <ShipBody index={index} />;
     }
   };
 
@@ -243,7 +269,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
                   >
                     {rowIndex + 1}
                   </th>
-                  {row.map((_, columnIndex: number) => {
+                  {row.map((cell: string, columnIndex: number) => {
                     // Calculate highlight area
                     const isHighlighted =
                       draggedShip &&
@@ -263,6 +289,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
                         draggedShip!.y,
                         draggedShip!.size,
                         draggedShip!.orientation,
+                        draggedShip!.type
                       );
 
                     const cellClass =
@@ -279,8 +306,10 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
                               ? "bg-green-200"
                               : "bg-red-200"
                             : ""
-                        } transition-colors duration-200`}
-                      />
+                        } transition-colors duration-200 relative`}
+                      >
+                        {cell && renderShipPart(cell)}
+                      </td>
                     );
                   })}
                 </tr>
@@ -320,3 +349,4 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
 };
 
 export { Board };
+

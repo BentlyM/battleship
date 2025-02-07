@@ -1,4 +1,9 @@
+'use client';
+
 import React, { useState } from 'react'
+import ShipHead from './ship/ShipHead';
+import ShipBody from './ship/ShipBody';
+import ShipTail from './ship/ShipTail';
 
 export const shipProps: { [key: string]: { size: number; orientation: 'horizontal' | 'vertical'; } } = {
     carrier: {
@@ -70,33 +75,16 @@ const Ship: React.FC<ShipProps> = ({ type, size, orientation: initialOrientation
                 role="img"
                 aria-label={`${type} ship`}
             >
-                {/* Ship head (pointer) */}
-                <div className={`
-                    w-8 h-8 bg-gray-400 rounded-sm flex items-center justify-center relative
-                    ${orientation === 'horizontal' ? 'rounded-l-full' : 'rounded-t-full'}
-                    transition-all duration-300
-                `}>
-                    <div className="w-2 h-2 bg-gray-600 rounded-full" />
-                </div>
+                {/* Ship head */}
+                <ShipHead orientation={orientation as 'horizontal' | 'vertical'} />
                 
                 {/* Ship body */}
                 {Array.from({ length: Math.max(0, size - 2) }).map((_, index) => (
-                    <div 
-                        key={index} 
-                        className="w-8 h-8 bg-gray-400 rounded-sm flex items-center justify-center transition-all duration-300"
-                    >
-                        <div className="w-2 h-2 bg-gray-600 rounded-full" />
-                    </div>
+                    <ShipBody key={index} index={index} />
                 ))}
                 
                 {/* Ship tail */}
-                <div className={`
-                    w-8 h-8 bg-gray-400 rounded-sm flex items-center justify-center
-                    ${orientation === 'horizontal' ? 'rounded-r-full' : 'rounded-b-full'}
-                    transition-all duration-300
-                `}>
-                    <div className="w-2 h-2 bg-gray-600 rounded-full" />
-                </div>
+                <ShipTail orientation={orientation as 'horizontal' | 'vertical'} />
             </div>
             <span className="ml-2 text-sm text-gray-600 capitalize select-none">{type}</span>
         </div>
