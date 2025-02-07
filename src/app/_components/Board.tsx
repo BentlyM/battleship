@@ -5,12 +5,13 @@ import { Button } from "~/components/ui/button";
 import ShipHead from './ship/ShipHead';
 import ShipBody from './ship/ShipBody';
 import ShipTail from './ship/ShipTail';
-
+import { Board as BoardType } from "./BoardStack";
 interface BoardProps {
   board: {
     id: string;
-    boardData: string[][];
+    boardData: BoardType;
     activeBoard: "player" | "bot";
+    setBoardData: (boardData: BoardType) => void;
   };
   onClick?: () => void;
 }
@@ -32,6 +33,9 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
       x: number;
       y: number;
     };
+  }>({});
+  const [shipCount, setShipCount] = React.useState<{
+    [key: string]: number;
   }>({});
   const isActive =
     (id === "player-board" && activeBoard === "player") ||
@@ -118,7 +122,6 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
         }
       }
     }
-
     return true;
   };
 
@@ -262,14 +265,14 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
                   </th>
                 ))}
               </tr>
-              {boardData.map((row: string[], rowIndex: number) => (
+              {boardData.map((row: BoardType[number], rowIndex: number) => (
                 <tr key={rowIndex}>
                   <th
                     className={`h-8 w-8 text-center text-sm sm:h-10 sm:w-10 sm:text-base ${isActive ? "text-black" : "text-transparent"} transition-colors duration-300`}
                   >
                     {rowIndex + 1}
                   </th>
-                  {row.map((cell: string, columnIndex: number) => {
+                    {row.map((cell: BoardType[number][number], columnIndex: number) => {
                     // Calculate highlight area
                     const isHighlighted =
                       draggedShip &&
@@ -323,13 +326,14 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
       {id === "player-board" && (
         <div className="w-full rounded-lg border-2 border-gray-200 p-4">
           <div className="flex flex-row gap-4">
-          <h4 className="mb-4 text-lg font-semibold">Your Ships</h4>
+          <h4 className="mb-4 text-lg font-semibold">Ships</h4>
             <Button variant="outline" className="h-8 rounded-full px-3 text-sm">
               Auto-place Ships
             </Button>
             <Button variant="outline" className="h-8 rounded-full px-3 text-sm">
               Remove Ships
             </Button>
+            <Button variant="outline" className="h-8 rounded-full px-3 text-sm bg-green-500 text-white hover:bg-green-600">Start Game</Button>
           </div>
           <div className="flex h-[176px] w-[440px] flex-wrap justify-center gap-4 overflow-auto">
             {Object.entries(shipProps).map(([type, props]) => (
@@ -339,6 +343,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
                 size={props.size}
                 orientation={props.orientation}
                 active={isActive}
+                count={shipCount[type] || 1}
               />
             ))}
           </div>

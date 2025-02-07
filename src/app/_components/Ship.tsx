@@ -5,26 +5,31 @@ import ShipHead from './ship/ShipHead';
 import ShipBody from './ship/ShipBody';
 import ShipTail from './ship/ShipTail';
 
-export const shipProps: { [key: string]: { size: number; orientation: 'horizontal' | 'vertical'; } } = {
+export const shipProps: { [key: string]: { size: number; orientation: 'horizontal' | 'vertical'; count: number } } = {
     carrier: {
         size: 5,
         orientation: 'horizontal',
+        count: 1,
     },
     battleship: {
         size: 4,
         orientation: 'horizontal',
+        count: 1,
     },
     cruiser: {
         size: 3,
         orientation: 'horizontal',
+        count: 1,
     },
     submarine: {
         size: 3,
         orientation: 'horizontal',
+        count: 1,
     },
     destroyer: {
         size: 2,
         orientation: 'horizontal',        
+        count: 1,
     }
 }
 
@@ -33,9 +38,10 @@ interface ShipProps {
     size: number;
     orientation: string;
     active: boolean;
+    count: number;
 }
 
-const Ship: React.FC<ShipProps> = ({ type, size, orientation: initialOrientation, active }) => {
+const Ship: React.FC<ShipProps> = ({ type, size, orientation: initialOrientation, active, count }) => {
     const [orientation, setOrientation] = useState(initialOrientation);
 
     const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
@@ -76,7 +82,7 @@ const Ship: React.FC<ShipProps> = ({ type, size, orientation: initialOrientation
                 aria-label={`${type} ship`}
             >
                 {/* Ship head */}
-                <ShipHead orientation={orientation as 'horizontal' | 'vertical'} />
+                <ShipHead orientation={orientation as 'horizontal' | 'vertical'}/>
                 
                 {/* Ship body */}
                 {Array.from({ length: Math.max(0, size - 2) }).map((_, index) => (
@@ -86,7 +92,7 @@ const Ship: React.FC<ShipProps> = ({ type, size, orientation: initialOrientation
                 {/* Ship tail */}
                 <ShipTail orientation={orientation as 'horizontal' | 'vertical'} />
             </div>
-            <span className="ml-2 text-sm text-gray-600 capitalize select-none">{type}</span>
+            <span className="ml-2 text-sm text-gray-600 capitalize select-none">{`(${count}) ${type} ship`}</span>
         </div>
     );
 };
