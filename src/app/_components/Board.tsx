@@ -17,7 +17,7 @@ interface BoardProps {
 }
 
 const Board: React.FC<BoardProps> = ({ board, onClick }) => {
-  const { id, boardData, activeBoard }: BoardProps["board"] = board;
+  const { id, boardData, activeBoard, setBoardData }: BoardProps["board"] = board;
   const [draggedShip, setDraggedShip] = React.useState<{
     type: string;
     size: number;
@@ -326,14 +326,31 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
       {id === "player-board" && (
         <div className="w-full rounded-lg border-2 border-gray-200 p-4">
           <div className="flex flex-row gap-4">
-          <h4 className="mb-4 text-lg font-semibold">Ships</h4>
+            <h4 className="mb-4 text-lg font-semibold">Ships</h4>
             <Button variant="outline" className="h-8 rounded-full px-3 text-sm">
               Auto-place Ships
             </Button>
-            <Button variant="outline" className="h-8 rounded-full px-3 text-sm">
+            <Button 
+              variant="outline" 
+              className="h-8 rounded-full px-3 text-sm"
+              onClick={() => {
+                setPlacedShips({});
+                setShipCount({
+                  ...shipCount,
+                  carrier: 1,
+                  battleship: 1,
+                  cruiser: 1,
+                  submarine: 1,
+                  destroyer: 1
+                });
+                setBoardData(Array.from({ length: 10 }, () => Array(10).fill("")));
+              }}
+            >
               Remove Ships
             </Button>
-            <Button variant="outline" className="h-8 rounded-full px-3 text-sm bg-green-500 text-white hover:bg-green-600">Start Game</Button>
+            <Button variant="outline" className="h-8 rounded-full px-3 text-sm bg-green-500 text-white hover:bg-green-600">
+              Start Game
+            </Button>
           </div>
           <div className="flex h-[176px] w-[440px] flex-wrap justify-center gap-4 overflow-auto">
             {Object.entries(shipProps).map(([type, props]) => (
