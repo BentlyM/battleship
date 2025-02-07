@@ -27,9 +27,10 @@ interface ShipProps {
     type: string;
     size: number;
     orientation: string;
+    active: boolean;
 }
 
-const Ship: React.FC<ShipProps> = ({ type, size, orientation: initialOrientation }) => {
+const Ship: React.FC<ShipProps> = ({ type, size, orientation: initialOrientation, active }) => {
     const [orientation, setOrientation] = useState(initialOrientation);
 
     const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
@@ -51,13 +52,14 @@ const Ship: React.FC<ShipProps> = ({ type, size, orientation: initialOrientation
     };
 
     const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!active) return;
         e.preventDefault();
         setOrientation(prev => prev === 'horizontal' ? 'vertical' : 'horizontal');
     };
 
     return (
         <div
-            draggable="true"
+            draggable={active}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
             onClick={handleClick}
