@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import Ship, { shipProps } from "./Ship";
+import { Button } from "~/components/ui/button";
 
 interface BoardProps {
   board: {
@@ -160,15 +161,12 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
         return;
       }
 
-      const shipData = JSON.parse(shipDataStr);
+      const shipData: {
+        type: string;
+        size: number;
+        orientation: "horizontal" | "vertical";
+      } = JSON.parse(shipDataStr);
 
-      // Use the adjusted position for the drop
-      console.log("Ship dropped at:", {
-        ...shipData,
-        x: adjustedX,
-        y: adjustedY,
-        orientation: draggedShip?.orientation || shipData.orientation,
-      });
 
       if (id === "player-board") {
         if (
@@ -183,7 +181,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
           if (shipData.orientation === "horizontal") {
             for (let i = 0; i < shipData.size; i++) {
               if (boardData[adjustedY]![adjustedX + i] === "") {
-                boardData[adjustedY]![adjustedX + i] = shipData.type;
+                boardData[adjustedY]![adjustedX + i] = `${shipData.type}-${i}`;
               } else {
                 throw new Error("Invalid placement");
               }
@@ -191,7 +189,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
           } else {
             for (let i = 0; i < shipData.size; i++) {
               if (boardData[adjustedY + i]![adjustedX] === "") {
-                boardData[adjustedY + i]![adjustedX] = shipData.type;
+                boardData[adjustedY + i]![adjustedX] = `${shipData.type}-${i}`;
               } else {
                 throw new Error("Invalid placement");
               }
@@ -199,8 +197,12 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
           }
         }
       }
-    } catch (error) {
-      console.error("Error handling ship drop:", error);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("Error handling ship drop:", error.message);
+      } else {
+        console.error("Error handling ship drop:", String(error));
+      }
     }
   };
 
@@ -291,7 +293,15 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
       {/* Ships section - only show for player board */}
       {id === "player-board" && (
         <div className="w-full rounded-lg border-2 border-gray-200 p-4">
+          <div className="flex flex-row gap-4">
           <h4 className="mb-4 text-lg font-semibold">Your Ships</h4>
+            <Button variant="outline" className="h-8 rounded-full px-3 text-sm">
+              Auto-place Ships
+            </Button>
+            <Button variant="outline" className="h-8 rounded-full px-3 text-sm">
+              Remove Ships
+            </Button>
+          </div>
           <div className="flex h-[176px] w-[440px] flex-wrap justify-center gap-4 overflow-auto">
             {Object.entries(shipProps).map(([type, props]) => (
               <Ship

@@ -9,9 +9,10 @@ features:
     status: "in progress"
     dueDate: "before the end of this week"
     priority: "medium"
-    notes: "The player board should have a button to place the ship on the board. (undeveloped)",
+    notes: "The player board should have a button to auto-place the ship on the board. (undeveloped)",
           "The player board should have a button to remove the ship from the board. (undeveloped)",
           "The player board should have a button to rotate the ship. (completed)",
+          "The player board should have the capability to drag and drop the ship to the desired location. (completed)",
           " the player board ships should be visible to the player (in progress)",
   - name: "Game Logic"
     description: "The game logic is the logic that the game follows."
