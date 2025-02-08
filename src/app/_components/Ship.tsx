@@ -50,6 +50,7 @@ const Ship: React.FC<ShipProps> = ({ type, size, orientation: initialOrientation
                 type,
                 size,
                 orientation,
+                count,
             };
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.setData('application/json', JSON.stringify(shipData));

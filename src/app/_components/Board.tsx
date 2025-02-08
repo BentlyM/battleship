@@ -22,6 +22,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
     type: string;
     size: number;
     orientation: "horizontal" | "vertical";
+    count: number;
     x: number;
     y: number;
   } | null>(null);
@@ -30,12 +31,16 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
       type: string;
       size: number;
       orientation: "horizontal" | "vertical";
+      count: number;
       x: number;
       y: number;
     };
   }>({});
   const [shipCount, setShipCount] = React.useState<{
-    [key: string]: number;
+    [key: string]: {
+      type: string;
+      count: number;
+    };
   }>({});
   const isActive =
     (id === "player-board" && activeBoard === "player") ||
@@ -47,7 +52,12 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
   const handleDragStart = (e: React.DragEvent) => {
     const shipDataStr = e.dataTransfer.getData("application/json");
     if (shipDataStr) {
-      const shipData = JSON.parse(shipDataStr);
+      const shipData = JSON.parse(shipDataStr) as {
+        type: string;
+        size: number;
+        orientation: "horizontal" | "vertical";
+        count: number;
+      };
       setDraggedShip({ ...shipData, x: -1, y: -1 });
     }
   };
@@ -168,6 +178,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
       const shipData = JSON.parse(shipDataStr) as {
         type: string;
         size: number;
+        count: number;
         orientation: "horizontal" | "vertical";
       };
 
@@ -337,11 +348,11 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
                 setPlacedShips({});
                 setShipCount({
                   ...shipCount,
-                  carrier: 1,
-                  battleship: 1,
-                  cruiser: 1,
-                  submarine: 1,
-                  destroyer: 1
+                  carrier: { type: 'carrier', count: 1 },
+                  battleship: { type: 'battleship', count: 1 },
+                  cruiser: { type: 'cruiser', count: 1 },
+                  submarine: { type: 'submarine', count: 1 },
+                  destroyer: { type: 'destroyer', count: 1 }
                 });
                 setBoardData(Array.from({ length: 10 }, () => Array(10).fill("")));
               }}
@@ -360,7 +371,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
                 size={props.size}
                 orientation={props.orientation}
                 active={isActive}
-                count={shipCount[type] || 1}
+                count={shipProps[type]?.count || 0}
               />
             ))}
           </div>
