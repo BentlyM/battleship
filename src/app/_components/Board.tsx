@@ -19,7 +19,6 @@ interface BoardProps {
 const Board: React.FC<BoardProps> = ({ board, onClick }) => {
   const { id, boardData, activeBoard, setBoardData }: BoardProps["board"] = board;
   const [draggedShip, setDraggedShip] = React.useState<{
-    type: string;
     size: number;
     orientation: "horizontal" | "vertical";
     count: number;
@@ -28,7 +27,6 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
   } | null>(null);
   const [placedShips, setPlacedShips] = React.useState<{
     [key: string]: {
-      type: string;
       size: number;
       orientation: "horizontal" | "vertical";
       count: number;
@@ -38,10 +36,15 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
   }>({});
   const [shipCount, setShipCount] = React.useState<{
     [key: string]: {
-      type: string;
       count: number;
     };
-  }>({});
+  }>({
+    carrier: { count: 1 },
+    battleship: { count: 1 },
+    cruiser: { count: 1 },
+    submarine: { count: 1 },
+    destroyer: { count: 1 }
+  });
   const isActive =
     (id === "player-board" && activeBoard === "player") ||
     (id === "bot-board" && activeBoard === "bot");
@@ -53,7 +56,6 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
     const shipDataStr = e.dataTransfer.getData("application/json");
     if (shipDataStr) {
       const shipData = JSON.parse(shipDataStr) as {
-        type: string;
         size: number;
         orientation: "horizontal" | "vertical";
         count: number;
@@ -176,16 +178,17 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
       if (!shipDataStr) return;
 
       const shipData = JSON.parse(shipDataStr) as {
-        type: string;
-        size: number;
-        count: number;
-        orientation: "horizontal" | "vertical";
+        type: string,
+        size: number,
+        count: number,
+        orientation: "horizontal" | "vertical",
       };
 
       if (id === "player-board") {
         // Remove existing ship of same type if it exists
         if (placedShips[shipData.type]) {
           const oldShip = placedShips[shipData.type]!;
+          
           if (oldShip.orientation === "horizontal") {
             for (let i = 0; i < oldShip.size; i++) {
               boardData[oldShip.y]![oldShip.x + i] = "";
@@ -216,6 +219,14 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
               ...shipData,
               x: adjustedX,
               y: adjustedY
+            }
+          }));
+
+          setShipCount(prev => ({
+            ...prev,
+            [shipData.type]: {
+              ...shipProps[shipData.type],
+              count: shipProps[shipData.type]!.count - 1
             }
           }));
         }
@@ -303,7 +314,6 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
                         draggedShip!.y,
                         draggedShip!.size,
                         draggedShip!.orientation,
-                        draggedShip!.type
                       );
 
                     const cellClass =
@@ -348,11 +358,11 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
                 setPlacedShips({});
                 setShipCount({
                   ...shipCount,
-                  carrier: { type: 'carrier', count: 1 },
-                  battleship: { type: 'battleship', count: 1 },
-                  cruiser: { type: 'cruiser', count: 1 },
-                  submarine: { type: 'submarine', count: 1 },
-                  destroyer: { type: 'destroyer', count: 1 }
+                  carrier: { count: 1 },
+                  battleship: {  count: 1 },
+                  cruiser: {  count: 1 },
+                  submarine: {  count: 1 },
+                  destroyer: {  count: 1 }
                 });
                 setBoardData(Array.from({ length: 10 }, () => Array(10).fill("")));
               }}
@@ -371,7 +381,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
                 size={props.size}
                 orientation={props.orientation}
                 active={isActive}
-                count={shipProps[type]?.count || 0}
+                count={shipCount[type]?.count || 0}
               />
             ))}
           </div>
