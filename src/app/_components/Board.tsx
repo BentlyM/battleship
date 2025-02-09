@@ -6,6 +6,8 @@ import ShipHead from './ship/ShipHead';
 import ShipBody from './ship/ShipBody';
 import ShipTail from './ship/ShipTail';
 import { Board as BoardType } from "./BoardStack";
+import { handleDragEnd, handleDragEnter, handleDragOver, handleDragStart } from "./helpers/dragHelpers";
+import { handleAutoPlace, handleDrop, isPlacementValid } from "./helpers/boardHelpers";
 interface BoardProps {
   board: {
     id: string;
@@ -19,6 +21,7 @@ interface BoardProps {
 const Board: React.FC<BoardProps> = ({ board, onClick }) => {
   const { id, boardData, activeBoard, setBoardData }: BoardProps["board"] = board;
   const [draggedShip, setDraggedShip] = React.useState<{
+    type?: string;
     size: number;
     orientation: "horizontal" | "vertical";
     count: number;
@@ -54,265 +57,9 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
 
   useEffect(() => {
     if (id === "bot-board") {
-      handleAutoPlace();
+      handleAutoPlace(boardData, placedShips, setPlacedShips, setBoardData, setShipCount);
     }
   }, [id]);
-
-  const handleDragStart = (e: React.DragEvent) => {
-    const shipDataStr = e.dataTransfer.getData("application/json");
-    if (shipDataStr) {
-      const shipData = JSON.parse(shipDataStr) as {
-        size: number;
-        orientation: "horizontal" | "vertical";
-        count: number;
-      };
-      setDraggedShip({ ...shipData, x: -1, y: -1 });
-    }
-  };
-
-  const handleDragOver = (e: React.DragEvent<HTMLTableElement>) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-
-    if (!draggedShip) return;
-
-    const target = e.target as HTMLElement;
-    const table = target.closest("table");
-    if (!table) return;
-
-    const rect = table.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-
-    const cellSize = 32;
-    const borderSpacing = 3;
-
-    // Snap to grid calculation
-    const x = Math.floor(mouseX / (cellSize + borderSpacing)) - 1;
-    const y = Math.floor(mouseY / (cellSize + borderSpacing)) - 1;
-
-    // Adjust position based on orientation and size to keep highlight centered
-    const adjustedX =
-      draggedShip.orientation === "horizontal"
-        ? Math.max(0, Math.min(x, boardData.length - draggedShip.size))
-        : Math.max(0, Math.min(x, boardData.length - 1));
-
-    const adjustedY =
-      draggedShip.orientation === "vertical"
-        ? Math.max(0, Math.min(y, boardData[0]!.length - draggedShip.size))
-        : Math.max(0, Math.min(y, boardData[0]!.length - 1));
-
-    if (adjustedX !== draggedShip.x || adjustedY !== draggedShip.y) {
-      setDraggedShip((prev) =>
-        prev ? { ...prev, x: adjustedX, y: adjustedY } : null,
-      );
-    }
-  };
-
-  const handleDragEnd = () => {
-    setDraggedShip(null);
-  };
-
-  const handleDragEnter = (e: React.DragEvent<HTMLTableElement>) => {
-    e.preventDefault();
-  };
-
-  const isPlacementValid = (
-    x: number,
-    y: number,
-    size: number,
-    orientation: "horizontal" | "vertical",
-    shipType?: string,
-    boardToCheck?: BoardType 
-  ): boolean => {
-    const currentBoard = boardToCheck || boardData;
-    // Check boundaries
-    if (orientation === "horizontal" && x + size > currentBoard[0]!.length) return false;
-    if (orientation === "vertical" && y + size > currentBoard.length) return false;
-
-    // Check for collisions with other ships and adjacent cells
-    for (let row = Math.max(0, y - 1); row <= Math.min(currentBoard.length - 1, y + (orientation === "vertical" ? size : 1)); row++) {
-      for (let col = Math.max(0, x - 1); col <= Math.min(currentBoard[0]!.length - 1, x + (orientation === "horizontal" ? size : 1)); col++) {
-        const cell = currentBoard[row]![col];
-        if (cell) {
-          const [existingShipType] = cell.split('-');
-          // Allow overlap with the same ship (for repositioning)
-          if (shipType && existingShipType === shipType) continue;
-          return false;
-        }
-      }
-    }
-    return true;
-  };
-
-  const handleAutoPlace = () => {
-    const newBoardData = boardData.map(row => [...row]);
-    const newPlacedShips = { ...placedShips };
-
-    Object.entries(shipProps).forEach(([shipType, { size }]) => {
-      // Remove existing ship of the same type
-      const existingShip = newPlacedShips[shipType];
-      if (existingShip) {
-        if (existingShip.orientation === "horizontal") {
-          for (let i = 0; i < existingShip.size; i++) {
-            newBoardData[existingShip.y]![existingShip.x + i] = "";
-          }
-        } else {
-          for (let i = 0; i < existingShip.size; i++) {
-            newBoardData[existingShip.y + i]![existingShip.x] = "";
-          }
-        }
-        delete newPlacedShips[shipType];
-      }
-
-      let placed = false;
-      let attempts = 0;
-      while (!placed && attempts < 100) {
-        attempts++;
-        const orientation: "horizontal" | "vertical" = Math.random() < 0.5 ? "horizontal" : "vertical";
-        let x: number, y: number;
-
-        if (orientation === "horizontal") {
-          x = Math.floor(Math.random() * (10 - size));
-          y = Math.floor(Math.random() * 10);
-        } else {
-          x = Math.floor(Math.random() * 10);
-          y = Math.floor(Math.random() * (10 - size));
-        }
-
-        if (isPlacementValid(x, y, size, orientation, shipType, newBoardData)) {
-          // Place the ship on newBoardData
-          if (orientation === "horizontal") {
-            for (let i = 0; i < size; i++) {
-              newBoardData[y]![x + i] = `${shipType}-${i}`;
-            }
-          } else {
-            for (let i = 0; i < size; i++) {
-              newBoardData[y + i]![x] = `${shipType}-${i}`;
-            }
-          }
-
-          newPlacedShips[shipType] = {
-            size,
-            orientation,
-            count: 0,
-            x,
-            y
-          };
-          placed = true;
-        }
-      }
-    });
-
-    setPlacedShips(newPlacedShips);
-    setBoardData(newBoardData);
-    setShipCount(prev => {
-      const newCounts = { ...prev };
-      Object.keys(shipProps).forEach(type => {
-        newCounts[type] = { count: 0 };
-      });
-      return newCounts;
-    });
-  };
-
-  const handleDrop = (e: React.DragEvent<HTMLElement>) => {
-    e.preventDefault();
-
-    try {
-      const target = e.target as HTMLElement;
-      const table = target.closest("table");
-      if (!table) return;
-
-      const rect = table.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
-
-      const cellSize = 32;
-      const borderSpacing = 3;
-
-      const x = Math.floor(mouseX / (cellSize + borderSpacing)) - 1;
-      const y = Math.floor(mouseY / (cellSize + borderSpacing)) - 1;
-
-      const adjustedX =
-        draggedShip?.orientation === "horizontal"
-          ? Math.max(0, Math.min(x, boardData.length - draggedShip.size))
-          : Math.max(0, Math.min(x, boardData.length - 1));
-
-      const adjustedY =
-        draggedShip?.orientation === "vertical"
-          ? Math.max(0, Math.min(y, boardData[0]!.length - draggedShip.size))
-          : Math.max(0, Math.min(y, boardData[0]!.length - 1));
-
-      if (
-        adjustedX < 0 ||
-        adjustedX >= boardData.length ||
-        adjustedY < 0 ||
-        adjustedY >= boardData[0]!.length
-      ) {
-        return;
-      }
-
-      const shipDataStr = e.dataTransfer.getData("application/json");
-      if (!shipDataStr) return;
-
-      const shipData = JSON.parse(shipDataStr) as {
-        type: string,
-        size: number,
-        count: number,
-        orientation: "horizontal" | "vertical",
-      };
-
-      if (id === "player-board") {
-        // Remove existing ship of same type if it exists
-        if (placedShips[shipData.type]) {
-          const oldShip = placedShips[shipData.type]!;
-          
-          if (oldShip.orientation === "horizontal") {
-            for (let i = 0; i < oldShip.size; i++) {
-              boardData[oldShip.y]![oldShip.x + i] = "";
-            }
-          } else {
-            for (let i = 0; i < oldShip.size; i++) {
-              boardData[oldShip.y + i]![oldShip.x] = "";
-            }
-          }
-        }
-
-        if (isPlacementValid(adjustedX, adjustedY, shipData.size, shipData.orientation, shipData.type)) {
-          // Place the ship
-          if (shipData.orientation === "horizontal") {
-            for (let i = 0; i < shipData.size; i++) {
-              boardData[adjustedY]![adjustedX + i] = `${shipData.type}-${i}`;
-            }
-          } else {
-            for (let i = 0; i < shipData.size; i++) {
-              boardData[adjustedY + i]![adjustedX] = `${shipData.type}-${i}`;
-            }
-          }
-
-          // Update placed ships
-          setPlacedShips(prev => ({
-            ...prev,
-            [shipData.type]: {
-              ...shipData,
-              x: adjustedX,
-              y: adjustedY
-            }
-          }));
-
-          setShipCount(prev => ({
-            ...prev,
-            [shipData.type]: {
-              ...shipProps[shipData.type],
-              count: shipProps[shipData.type]!.count - 1
-            }
-          }));
-        }
-      }
-    } catch (error) {
-      console.error("Error handling ship drop:", error);
-    }
-  };
 
   const renderShipPart = (cell: string) => {
     if (!cell) return null;
@@ -343,8 +90,8 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
     <div
       className="mx-auto flex w-full max-w-[600px] flex-col items-center p-4"
       onClick={onClick}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
+      onDragStart={(e) => handleDragStart(e, setDraggedShip)}
+      onDragEnd={() => handleDragEnd(setDraggedShip)}
     >
       <h3 className="mb-6 text-center text-xl font-semibold">
         {id === "player-board" ? "Player Board" : "Bot Board"}
@@ -353,9 +100,9 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
         <div className="overflow-x-auto">
           <table
             className="w-full table-fixed border-separate border-spacing-[3px]"
-            onDragOver={handleDragOver}
+            onDragOver={(e) => handleDragOver(e, boardData, draggedShip, setDraggedShip)}
             onDragEnter={handleDragEnter}
-            onDrop={handleDrop}
+            onDrop={(e) => handleDrop(e, boardData, id, draggedShip, placedShips, setPlacedShips, setShipCount)}
           >
             <tbody className="board" id={id}>
               <tr>
@@ -395,7 +142,9 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
                         draggedShip!.x,
                         draggedShip!.y,
                         draggedShip!.size,
-                        draggedShip!.orientation,
+                        draggedShip!.orientation, 
+                        boardData,
+                        draggedShip!.type
                       );
 
                     const cellClass =
@@ -430,7 +179,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
         <div className="w-full rounded-lg border-2 border-gray-200 p-4">
           <div className="flex flex-row gap-4">
             <h4 className="mb-4 text-lg font-semibold">Ships</h4>
-            <Button variant="outline" className="h-8 rounded-full px-3 text-sm" onClick={handleAutoPlace} disabled={!isActive}>
+            <Button variant="outline" className="h-8 rounded-full px-3 text-sm" onClick={() => handleAutoPlace(boardData, placedShips, setPlacedShips, setBoardData, setShipCount)} disabled={!isActive}>
               Auto-place Ships
             </Button>
             <Button 
