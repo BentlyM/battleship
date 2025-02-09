@@ -116,16 +116,18 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
     y: number,
     size: number,
     orientation: "horizontal" | "vertical",
-    shipType?: string
+    shipType?: string,
+    boardToCheck?: BoardType // Add optional board parameter
   ): boolean => {
+    const currentBoard = boardToCheck || boardData;
     // Check boundaries
-    if (orientation === "horizontal" && x + size > boardData[0]!.length) return false;
-    if (orientation === "vertical" && y + size > boardData.length) return false;
+    if (orientation === "horizontal" && x + size > currentBoard[0]!.length) return false;
+    if (orientation === "vertical" && y + size > currentBoard.length) return false;
 
     // Check for collisions with other ships and adjacent cells
-    for (let row = Math.max(0, y - 1); row <= Math.min(boardData.length - 1, y + (orientation === "vertical" ? size : 1)); row++) {
-      for (let col = Math.max(0, x - 1); col <= Math.min(boardData[0]!.length - 1, x + (orientation === "horizontal" ? size : 1)); col++) {
-        const cell = boardData[row]![col];
+    for (let row = Math.max(0, y - 1); row <= Math.min(currentBoard.length - 1, y + (orientation === "vertical" ? size : 1)); row++) {
+      for (let col = Math.max(0, x - 1); col <= Math.min(currentBoard[0]!.length - 1, x + (orientation === "horizontal" ? size : 1)); col++) {
+        const cell = currentBoard[row]![col];
         if (cell) {
           const [existingShipType] = cell.split('-');
           // Allow overlap with the same ship (for repositioning)
@@ -135,6 +137,76 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
       }
     }
     return true;
+  };
+
+  const handleAutoPlace = () => {
+    const newBoardData = boardData.map(row => [...row]);
+    const newPlacedShips = { ...placedShips };
+
+    Object.entries(shipProps).forEach(([shipType, { size }]) => {
+      // Remove existing ship of the same type
+      const existingShip = newPlacedShips[shipType];
+      if (existingShip) {
+        if (existingShip.orientation === "horizontal") {
+          for (let i = 0; i < existingShip.size; i++) {
+            newBoardData[existingShip.y]![existingShip.x + i] = "";
+          }
+        } else {
+          for (let i = 0; i < existingShip.size; i++) {
+            newBoardData[existingShip.y + i]![existingShip.x] = "";
+          }
+        }
+        delete newPlacedShips[shipType];
+      }
+
+      let placed = false;
+      let attempts = 0;
+      while (!placed && attempts < 100) {
+        attempts++;
+        const orientation: "horizontal" | "vertical" = Math.random() < 0.5 ? "horizontal" : "vertical";
+        let x: number, y: number;
+
+        if (orientation === "horizontal") {
+          x = Math.floor(Math.random() * (10 - size));
+          y = Math.floor(Math.random() * 10);
+        } else {
+          x = Math.floor(Math.random() * 10);
+          y = Math.floor(Math.random() * (10 - size));
+        }
+
+        if (isPlacementValid(x, y, size, orientation, shipType, newBoardData)) {
+          // Place the ship on newBoardData
+          if (orientation === "horizontal") {
+            for (let i = 0; i < size; i++) {
+              newBoardData[y]![x + i] = `${shipType}-${i}`;
+            }
+          } else {
+            for (let i = 0; i < size; i++) {
+              newBoardData[y + i]![x] = `${shipType}-${i}`;
+            }
+          }
+
+          newPlacedShips[shipType] = {
+            size,
+            orientation,
+            count: 0,
+            x,
+            y
+          };
+          placed = true;
+        }
+      }
+    });
+
+    setPlacedShips(newPlacedShips);
+    setBoardData(newBoardData);
+    setShipCount(prev => {
+      const newCounts = { ...prev };
+      Object.keys(shipProps).forEach(type => {
+        newCounts[type] = { count: 0 };
+      });
+      return newCounts;
+    });
   };
 
   const handleDrop = (e: React.DragEvent<HTMLElement>) => {
@@ -348,7 +420,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
         <div className="w-full rounded-lg border-2 border-gray-200 p-4">
           <div className="flex flex-row gap-4">
             <h4 className="mb-4 text-lg font-semibold">Ships</h4>
-            <Button variant="outline" className="h-8 rounded-full px-3 text-sm">
+            <Button variant="outline" className="h-8 rounded-full px-3 text-sm" onClick={handleAutoPlace}>
               Auto-place Ships
             </Button>
             <Button 
