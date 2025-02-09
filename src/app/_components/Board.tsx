@@ -8,6 +8,7 @@ import ShipTail from './ship/ShipTail';
 import { Board as BoardType } from "./BoardStack";
 import { handleDragEnd, handleDragEnter, handleDragOver, handleDragStart } from "./helpers/dragHelpers";
 import { handleAutoPlace, handleDrop, isPlacementValid } from "./helpers/boardHelpers";
+import { ShipType , Ship as ShipStructure } from "~/types/game";
 interface BoardProps {
   board: {
     id: string;
@@ -65,7 +66,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
     if (!cell) return null;
 
     const [shipType, partIndex] = cell.split('-');
-    if (!shipType || !partIndex) return null;
+    if (!shipType || !partIndex) return null; 
 
     const ship = placedShips[shipType];
     if (!ship) return null;
@@ -102,7 +103,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
             className="w-full table-fixed border-separate border-spacing-[3px]"
             onDragOver={(e) => handleDragOver(e, boardData, draggedShip, setDraggedShip)}
             onDragEnter={handleDragEnter}
-            onDrop={(e) => handleDrop(e, boardData, id, draggedShip, placedShips, setPlacedShips, setShipCount)}
+            onDrop={(e) => handleDrop(e, boardData, id, draggedShip as ShipStructure | null, placedShips, setPlacedShips, setShipCount)}
           >
             <tbody className="board" id={id}>
               <tr>
@@ -144,7 +145,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
                         draggedShip!.size,
                         draggedShip!.orientation, 
                         boardData,
-                        draggedShip!.type
+                        draggedShip!.type as ShipType | undefined
                       );
 
                     const cellClass =

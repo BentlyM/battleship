@@ -1,4 +1,4 @@
-import { Board as BoardType } from "../BoardStack";
+import { Board, Ship, PlacedShips, ShipCount, ShipType, SetPlacedShips, SetShipCount, SetBoardData } from "~/types/game";
 import { shipProps } from "../Ship";
 
 export const isPlacementValid = (
@@ -6,9 +6,9 @@ export const isPlacementValid = (
     y: number,
     size: number,
     orientation: "horizontal" | "vertical",
-    boardToCheck: BoardType,
-    shipType: string | undefined,
-  ): boolean => {
+    boardToCheck: Board,
+    shipType: ShipType | undefined,
+): boolean => {
     const currentBoard = boardToCheck;
     // Check boundaries
     if (orientation === "horizontal" && x + size > currentBoard[0]!.length) return false;
@@ -30,11 +30,17 @@ export const isPlacementValid = (
   };
 
 
-  export const handleAutoPlace = (boardData: BoardType, placedShips: Record<string, { size: number; orientation: "horizontal" | "vertical"; count: number; x: number; y: number }>, setPlacedShips: (ships: Record<string, { size: number; orientation: "horizontal" | "vertical"; count: number; x: number; y: number }>) => void, setBoardData: (board: BoardType) => void, setShipCount: (count: Record<string, { count: number }>) => void) => {
+  export const handleAutoPlace = (
+    boardData: Board, 
+    placedShips: PlacedShips, 
+    setPlacedShips: SetPlacedShips, 
+    setBoardData: SetBoardData, 
+    setShipCount: SetShipCount
+  ) => {
     const newBoardData = boardData.map(row => [...row]);
     const newPlacedShips = { ...placedShips };
 
-    Object.entries(shipProps).forEach(([shipType, { size }]) => {
+    (Object.entries(shipProps) as [ShipType, { size: number }][]).forEach(([shipType, { size }]) => {
       // Remove existing ship of the same type
       const existingShip = newPlacedShips[shipType];
       if (existingShip) {
@@ -91,17 +97,26 @@ export const isPlacementValid = (
 
     setPlacedShips(newPlacedShips);
     setBoardData(newBoardData);
-    setShipCount(prev => {
-      const newCounts = { ...prev };
-      Object.keys(shipProps).forEach(type => {
-        newCounts[type] = { count: 0 };
-      });
-      return newCounts;
-    });
+    const newShipCount: ShipCount = {
+      carrier: { count: 0 },
+      battleship: { count: 0 },
+      cruiser: { count: 0 },
+      submarine: { count: 0 },
+      destroyer: { count: 0 }
+    };
+    setShipCount(newShipCount);
   };
 
 
-  export const handleDrop = (e: React.DragEvent<HTMLElement>, boardData: BoardType, id: string, draggedShip: { size: number; orientation: "horizontal" | "vertical"; count: number; x: number; y: number } | null, placedShips: Record<string, { size: number; orientation: "horizontal" | "vertical"; count: number; x: number; y: number }>, setPlacedShips: (ships: Record<string, { size: number; orientation: "horizontal" | "vertical"; count: number; x: number; y: number }>) => void, setShipCount: (count: Record<string, { count: number }>) => void) => {
+  export const handleDrop = (
+    e: React.DragEvent<HTMLElement>,
+    boardData: Board,
+    id: string,
+    draggedShip: Ship | null,
+    placedShips: PlacedShips,
+    setPlacedShips: SetPlacedShips,
+    setShipCount: SetShipCount
+  ) => {
     e.preventDefault();
 
     try {
@@ -141,15 +156,9 @@ export const isPlacementValid = (
       const shipDataStr = e.dataTransfer.getData("application/json");
       if (!shipDataStr) return;
 
-      const shipData = JSON.parse(shipDataStr) as {
-        type: string,
-        size: number,
-        count: number,
-        orientation: "horizontal" | "vertical",
-      };
+      const shipData = JSON.parse(shipDataStr) as Ship & { type: ShipType };
 
       if (id === "player-board") {
-        // Remove existing ship of same type if it exists
         if (placedShips[shipData.type]) {
           const oldShip = placedShips[shipData.type]!;
           
@@ -176,23 +185,27 @@ export const isPlacementValid = (
             }
           }
 
-          // Update placed ships
-          setPlacedShips(prev => ({
-            ...prev,
+          const newPlacedShips: PlacedShips = {
+            ...placedShips,
             [shipData.type]: {
               ...shipData,
               x: adjustedX,
               y: adjustedY
             }
-          }));
+          };
+          setPlacedShips(newPlacedShips);
 
-          setShipCount(prev => ({
-            ...prev,
+          const newShipCount: ShipCount = {
+            carrier: { count: shipProps.carrier!.count },
+            battleship: { count: shipProps.battleship!.count },
+            cruiser: { count: shipProps.cruiser!.count },
+            submarine: { count: shipProps.submarine!.count },
+            destroyer: { count: shipProps.destroyer!.count },
             [shipData.type]: {
-              ...shipProps[shipData.type],
               count: shipProps[shipData.type]!.count - 1
             }
-          }));
+          };
+          setShipCount(newShipCount);
         }
       }
     } catch (error) {
