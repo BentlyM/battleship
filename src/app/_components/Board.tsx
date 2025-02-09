@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import Ship, { shipProps } from "./Ship";
 import { Button } from "~/components/ui/button";
 import ShipHead from './ship/ShipHead';
@@ -51,6 +51,12 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
 
   // Column headers for the game board (A to J)
   const columnHeaders = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
+
+  useEffect(() => {
+    if (id === "bot-board") {
+      handleAutoPlace();
+    }
+  }, [id]);
 
   const handleDragStart = (e: React.DragEvent) => {
     const shipDataStr = e.dataTransfer.getData("application/json");
@@ -117,7 +123,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
     size: number,
     orientation: "horizontal" | "vertical",
     shipType?: string,
-    boardToCheck?: BoardType // Add optional board parameter
+    boardToCheck?: BoardType 
   ): boolean => {
     const currentBoard = boardToCheck || boardData;
     // Check boundaries
@@ -320,12 +326,16 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
     const index = parseInt(partIndex);
     if (isNaN(index)) return null;
     
-    if (index === 0) {
-      return <ShipHead orientation={ship.orientation} />;
-    } else if (index === ship.size - 1) {
-      return <ShipTail orientation={ship.orientation} />;
+    if(id === "player-board") { 
+      if (index === 0) {
+        return <ShipHead orientation={ship.orientation} />;
+      } else if (index === ship.size - 1) {
+        return <ShipTail orientation={ship.orientation} />;
+      } else {
+        return <ShipBody index={index} />;
+      }
     } else {
-      return <ShipBody index={index} />;
+      return null;
     }
   };
 
@@ -420,7 +430,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
         <div className="w-full rounded-lg border-2 border-gray-200 p-4">
           <div className="flex flex-row gap-4">
             <h4 className="mb-4 text-lg font-semibold">Ships</h4>
-            <Button variant="outline" className="h-8 rounded-full px-3 text-sm" onClick={handleAutoPlace}>
+            <Button variant="outline" className="h-8 rounded-full px-3 text-sm" onClick={handleAutoPlace} disabled={!isActive}>
               Auto-place Ships
             </Button>
             <Button 
@@ -438,6 +448,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
                 });
                 setBoardData(Array.from({ length: 10 }, () => Array(10).fill("")));
               }}
+              disabled={!isActive}
             >
               Remove Ships
             </Button>
