@@ -47,6 +47,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
     submarine: { count: 1 },
     destroyer: { count: 1 }
   });
+  const [gameStarted, setGameStarted] = React.useState(false);
   const isActive =
     (id === "player-board" && activeBoard === "player") ||
     (id === "bot-board" && activeBoard === "bot");
@@ -82,6 +83,15 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
       }
     } else {
       return null;
+    }
+  };
+
+  const handleStartGame = () => {
+    if(Object.values(shipCount).every((ship) => ship.count === 0)) {
+      setGameStarted(true);
+    } else {
+      alert("Please place all ships before starting the game");
+      return;
     }
   };
 
@@ -178,7 +188,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
         <div className="w-full rounded-lg border-2 border-gray-200 p-4">
           <div className="flex flex-row gap-4">
             <h4 className="mb-4 text-lg font-semibold">Ships</h4>
-            <Button variant="outline" className="h-8 rounded-full px-3 text-sm" onClick={() => handleAutoPlace(boardData, placedShips, setPlacedShips, setBoardData, setShipCount)} disabled={!isActive}>
+            <Button variant="outline" className="h-8 rounded-full px-3 text-sm" onClick={() => handleAutoPlace(boardData, placedShips, setPlacedShips, setBoardData, setShipCount)} disabled={!isActive || gameStarted}>
               Auto-place Ships
             </Button>
             <Button 
@@ -196,15 +206,15 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
                 });
                 setBoardData(Array.from({ length: 10 }, () => Array(10).fill("")));
               }}
-              disabled={!isActive}
+              disabled={!isActive || gameStarted}
             >
               Remove Ships
-            </Button>
-            <Button variant="outline" className="h-8 rounded-full px-3 text-sm bg-green-500 text-white hover:bg-green-600">
+            </Button>   
+            <Button variant="outline" className="h-8 rounded-full px-3 text-sm bg-green-500 text-white hover:bg-green-600" onClick={handleStartGame} disabled={gameStarted}>
               Start Game
             </Button>
           </div>
-          <div className="flex h-[176px] w-[440px] flex-wrap justify-center gap-4 overflow-auto">
+          {!gameStarted && <div className="flex h-[176px] w-[440px] flex-wrap justify-center gap-4 overflow-auto">
             {Object.entries(shipProps).map(([type, props]) => (
               <Ship
                 key={type}
@@ -215,7 +225,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
                 count={shipCount[type as keyof typeof shipCount]?.count || 0}
               />
             ))}
-          </div>
+          </div>}
         </div>
       )}
     </div>
