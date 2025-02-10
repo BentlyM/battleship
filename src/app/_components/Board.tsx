@@ -39,9 +39,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
     };
   }>({});
   const [shipCount, setShipCount] = React.useState<{
-    [key: string]: {
-      count: number;
-    };
+    [key in ShipType]: { count: number }
   }>({
     carrier: { count: 1 },
     battleship: { count: 1 },
@@ -214,7 +212,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
                 size={props.size}
                 orientation={props.orientation}
                 active={isActive}
-                count={shipCount[type]?.count || 0}
+                count={shipCount[type as keyof typeof shipCount]?.count || 0}
               />
             ))}
           </div>

@@ -195,17 +195,13 @@ export const isPlacementValid = (
           };
           setPlacedShips(newPlacedShips);
 
-          const newShipCount: ShipCount = {
-            carrier: { count: shipProps.carrier!.count },
-            battleship: { count: shipProps.battleship!.count },
-            cruiser: { count: shipProps.cruiser!.count },
-            submarine: { count: shipProps.submarine!.count },
-            destroyer: { count: shipProps.destroyer!.count },
-            [shipData.type]: {
-              count: shipProps[shipData.type]!.count - 1
-            }
-          };
-          setShipCount(newShipCount);
+          setShipCount((prev: ShipCount): ShipCount => {
+            const newCount = prev[shipData.type]!.count === 0 ? 0 : prev[shipData.type]!.count - 1;
+            return {
+              ...prev,
+              [shipData.type]: { count: newCount }
+            };
+          });
         }
       }
     } catch (error) {

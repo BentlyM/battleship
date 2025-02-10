@@ -47,6 +47,6 @@ export type SetDraggedShip = (ship: Ship | null) => void;
 
 export type SetPlacedShips = (ships: PlacedShips) => void;
 
-export type SetShipCount = (count: ShipCount) => void;
+export type SetShipCount = (count: ShipCount | ((prev: ShipCount) => ShipCount)) => void;
 
 export type SetBoardData = (board: Board) => void; 
