@@ -50,11 +50,11 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
     submarine: { count: 1 },
     destroyer: { count: 1 }
   });
-  const [botTargeting, setBotTargeting] = React.useState(true);
+  const [botTargeting, setBotTargeting] = React.useState(false);
   const [botTarget, setBotTarget] = React.useState<{
     x: number;
     y: number;
-  } | null>(null);
+  }>({ x: 0, y: 0 });
   const isActive =
     (id === "player-board" && activeBoard === "player") ||
     (id === "bot-board" && activeBoard === "bot");
@@ -67,6 +67,64 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
       handleAutoPlace(boardData, placedShips, setPlacedShips, setBoardData, setShipCount);
     }
   }, [id]);
+
+  useEffect(() => {
+    if (id === "player-board" && gameStarted && activeBoard === "player") {
+      setBotTargeting(true);
+      let currentPosition = { x: 0, y: 0 };
+      let steps = 0;
+      const maxSteps = Math.floor(Math.random() * 10) + 1; // Number of cells to traverse before attacking
+      
+      const moveTarget = () => {
+        if (steps >= maxSteps) {
+          // Final target selection
+          const finalX = Math.floor(Math.random() * 10);
+          const finalY = Math.floor(Math.random() * 10);
+          setBotTarget({ x: finalX, y: finalY });
+          setTimeout(() => {
+            setBotTargeting(false);
+            // Here you would handle the actual attack
+          }, 500);
+          return;
+        }
+
+        // Random movement to adjacent cell
+        const possibleMoves = [
+          { dx: 1, dy: 0 },
+          { dx: -1, dy: 0 },
+          { dx: 0, dy: 1 },
+          { dx: 0, dy: -1 }
+        ];
+
+        const validMoves = possibleMoves.filter(move => {
+          const newX = currentPosition.x + move.dx;
+          const newY = currentPosition.y + move.dy;
+          return newX >= 0 && newX < 10 && newY >= 0 && newY < 10;
+        });
+
+        if (validMoves.length === 0) {
+          // If no valid moves, jump to a random position
+          currentPosition = {
+            x: Math.floor(Math.random() * 10),
+            y: Math.floor(Math.random() * 10)
+          };
+        } else {
+          const moveIndex = Math.floor(Math.random() * validMoves.length);
+          const selectedMove = validMoves[moveIndex]!;
+          currentPosition = {
+            x: currentPosition.x + selectedMove.dx,
+            y: currentPosition.y + selectedMove.dy
+          };
+        }
+
+        setBotTarget(currentPosition);
+        steps++;
+        setTimeout(moveTarget, 200); // Move every 200ms
+      };
+
+      moveTarget();
+    }
+  }, [id, gameStarted, activeBoard]);
 
   const renderShipPart = (cell: string) => {
     if (!cell) return null;
@@ -187,7 +245,13 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
               ))}
             </tbody>
           </table>
-          {id === "player-board" && botTargeting && <TargetPointer x={botTarget?.x || 0} y={botTarget?.y || 0} />}
+          {id === "player-board" && botTargeting && (
+            <div 
+              className="transition-all duration-200 ease-in-out pointer-events-none"
+            >
+              <TargetPointer x={botTarget.x} y={botTarget.y} />
+            </div>
+          )}
         </div>
       </div>
 
