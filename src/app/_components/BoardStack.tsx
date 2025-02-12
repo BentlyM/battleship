@@ -17,7 +17,9 @@ export const BoardStack = () => {
 
   return (
     <div className="flex items-center justify-evenly w-full h-full">
-      <div onClick={() => setActiveBoard('player')}>{'Player'}</div>
+      <div className='border border-1 border-black'>
+        <div>{'stats'}</div>
+      </div>
       <div className="relative w-[545px] h-[600px]">
         {/* Player Board */}
         <div
@@ -61,7 +63,21 @@ export const BoardStack = () => {
           />
         </div>
       </div>
-      <div onClick={() => setActiveBoard('bot')}>{'Bot'}</div>
+      <div className='border border-1 border-black flex flex-col items-center justify-center'>
+      <label htmlFor='first-move'>First Move</label>
+        <select className='bg-transparent border-none' disabled={gameStarted} onChange={(e) => {if (e.target.value === 'random') {
+          setActiveBoard(Math.random() > 0.5 ? 'player' : 'bot');
+        } else {
+          setActiveBoard(e.target.value as 'player' | 'bot');
+        }}}
+        name='first-move'
+        id='first-move'
+        >
+          <option value='random'>Random</option>
+          <option value='player'>Opponent</option>
+          <option value='bot'>Player</option>
+        </select>
+      </div>
     </div>
   );
 };
