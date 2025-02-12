@@ -92,7 +92,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
   useEffect(() => {
     if (id === "player-board" && gameStarted && activeBoard === "player") {
       setBotTargeting(true);
-      let currentPosition = { x: 0, y: 0 };
+      let currentPosition = { x: Math.floor(Math.random() * 10), y: Math.floor(Math.random() * 10) };
       let steps = 0;
       const maxSteps = Math.floor(Math.random() * 10) + 1; // Number of cells to traverse before attacking
       

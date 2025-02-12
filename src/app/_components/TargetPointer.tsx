@@ -9,7 +9,7 @@ function TargetPointer({ x, y }: { x: number, y: number }) {
         alt='target pointer' 
         width={32} 
         height={32}
-        className="animate-pulse"
+      className={`animate-pulse ${x === 0 && y === 0 ? 'opacity-0' : 'opacity-100'}`}
       />
     </div>
   )
