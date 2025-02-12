@@ -9,6 +9,7 @@ import { Board as BoardType } from "./BoardStack";
 import { handleDragEnd, handleDragEnter, handleDragOver, handleDragStart } from "./helpers/dragHelpers";
 import { handleAutoPlace, handleDrop, isPlacementValid } from "./helpers/boardHelpers";
 import { ShipType , Ship as ShipStructure } from "~/types/game";
+import TargetPointer from "./TargetPointer";
 interface BoardProps {
   board: {
     id: string;
@@ -49,6 +50,11 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
     submarine: { count: 1 },
     destroyer: { count: 1 }
   });
+  const [botTargeting, setBotTargeting] = React.useState(true);
+  const [botTarget, setBotTarget] = React.useState<{
+    x: number;
+    y: number;
+  } | null>(null);
   const isActive =
     (id === "player-board" && activeBoard === "player") ||
     (id === "bot-board" && activeBoard === "bot");
@@ -107,7 +113,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
         {id === "player-board" ? "Player Board" : "Bot Board"}
       </h3>
       <div className="aspect-square w-full">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto relative">
           <table
             className="w-full table-fixed border-separate border-spacing-[3px]"
             onDragOver={(e) => handleDragOver(e, boardData, draggedShip, setDraggedShip)}
@@ -181,6 +187,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
               ))}
             </tbody>
           </table>
+          {id === "player-board" && botTargeting && <TargetPointer x={botTarget?.x || 0} y={botTarget?.y || 0} />}
         </div>
       </div>
 
