@@ -12,6 +12,8 @@ export const BoardStack = () => {
   const [activeBoard, setActiveBoard] = useState<'player' | 'bot'>('player');
   const [playerBoard, setPlayerBoard] = useState<Board>(createBoard());
   const [botBoard, setBotBoard] = useState<Board>(createBoard());
+  const [gameStarted, setGameStarted] = useState(false);
+
 
   return (
     <div className="flex items-center justify-evenly w-full h-full">
@@ -27,11 +29,13 @@ export const BoardStack = () => {
             }`}
         >
           <ShowBoard 
-            board={{ 
-              id: 'player-board', 
+            board={{
+              id: 'player-board',
               boardData: playerBoard, 
               activeBoard, 
-              setBoardData: setPlayerBoard 
+              setBoardData: setPlayerBoard,
+              gameStarted,
+              setGameStarted
             }} 
           />
         </div>
@@ -50,7 +54,9 @@ export const BoardStack = () => {
               id: 'bot-board', 
               boardData: botBoard, 
               activeBoard, 
-              setBoardData: setBotBoard 
+              setBoardData: setBotBoard,
+              gameStarted,
+              setGameStarted
             }} 
           />
         </div>

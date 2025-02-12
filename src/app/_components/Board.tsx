@@ -15,12 +15,14 @@ interface BoardProps {
     boardData: BoardType;
     activeBoard: "player" | "bot";
     setBoardData: (boardData: BoardType) => void;
+    gameStarted: boolean;
+    setGameStarted: (gameStarted: boolean) => void;
   };
   onClick?: () => void;
 }
 
 const Board: React.FC<BoardProps> = ({ board, onClick }) => {
-  const { id, boardData, activeBoard, setBoardData }: BoardProps["board"] = board;
+  const { id, boardData, activeBoard, setBoardData, gameStarted, setGameStarted }: BoardProps["board"] = board;
   const [draggedShip, setDraggedShip] = React.useState<{
     type?: string;
     size: number;
@@ -47,7 +49,6 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
     submarine: { count: 1 },
     destroyer: { count: 1 }
   });
-  const [gameStarted, setGameStarted] = React.useState(false);
   const isActive =
     (id === "player-board" && activeBoard === "player") ||
     (id === "bot-board" && activeBoard === "bot");
@@ -185,7 +186,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
 
       {/* Ships section - only show for player board */}
       {id === "player-board" && (
-        <div className="w-full rounded-lg border-2 border-gray-200 p-4">
+        <div className={`w-full rounded-lg border-2 border-gray-200 p-4 ${gameStarted && 'mb-[176px]'}`}>
           <div className="flex flex-row gap-4">
             <h4 className="mb-4 text-lg font-semibold">Ships</h4>
             <Button variant="outline" className="h-8 rounded-full px-3 text-sm" onClick={() => handleAutoPlace(boardData, placedShips, setPlacedShips, setBoardData, setShipCount)} disabled={!isActive || gameStarted}>
@@ -214,8 +215,8 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
               Start Game
             </Button>
           </div>
-          {!gameStarted && <div className="flex h-[176px] w-[440px] flex-wrap justify-center gap-4 overflow-auto">
-            {Object.entries(shipProps).map(([type, props]) => (
+          <div className={`flex flex-wrap justify-center gap-4 overflow-hidden transition-all duration-300 ${gameStarted ? 'h-0 opacity-0' : 'h-[176px] opacity-100'}`}>
+            {!gameStarted && Object.entries(shipProps).map(([type, props]) => (
               <Ship
                 key={type}
                 type={type}
@@ -225,7 +226,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
                 count={shipCount[type as keyof typeof shipCount]?.count || 0}
               />
             ))}
-          </div>}
+          </div>
         </div>
       )}
     </div>
