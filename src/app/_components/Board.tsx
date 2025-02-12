@@ -172,6 +172,18 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
       </h3>
       <div className="aspect-square w-full">
         <div className="overflow-x-auto relative">
+        {id === "player-board" && botTargeting && (
+            <div 
+              className="absolute transition-transform duration-200 ease-in-out pointer-events-none"
+              style={{
+                transform: `translate(calc(${botTarget.x * 40}% + 40px), calc(${botTarget.y * 40}% + 40px))`,
+                willChange: 'transform',
+                zIndex: 1
+              }}
+            >
+              <TargetPointer x={botTarget.x} y={botTarget.y} />
+            </div>
+          )}
           <table
             className="w-full table-fixed border-separate border-spacing-[3px]"
             onDragOver={(e) => handleDragOver(e, boardData, draggedShip, setDraggedShip)}
@@ -229,6 +241,8 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
                     return (
                       <td
                         key={columnIndex}
+                        data-x={columnIndex}
+                        data-y={rowIndex}
                         className={`h-8 w-8 rounded-sm sm:h-10 sm:w-10 ${cellClass} ${
                           isHighlighted
                             ? isValid
@@ -245,13 +259,6 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
               ))}
             </tbody>
           </table>
-          {id === "player-board" && botTargeting && (
-            <div 
-              className="transition-all duration-200 ease-in-out pointer-events-none"
-            >
-              <TargetPointer x={botTarget.x} y={botTarget.y} />
-            </div>
-          )}
         </div>
       </div>
 
