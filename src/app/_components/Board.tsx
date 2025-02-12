@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import Ship, { shipProps } from "./Ship";
 import { Button } from "~/components/ui/button";
 import ShipHead from './ship/ShipHead';
@@ -55,12 +55,33 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
     x: number;
     y: number;
   }>({ x: 0, y: 0 });
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+  const [targetTransform, setTargetTransform] = React.useState({ x: 0, y: 0 });
   const isActive =
     (id === "player-board" && activeBoard === "player") ||
     (id === "bot-board" && activeBoard === "bot");
 
   // Column headers for the game board (A to J)
   const columnHeaders = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
+
+ 
+  useEffect(() => {
+    if (!botTargeting || !tableContainerRef.current) return;
+
+    const cell = tableContainerRef.current.querySelector(
+      `td[data-x="${botTarget.x}"][data-y="${botTarget.y}"]`
+    ) as HTMLTableCellElement | null;
+    
+    if (!cell) return;
+
+    const cellRect = cell.getBoundingClientRect();
+    const containerRect = tableContainerRef.current.getBoundingClientRect();
+    
+    const x = cellRect.left - containerRect.left + cellRect.width/2;
+    const y = cellRect.top - containerRect.top + cellRect.height/2;
+
+    setTargetTransform({ x, y });
+  }, [botTarget, botTargeting]);
 
   useEffect(() => {
     if (id === "bot-board") {
@@ -171,12 +192,12 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
         {id === "player-board" ? "Player Board" : "Bot Board"}
       </h3>
       <div className="aspect-square w-full">
-        <div className="overflow-x-auto relative">
+        <div className="overflow-x-auto relative" ref={tableContainerRef}>
         {id === "player-board" && botTargeting && (
             <div 
-              className="absolute transition-transform duration-200 ease-in-out pointer-events-none"
+              className="absolute transition-[transform] duration-200 ease-in-out pointer-events-none"
               style={{
-                transform: `translate(calc(${botTarget.x * 40}% + 40px), calc(${botTarget.y * 40}% + 40px))`,
+                transform: `translate(${targetTransform.x}px, ${targetTransform.y}px)`,
                 willChange: 'transform',
                 zIndex: 1
               }}
