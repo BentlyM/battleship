@@ -1,20 +1,17 @@
-'use client';
+"use client";
 
-import React from 'react';
+import React from "react";
 
 interface ShipTailProps {
-  orientation: 'horizontal' | 'vertical';
+  orientation: "horizontal" | "vertical";
 }
 
 const ShipTail: React.FC<ShipTailProps> = ({ orientation }) => {
-
   return (
-    <div className={`
-      w-8 h-8 bg-gray-400 rounded-sm flex items-center justify-center
-      ${orientation === 'horizontal' ? 'rounded-r-full' : 'rounded-b-full'}
-      transition-all duration-300
-    `}>
-      <div className="w-2 h-2 bg-gray-600 rounded-full" />
+    <div
+      className={`flex h-8 w-8 items-center justify-center rounded-sm bg-gray-400 ${orientation === "horizontal" ? "rounded-r-full" : "rounded-b-full"} transition-all duration-300`}
+    >
+      <div className="h-2 w-2 rounded-full bg-gray-600" />
     </div>
   );
 };

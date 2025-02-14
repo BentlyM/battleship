@@ -1,6 +1,11 @@
 export type Orientation = "horizontal" | "vertical";
 
-export type ShipType = "carrier" | "battleship" | "cruiser" | "submarine" | "destroyer";
+export type ShipType =
+  | "carrier"
+  | "battleship"
+  | "cruiser"
+  | "submarine"
+  | "destroyer";
 
 export type Ship = {
   size: number;
@@ -47,6 +52,8 @@ export type SetDraggedShip = (ship: Ship | null) => void;
 
 export type SetPlacedShips = (ships: PlacedShips) => void;
 
-export type SetShipCount = (count: ShipCount | ((prev: ShipCount) => ShipCount)) => void;
+export type SetShipCount = (
+  count: ShipCount | ((prev: ShipCount) => ShipCount),
+) => void;
 
-export type SetBoardData = (board: Board) => void; 
+export type SetBoardData = (board: Board) => void;
