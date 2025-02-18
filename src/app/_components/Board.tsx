@@ -135,7 +135,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
               reTarget = true;
               setBotTargeting(reTarget);
               steps = 0;
-              moveTarget();
+              return moveTarget(); 
             }
             if (boardData[finalY] && boardData[finalY][finalX]) {
               setBoardData(
@@ -201,6 +201,12 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
       moveTarget();
     }
   }, [id, gameStarted, activeBoard]);
+
+  useEffect(() => {
+    if(activeBoard === 'player'){
+      
+    }
+  }, [activeBoard])
 
   const renderShipPart = (cell: string) => {
     if (!cell) return null;

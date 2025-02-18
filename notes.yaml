@@ -33,3 +33,6 @@ features:
     status: "in progress"
     dueDate: "before the end of this week"
     priority: "high"
+bugs:
+  - name: "Hit to Miss",
+    note: "this is a bug where it finds it final area checks if its a hit or miss and if its a hit it'll attack but still navigate to another board to hit again due to the current game logic it should just skip the hit board"
