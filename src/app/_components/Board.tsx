@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useRef } from "react";
 import Ship, { shipProps } from "./Ship";
 import { Button } from "~/components/ui/button";
 import ShipHead from "./ship/ShipHead";
@@ -19,11 +19,13 @@ import {
 } from "../helpers/boardHelpers";
 import { ShipType, Ship as ShipStructure } from "~/types/game";
 import TargetPointer from "./TargetPointer";
+import { handlePlayerAttack } from "../helpers/attackHelpers";
 interface BoardProps {
   board: {
     id: string;
     boardData: BoardType;
     activeBoard: "player" | "bot";
+    setActiveBoard: Dispatch<SetStateAction<"player" | "bot">>
     setBoardData: (boardData: BoardType) => void;
     gameStarted: boolean;
     setGameStarted: (gameStarted: boolean) => void;
@@ -39,6 +41,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
     setBoardData,
     gameStarted,
     setGameStarted,
+    setActiveBoard,
   }: BoardProps["board"] = board;
   const [draggedShip, setDraggedShip] = React.useState<{
     type?: string;
@@ -135,7 +138,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
               reTarget = true;
               setBotTargeting(reTarget);
               steps = 0;
-              return moveTarget(); 
+              return moveTarget(); // making this return to that it doesn't convert hits to misses
             }
             if (boardData[finalY] && boardData[finalY][finalX]) {
               setBoardData(
@@ -153,6 +156,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
                   ),
                 ),
               );
+              setActiveBoard('bot');
             }
           }, 500);
           return;
@@ -201,12 +205,6 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
       moveTarget();
     }
   }, [id, gameStarted, activeBoard]);
-
-  useEffect(() => {
-    if(activeBoard === 'player'){
-      
-    }
-  }, [activeBoard])
 
   const renderShipPart = (cell: string) => {
     if (!cell) return null;
@@ -283,6 +281,11 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
                 setShipCount,
               )
             }
+            onClick={
+              id === "bot-board" && gameStarted
+                ? (e) => handlePlayerAttack(e, boardData, setBoardData, setActiveBoard)
+                : undefined
+            }
           >
             <tbody className="board" id={id}>
               <tr>
@@ -332,7 +335,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
                         id === "player-board"
                           ? "bg-board-cell"
                           : "cursor-pointer bg-gray-200 hover:bg-board-cell-hover";
-
+                        
                       return (
                         <td
                           key={columnIndex}
@@ -344,7 +347,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
                                 ? "bg-green-200"
                                 : "bg-red-200"
                               : ""
-                          } relative transition-colors duration-200`}
+                          } ${cell === 'hit' ? 'bg-red-600' : ''} relative transition-colors duration-200`}
                         >
                           {cell && renderShipPart(cell)}
                         </td>
