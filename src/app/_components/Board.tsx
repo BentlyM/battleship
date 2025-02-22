@@ -25,7 +25,7 @@ interface BoardProps {
     id: string;
     boardData: BoardType;
     activeBoard: "player" | "bot";
-    setActiveBoard: Dispatch<SetStateAction<"player" | "bot">>
+    setActiveBoard: Dispatch<SetStateAction<"player" | "bot">>;
     setBoardData: (boardData: BoardType) => void;
     gameStarted: boolean;
     setGameStarted: (gameStarted: boolean) => void;
@@ -43,22 +43,11 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
     setGameStarted,
     setActiveBoard,
   }: BoardProps["board"] = board;
-  const [draggedShip, setDraggedShip] = React.useState<{
-    type?: string;
-    size: number;
-    orientation: "horizontal" | "vertical";
-    count: number;
-    x: number;
-    y: number;
-  } | null>(null);
+  const [draggedShip, setDraggedShip] = React.useState<ShipStructure | null>(
+    null,
+  );
   const [placedShips, setPlacedShips] = React.useState<{
-    [key: string]: {
-      size: number;
-      orientation: "horizontal" | "vertical";
-      count: number;
-      x: number;
-      y: number;
-    };
+    [key: string]: ShipStructure;
   }>({});
   const [shipCount, setShipCount] = React.useState<{
     [key in ShipType]: { count: number };
@@ -76,6 +65,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
   }>({ x: 0, y: 0 });
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const [targetTransform, setTargetTransform] = React.useState({ x: 0, y: 0 });
+  const [reTarget, setReTarget] = React.useState<boolean>(false);
   const isActive =
     (id === "player-board" && activeBoard === "player") ||
     (id === "bot-board" && activeBoard === "bot");
@@ -120,47 +110,61 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
         x: Math.floor(Math.random() * 10),
         y: Math.floor(Math.random() * 10),
       };
+      let baseSteps = 5; // Base number of steps
+      let maxSteps = baseSteps;
       let steps = 0;
-      const maxSteps = Math.floor(Math.random() * 10) + 1;
-      let reTarget = false;
+      let consecutiveHits = 0;
+
       const moveTarget = () => {
         if (steps >= maxSteps) {
           // Final target selection
           const finalX = Math.floor(Math.random() * 10);
           const finalY = Math.floor(Math.random() * 10);
           setBotTarget({ x: finalX, y: finalY });
+
           setTimeout(() => {
-            setBotTargeting(false);
-            if (
-              (boardData[finalY] && boardData[finalY][finalX] === "hit") ||
-              (boardData[finalY] && boardData[finalY][finalX] === "miss")
-            ) {
-              reTarget = true;
-              setBotTargeting(reTarget);
+            const targetCell = boardData[finalY]?.[finalX];
+
+            // If cell is already hit or missed, retarget
+            if (targetCell === "hit" || targetCell === "miss") {
+              setReTarget(true);
+              setBotTargeting(true);
               steps = 0;
-              return moveTarget(); // making this return to that it doesn't convert hits to misses
+              maxSteps = baseSteps + consecutiveHits * 2; // Increase steps based on consecutive hits
+              return moveTarget();
             }
-            if (boardData[finalY] && boardData[finalY][finalX]) {
-              setBoardData(
-                boardData.map((row, y) =>
+
+            // If cell contains a ship part
+            if (targetCell && targetCell !== "hit" && targetCell !== "miss") {
+              setBoardData((prevBoard) =>
+                prevBoard.map((row, y) =>
                   row.map((cell, x) =>
                     x === finalX && y === finalY ? "hit" : cell,
                   ),
                 ),
               );
+              consecutiveHits++;
+              steps = 0;
+              maxSteps = baseSteps + consecutiveHits * 2; // Increase steps for next search
+              setBotTargeting(true);
+              return moveTarget();
             } else {
-              setBoardData(
-                boardData.map((row, y) =>
+              setBoardData((prevBoard) =>
+                prevBoard.map((row, y) =>
                   row.map((cell, x) =>
                     x === finalX && y === finalY ? "miss" : cell,
                   ),
                 ),
               );
-              setActiveBoard('bot');
+              // Switch to player's turn only on a miss
+              setActiveBoard("bot");
+              setBotTargeting(false);
+              consecutiveHits = 0; // Reset consecutive hits counter
             }
           }, 500);
           return;
         }
+        console.log(`Steps: ${steps} compared to maxSteps: ${maxSteps} `);
 
         // Random movement to adjacent cell
         const possibleMoves = [
@@ -283,7 +287,13 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
             }
             onClick={
               id === "bot-board" && gameStarted
-                ? (e) => handlePlayerAttack(e, boardData, setBoardData, setActiveBoard)
+                ? (e) =>
+                    handlePlayerAttack(
+                      e,
+                      boardData,
+                      setBoardData,
+                      setActiveBoard,
+                    )
                 : undefined
             }
           >
@@ -335,7 +345,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
                         id === "player-board"
                           ? "bg-board-cell"
                           : "cursor-pointer bg-gray-200 hover:bg-board-cell-hover";
-                        
+
                       return (
                         <td
                           key={columnIndex}
@@ -347,7 +357,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
                                 ? "bg-green-200"
                                 : "bg-red-200"
                               : ""
-                          } ${cell === 'hit' ? 'bg-red-600' : ''} relative transition-colors duration-200`}
+                          } ${cell === "hit" ? "bg-red-600" : ""} relative transition-colors duration-200`}
                         >
                           {cell && renderShipPart(cell)}
                         </td>
