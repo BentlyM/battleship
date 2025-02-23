@@ -5,7 +5,6 @@ import { Button } from "~/components/ui/button";
 import ShipHead from "./ship/ShipHead";
 import ShipBody from "./ship/ShipBody";
 import ShipTail from "./ship/ShipTail";
-import { Board as BoardType } from "./BoardStack";
 import {
   handleDragEnd,
   handleDragEnter,
@@ -17,7 +16,12 @@ import {
   handleDrop,
   isPlacementValid,
 } from "../helpers/boardHelpers";
-import { ShipType, Ship as ShipStructure } from "~/types/game";
+import {
+  ShipType,
+  Ship as ShipStructure,
+  Board as BoardType,
+  SetBoardData,
+} from "~/types/game";
 import TargetPointer from "./TargetPointer";
 import { handlePlayerAttack } from "../helpers/attackHelpers";
 interface BoardProps {
@@ -26,7 +30,7 @@ interface BoardProps {
     boardData: BoardType;
     activeBoard: "player" | "bot";
     setActiveBoard: Dispatch<SetStateAction<"player" | "bot">>;
-    setBoardData: (boardData: BoardType) => void;
+    setBoardData: SetBoardData;
     gameStarted: boolean;
     setGameStarted: (gameStarted: boolean) => void;
   };
@@ -125,7 +129,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
           setTimeout(() => {
             const targetCell = boardData[finalY]?.[finalX];
 
-            // If cell is already hit or missed, retarget
+            // If cell is already hit or missed, reTarget
             if (targetCell === "hit" || targetCell === "miss") {
               setReTarget(true);
               setBotTargeting(true);
@@ -138,28 +142,27 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
             if (targetCell && targetCell !== "hit" && targetCell !== "miss") {
               setBoardData((prevBoard) =>
                 prevBoard.map((row, y) =>
-                  row.map((cell, x) =>
-                    x === finalX && y === finalY ? "hit" : cell,
+                row.map((cell, x) =>
+                  x === finalX && y === finalY ? "hit" : cell,
                   ),
                 ),
               );
               consecutiveHits++;
               steps = 0;
-              maxSteps = baseSteps + consecutiveHits * 2; // Increase steps for next search
+              maxSteps = baseSteps + consecutiveHits * 2;
               setBotTargeting(true);
               return moveTarget();
             } else {
-              setBoardData((prevBoard) =>
-                prevBoard.map((row, y) =>
+              setBoardData((prevBoard: BoardType): BoardType => {
+                return prevBoard.map((row, y) =>
                   row.map((cell, x) =>
                     x === finalX && y === finalY ? "miss" : cell,
                   ),
-                ),
-              );
-              // Switch to player's turn only on a miss
+                );
+              });
               setActiveBoard("bot");
               setBotTargeting(false);
-              consecutiveHits = 0; // Reset consecutive hits counter
+              consecutiveHits = 0;
             }
           }, 500);
           return;

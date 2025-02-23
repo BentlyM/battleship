@@ -1,4 +1,4 @@
-import { Board as BoardType } from "../_components/BoardStack";
+import { Board } from "~/types/game";
 
 export const handleDragStart = (
   e: React.DragEvent,
@@ -23,7 +23,7 @@ export const handleDragStart = (
 
 export const handleDragOver = (
   e: React.DragEvent<HTMLTableElement>,
-  boardData: BoardType,
+  boardData: Board,
   draggedShip: {
     size: number;
     orientation: "horizontal" | "vertical";

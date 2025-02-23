@@ -33,7 +33,7 @@ export type BoardProps = {
     id: string;
     boardData: Board;
     activeBoard: "player" | "bot";
-    setBoardData: (boardData: Board) => void;
+    setBoardData: SetBoardData;
   };
   onClick?: () => void;
 };
@@ -56,4 +56,4 @@ export type SetShipCount = (
   count: ShipCount | ((prev: ShipCount) => ShipCount),
 ) => void;
 
-export type SetBoardData = (board: Board) => void;
+export type SetBoardData = (board: Board | ((prev: Board) => Board)) => void;

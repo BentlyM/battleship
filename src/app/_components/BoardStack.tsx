@@ -1,18 +1,17 @@
 // src/components/BoardStack.tsx
 "use client";
 import { useState } from "react";
-import { Board as ShowBoard } from "./Board";
+import { Board } from "./Board";
+import { Board as BoardType } from "~/types/game";
 
-type Cell = string;
-export type Board = Array<Array<Cell>>;
 export const BOARD_SIZE = 10;
-export const createBoard = (): Board =>
+export const createBoard = (): BoardType =>
   Array.from({ length: BOARD_SIZE }, () => Array(BOARD_SIZE).fill(""));
 
 export const BoardStack = () => {
   const [activeBoard, setActiveBoard] = useState<"player" | "bot">("player");
-  const [playerBoard, setPlayerBoard] = useState<Board>(createBoard());
-  const [botBoard, setBotBoard] = useState<Board>(createBoard());
+  const [playerBoard, setPlayerBoard] = useState<BoardType>(createBoard());
+  const [botBoard, setBotBoard] = useState<BoardType>(createBoard());
   const [gameStarted, setGameStarted] = useState(false);
 
   return (
@@ -29,7 +28,7 @@ export const BoardStack = () => {
               : "z-20 translate-x-[-45%] translate-y-[-47%] opacity-75"
           }`}
         >
-          <ShowBoard
+          <Board
             board={{
               id: "player-board",
               boardData: playerBoard,
@@ -50,7 +49,7 @@ export const BoardStack = () => {
               : "z-20 translate-x-[-45%] translate-y-[-67%] opacity-75"
           }`}
         >
-          <ShowBoard
+          <Board
             board={{
               id: "bot-board",
               boardData: botBoard,
