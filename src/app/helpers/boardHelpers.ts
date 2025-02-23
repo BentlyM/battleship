@@ -1,4 +1,4 @@
-import {
+import type {
   Board,
   Ship,
   PlacedShips,
@@ -234,9 +234,9 @@ export const handleDrop = (
 
         setShipCount((prev: ShipCount): ShipCount => {
           const newCount =
-            prev[shipData.type]!.count === 0
+            prev[shipData.type].count === 0
               ? 0
-              : prev[shipData.type]!.count - 1;
+              : prev[shipData.type].count - 1;
           return {
             ...prev,
             [shipData.type]: { count: newCount },

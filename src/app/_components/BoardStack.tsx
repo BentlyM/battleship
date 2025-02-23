@@ -2,11 +2,11 @@
 "use client";
 import { useState } from "react";
 import { Board } from "./Board";
-import { Board as BoardType } from "~/types/game";
+import type { Board as BoardType } from "~/types/game";
 
 export const BOARD_SIZE = 10;
 export const createBoard = (): BoardType =>
-  Array.from({ length: BOARD_SIZE }, () => Array(BOARD_SIZE).fill(""));
+  Array.from({ length: BOARD_SIZE }, (): string[] => Array(BOARD_SIZE).fill("") as string[]) as BoardType;
 
 export const BoardStack = () => {
   const [activeBoard, setActiveBoard] = useState<"player" | "bot">("player");

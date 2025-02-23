@@ -4,14 +4,9 @@ import React, { useState } from "react";
 import ShipHead from "./ship/ShipHead";
 import ShipBody from "./ship/ShipBody";
 import ShipTail from "./ship/ShipTail";
+import type { ShipProps as PropsForShip } from "~/types/game";
 
-export const shipProps: {
-  [key: string]: {
-    size: number;
-    orientation: "horizontal" | "vertical";
-    count: number;
-  };
-} = {
+export const shipProps: PropsForShip = {
   carrier: {
     size: 5,
     orientation: "horizontal",

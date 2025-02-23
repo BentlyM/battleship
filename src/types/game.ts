@@ -16,15 +16,9 @@ export type Ship = {
   type?: ShipType;
 };
 
-export type PlacedShips = {
-  [key in ShipType]?: Ship;
-};
+export type PlacedShips = Record<ShipType, Ship | undefined>;
 
-export type ShipCount = {
-  [key in ShipType]: {
-    count: number;
-  };
-};
+export type ShipCount = Record<ShipType, { count: number }>;
 
 export type Board = string[][];
 
@@ -38,13 +32,13 @@ export type BoardProps = {
   onClick?: () => void;
 };
 
-export type ShipProps = {
-  [key in ShipType]: {
+type ShipDetails = {
     size: number;
     orientation: Orientation;
     count: number;
-  };
 };
+
+export type ShipProps = Record<string, ShipDetails>
 
 export type DraggedShip = Ship | null;
 

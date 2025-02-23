@@ -1,4 +1,4 @@
-import { Board } from "~/types/game";
+import type { Board } from "~/types/game";
 
 export const handleDragStart = (
   e: React.DragEvent,

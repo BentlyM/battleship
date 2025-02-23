@@ -1,5 +1,6 @@
 "use client";
-import React, { Dispatch, SetStateAction, useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
+import type { Dispatch, SetStateAction } from "react";
 import Ship, { shipProps } from "./Ship";
 import { Button } from "~/components/ui/button";
 import ShipHead from "./ship/ShipHead";
@@ -16,11 +17,13 @@ import {
   handleDrop,
   isPlacementValid,
 } from "../helpers/boardHelpers";
-import {
+import type {
   ShipType,
   Ship as ShipStructure,
   Board as BoardType,
   SetBoardData,
+  PlacedShips,
+  ShipCount,
 } from "~/types/game";
 import TargetPointer from "./TargetPointer";
 import { handlePlayerAttack } from "../helpers/attackHelpers";
@@ -50,12 +53,10 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
   const [draggedShip, setDraggedShip] = React.useState<ShipStructure | null>(
     null,
   );
-  const [placedShips, setPlacedShips] = React.useState<{
-    [key: string]: ShipStructure;
-  }>({});
-  const [shipCount, setShipCount] = React.useState<{
-    [key in ShipType]: { count: number };
-  }>({
+  const [placedShips, setPlacedShips] = React.useState<
+    PlacedShips | undefined
+  >();
+  const [shipCount, setShipCount] = React.useState<ShipCount>({
     carrier: { count: 1 },
     battleship: { count: 1 },
     cruiser: { count: 1 },
@@ -82,7 +83,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
 
     const cell = tableContainerRef.current.querySelector(
       `td[data-x="${botTarget.x}"][data-y="${botTarget.y}"]`,
-    ) as HTMLTableCellElement | null;
+    )
 
     if (!cell) return;
 
@@ -99,7 +100,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
     if (id === "bot-board") {
       handleAutoPlace(
         boardData,
-        placedShips,
+        placedShips!,
         setPlacedShips,
         setBoardData,
         setShipCount,
@@ -114,7 +115,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
         x: Math.floor(Math.random() * 10),
         y: Math.floor(Math.random() * 10),
       };
-      let baseSteps = 5; // Base number of steps
+      const baseSteps = 5; // Base number of steps
       let maxSteps = baseSteps;
       let steps = 0;
       let consecutiveHits = 0;
@@ -142,8 +143,8 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
             if (targetCell && targetCell !== "hit" && targetCell !== "miss") {
               setBoardData((prevBoard) =>
                 prevBoard.map((row, y) =>
-                row.map((cell, x) =>
-                  x === finalX && y === finalY ? "hit" : cell,
+                  row.map((cell, x) =>
+                    x === finalX && y === finalY ? "hit" : cell,
                   ),
                 ),
               );
@@ -219,7 +220,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
     const [shipType, partIndex] = cell.split("-");
     if (!shipType || !partIndex) return null;
 
-    const ship = placedShips[shipType];
+    const ship = placedShips![shipType as ShipType];
     if (!ship) return null;
 
     const index = parseInt(partIndex);
@@ -282,8 +283,8 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
                 e,
                 boardData,
                 id,
-                draggedShip as ShipStructure | null,
-                placedShips,
+                draggedShip,
+                placedShips!,
                 setPlacedShips,
                 setShipCount,
               )
@@ -336,12 +337,12 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
                       const isValid =
                         isHighlighted &&
                         isPlacementValid(
-                          draggedShip!.x,
-                          draggedShip!.y,
-                          draggedShip!.size,
-                          draggedShip!.orientation,
+                          draggedShip.x,
+                          draggedShip.y,
+                          draggedShip.size,
+                          draggedShip.orientation,
                           boardData,
-                          draggedShip!.type as ShipType | undefined,
+                          draggedShip.type
                         );
 
                       const cellClass =
@@ -387,7 +388,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
               onClick={() =>
                 handleAutoPlace(
                   boardData,
-                  placedShips,
+                  placedShips!,
                   setPlacedShips,
                   setBoardData,
                   setShipCount,
@@ -401,7 +402,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
               variant="outline"
               className="h-8 rounded-full px-3 text-sm"
               onClick={() => {
-                setPlacedShips({});
+                setPlacedShips(undefined);
                 setShipCount({
                   ...shipCount,
                   carrier: { count: 1 },
@@ -411,7 +412,10 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
                   destroyer: { count: 1 },
                 });
                 setBoardData(
-                  Array.from({ length: 10 }, () => Array(10).fill("")),
+                  Array.from(
+                    { length: 10 },
+                    (): string[] => Array(10).fill("") as string[],
+                  ) as BoardType,
                 );
               }}
               disabled={!isActive || gameStarted}
