@@ -3,10 +3,15 @@
 import { useState } from "react";
 import { Board } from "./Board";
 import type { Board as BoardType } from "~/types/game";
+import ChatBox from "./ChatBox";
+import DetailsBox from "./DetailsBox";
 
 export const BOARD_SIZE = 10;
 export const createBoard = (): BoardType =>
-  Array.from({ length: BOARD_SIZE }, (): string[] => Array(BOARD_SIZE).fill("") as string[]) as BoardType;
+  Array.from(
+    { length: BOARD_SIZE },
+    (): string[] => Array(BOARD_SIZE).fill("") as string[],
+  ) as BoardType;
 
 export const BoardStack = () => {
   const [activeBoard, setActiveBoard] = useState<"player" | "bot">("player");
@@ -16,9 +21,7 @@ export const BoardStack = () => {
 
   return (
     <div className="flex h-full w-full items-center justify-evenly">
-      <div className="border-1 border border-black">
-        <div>{"stats"}</div>
-      </div>
+      <DetailsBox />
       <div className="relative h-[600px] w-[545px]">
         {/* Player Board */}
         <div
@@ -62,26 +65,11 @@ export const BoardStack = () => {
           />
         </div>
       </div>
-      <div className="border-1 flex flex-col items-center justify-center border border-black">
-        <label htmlFor="first-move">First Move</label>
-        <select
-          className="border-none bg-transparent"
-          disabled={gameStarted}
-          onChange={(e) => {
-            if (e.target.value === "random") {
-              setActiveBoard(Math.random() > 0.5 ? "player" : "bot");
-            } else {
-              setActiveBoard(e.target.value as "player" | "bot");
-            }
-          }}
-          name="first-move"
-          id="first-move"
-        >
-          <option value="random">Random</option>
-          <option value="player">Opponent</option>
-          <option value="bot">Player</option>
-        </select>
-      </div>
+      <ChatBox
+        gameStarted={gameStarted}
+        activeBoard={activeBoard}
+        setActiveBoard={setActiveBoard}
+      />
     </div>
   );
 };
