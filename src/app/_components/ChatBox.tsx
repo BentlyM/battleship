@@ -5,6 +5,7 @@ import {
   useState,
   useRef,
   useEffect,
+  memo,
   useCallback,
 } from "react";
 import { Button } from "~/components/ui/button";
@@ -17,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { motion } from "framer-motion";
 
 interface Message {
   id: number;
@@ -40,7 +42,7 @@ const useTypewriter = (text: string, speed = 50) => {
 
     const timer = setInterval(() => {
       if (i < text.length) {
-        setDisplayText((prev) => prev + text.charAt(i));
+        setDisplayText(text.slice(0, i + 1)); // Fix: Use slice instead of charAt
         i++;
       } else {
         clearInterval(timer);
@@ -52,6 +54,48 @@ const useTypewriter = (text: string, speed = 50) => {
 
   return displayText;
 };
+
+const MessageBubble = memo(({ message }: { message: Message }) => {
+  const text = useTypewriter(message.text);
+  const isPlayer = message.sender === "player";
+
+  return (
+    <div
+      className={`flex items-start space-x-2 ${isPlayer ? "flex-row-reverse space-x-reverse" : ""}`}
+    >
+      <div
+        className={`flex h-8 w-8 items-center justify-center rounded-full ${isPlayer ? "bg-primary" : "bg-muted"}`}
+      >
+        {isPlayer ? (
+          <User className="h-4 w-4 text-primary-foreground" />
+        ) : (
+          <Bot className="h-4 w-4" />
+        )}
+      </div>
+      <motion.div
+        className={`rounded-lg px-3 py-2 ${
+          isPlayer
+            ? "bg-primary text-primary-foreground"
+            : "bg-muted text-foreground"
+        }`}
+        initial={{ opacity: 0, scale: 0.5 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{
+          duration: 0.5,
+          ease: [0, 0.71, 0.2, 1.01],
+          scale: {
+            type: "spring",
+            damping: 5,
+            stiffness: 100,
+            restDelta: 0.001,
+          },
+        }}
+      >
+        {text}
+      </motion.div>
+    </div>
+  );
+});
 
 const ChatBox = ({
   gameStarted,
@@ -67,71 +111,39 @@ const ChatBox = ({
   );
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, []);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages, scrollToBottom]);
-
   useEffect(() => {
     setMessages([]);
   }, [isBotMode]);
 
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inputValue.trim()) return;
+  const handleSendMessage = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!inputValue.trim()) return;
 
-    const newMessage: Message = {
-      id: Date.now(),
-      text: inputValue,
-      sender: "player",
-      timestamp: new Date(),
-    };
+      const newMessage: Message = {
+        id: Date.now(),
+        text: inputValue,
+        sender: "player",
+        timestamp: new Date(),
+      };
 
-    setMessages((prev) => [...prev, newMessage]);
-    setInputValue("");
-  };
+      setMessages((prev) => [...prev, newMessage]);
+      setInputValue("");
+    },
+    [inputValue],
+  );
 
-  const handleFirstMoveChange = (value: "player" | "bot" | "random") => {
-    setFirstMove(value);
-    if (value === "random") {
-      setActiveBoard(Math.random() > 0.5 ? "player" : "bot");
-    } else {
-      setActiveBoard(value);
-    }
-  };
-
-  const MessageBubble = ({ message }: { message: Message }) => {
-    const text = useTypewriter(message.text);
-    const isPlayer = message.sender === "player";
-
-    return (
-      <div
-        className={`flex items-start space-x-2 ${isPlayer ? "flex-row-reverse space-x-reverse" : ""}`}
-      >
-        <div
-          className={`flex h-8 w-8 items-center justify-center rounded-full ${isPlayer ? "bg-primary" : "bg-muted"}`}
-        >
-          {isPlayer ? (
-            <User className="h-4 w-4 text-primary-foreground" />
-          ) : (
-            <Bot className="h-4 w-4" />
-          )}
-        </div>
-        <div
-          className={`rounded-lg px-3 py-2 ${
-            isPlayer
-              ? "bg-primary text-primary-foreground"
-              : "bg-muted text-foreground"
-          }`}
-        >
-          {text}
-        </div>
-      </div>
-    );
-  };
+  const handleFirstMoveChange = useCallback(
+    (value: "player" | "bot" | "random") => {
+      setFirstMove(value);
+      if (value === "random") {
+        setActiveBoard(Math.random() > 0.5 ? "player" : "bot");
+      } else {
+        setActiveBoard(value);
+      }
+    },
+    [setActiveBoard],
+  );
 
   return (
     <div className="flex w-[18vw] flex-col gap-4">
@@ -188,8 +200,12 @@ const ChatBox = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="easy">Easy (brute force)</SelectItem>
-                <SelectItem value="medium">Medium (simply knows where some are)</SelectItem>
-                <SelectItem value="hard">Hard (actually intelligent)</SelectItem>
+                <SelectItem value="medium">
+                  Medium (simply knows where some are)
+                </SelectItem>
+                <SelectItem value="hard">
+                  Hard (actually intelligent)
+                </SelectItem>
               </SelectContent>
             </Select>
           )}
@@ -211,11 +227,13 @@ const ChatBox = ({
             <form onSubmit={handleSendMessage} className="flex w-full gap-2">
               <Input
                 value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
+                onChange={(e) => {
+                  console.log("something is changing");
+                  setInputValue(e.target.value);
+                }}
                 placeholder="Type message..."
-                disabled={gameStarted}
               />
-              <Button type="submit" size="icon" disabled={gameStarted}>
+              <Button type="submit" size="icon">
                 <Send className="h-4 w-4" />
               </Button>
             </form>
@@ -226,4 +244,4 @@ const ChatBox = ({
   );
 };
 
-export default ChatBox;
+export default memo(ChatBox);
