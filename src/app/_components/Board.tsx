@@ -27,6 +27,7 @@ import type {
 } from "~/types/game";
 import TargetPointer from "./TargetPointer";
 import { handlePlayerAttack } from "../helpers/attackHelpers";
+import { motion, stagger, animate, useInView } from "framer-motion";
 interface BoardProps {
   board: {
     id: string;
@@ -83,7 +84,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
 
     const cell = tableContainerRef.current.querySelector(
       `td[data-x="${botTarget.x}"][data-y="${botTarget.y}"]`,
-    )
+    );
 
     if (!cell) return;
 
@@ -248,6 +249,41 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
     }
   };
 
+  const tableRef = useRef<HTMLTableElement>(null);
+  const isInView = useInView(tableRef, { once: true });
+
+  useEffect(() => {
+    if (isInView && tableRef.current) {
+      // Animate the title
+      animate("h3", { opacity: 1, y: [20, 0] }, { duration: 0.5 });
+  
+      // Animate the column headers (A-J)
+      animate("th:not(:first-child)", { opacity: 1, y: [20, 0] }, { 
+        delay: stagger(0.05),
+        duration: 0.3
+      });
+  
+      // Animate the row headers (1-10)
+      animate("th:first-child", { opacity: 1, y: [20, 0] }, { 
+        delay: stagger(0.05),
+        duration: 0.3
+      });
+  
+      // Existing cell animation
+      animate("td", 
+        { opacity: 1, y: [50, 0] }, 
+        { 
+          delay: (index) => {
+            const row = Math.floor(index / 10);
+            const col = index % 10;
+            return (row + col) * 0.05;
+          }
+        }
+      );
+    }
+  }, [isInView]);
+  
+
   return (
     <div
       className="mx-auto flex w-full max-w-[600px] flex-col items-center p-4"
@@ -255,11 +291,11 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
       onDragStart={(e) => handleDragStart(e, setDraggedShip)}
       onDragEnd={() => handleDragEnd(setDraggedShip)}
     >
-      <h3 className="mb-6 text-center text-xl font-semibold">
+      <h3 className="mb-6 text-center text-xl font-semibold opacity-0">
         {id === "player-board" ? "Player Board" : "Bot Board"}
       </h3>
       <div className="aspect-square w-full">
-        <div className="relative overflow-x-auto" ref={tableContainerRef}>
+        <div className="relative overflow-hidden" ref={tableContainerRef}>
           {id === "player-board" && botTargeting && (
             <div
               className="pointer-events-none absolute transition-[transform] duration-200 ease-in-out"
@@ -273,6 +309,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
             </div>
           )}
           <table
+            ref={tableRef}
             className="w-full table-fixed border-separate border-spacing-[3px]"
             onDragOver={(e) =>
               handleDragOver(e, boardData, draggedShip, setDraggedShip)
@@ -307,7 +344,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
                 {columnHeaders.map((header, index) => (
                   <th
                     key={index}
-                    className={`h-8 w-8 text-center text-sm sm:h-10 sm:w-10 sm:text-base ${isActive ? "text-black" : "text-transparent"} transition-colors duration-300`}
+                    className={`h-8 w-8 text-center text-sm sm:h-10 sm:w-10 sm:text-base ${isActive ? "text-black" : "text-transparent"} transition-colors duration-300 opacity-0`}
                   >
                     {header}
                   </th>
@@ -316,7 +353,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
               {boardData.map((row: BoardType[number], rowIndex: number) => (
                 <tr key={rowIndex}>
                   <th
-                    className={`h-8 w-8 text-center text-sm sm:h-10 sm:w-10 sm:text-base ${isActive ? "text-black" : "text-transparent"} transition-colors duration-300`}
+                    className={`h-8 w-8 text-center text-sm sm:h-10 sm:w-10 sm:text-base ${isActive ? "text-black" : "text-transparent"} transition-colors duration-300 opacity-0`}
                   >
                     {rowIndex + 1}
                   </th>
@@ -342,7 +379,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
                           draggedShip.size,
                           draggedShip.orientation,
                           boardData,
-                          draggedShip.type
+                          draggedShip.type,
                         );
 
                       const cellClass =
@@ -351,7 +388,8 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
                           : "cursor-pointer bg-gray-200 hover:bg-board-cell-hover";
 
                       return (
-                        <td
+                        <motion.td
+                          initial={{ opacity: 0 }}
                           key={columnIndex}
                           data-x={columnIndex}
                           data-y={rowIndex}
@@ -364,7 +402,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
                           } ${cell === "hit" ? "bg-red-600" : ""} relative transition-colors duration-200`}
                         >
                           {cell && renderShipPart(cell)}
-                        </td>
+                        </motion.td>
                       );
                     },
                   )}
