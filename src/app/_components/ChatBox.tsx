@@ -1,15 +1,6 @@
 import { Bot, Send, User, Users } from "lucide-react";
-import type {
-  Dispatch,
-  SetStateAction,
-} from "react";
-import {
-  useState,
-  useRef,
-  useEffect,
-  memo,
-  useCallback,
-} from "react";
+import type { Dispatch, SetStateAction } from "react";
+import { useState, useRef, useEffect, memo, useCallback } from "react";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardFooter } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
@@ -21,7 +12,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { motion } from "framer-motion";
-
+import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
 interface Message {
   id: number;
   text: string;
@@ -69,16 +60,14 @@ const MessageBubble = memo(({ message }: { message: Message }) => {
         className={`flex h-8 w-8 items-center justify-center rounded-full ${!isPlayer ? "bg-muted" : ""}`}
       >
         {isPlayer ? (
-          <User imageRendering={'test'} className="h-4 w-4" />
+          <User imageRendering={"test"} className="h-4 w-4" />
         ) : (
           <Bot className="h-4 w-4" />
         )}
       </div>
       <motion.div
         className={`rounded-lg px-3 py-2 ${
-          isPlayer
-            ? "bg-muted"
-            : "bg-muted text-foreground"
+          isPlayer ? "bg-muted" : "bg-muted text-foreground"
         }`}
         initial={{ opacity: 0, scale: 0.5 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -99,7 +88,48 @@ const MessageBubble = memo(({ message }: { message: Message }) => {
   );
 });
 
-MessageBubble.displayName = 'MessageBubble';
+MessageBubble.displayName = "MessageBubble";
+
+interface ResponseProps {
+  type: "player" | "bot";
+  isActive: boolean;
+  message: string;
+}
+
+const PlayerResponse = ({ type, isActive, message }: ResponseProps) => {
+  return (
+    <Card
+      className={`flex items-center gap-4 p-4 ${isActive ? "border-primary" : ""}`}
+    >
+      <Avatar>
+        <AvatarImage src="/idle.jpg" className="w-12 rounded" />
+        <AvatarFallback>P</AvatarFallback>
+      </Avatar>
+      <div className="flex-1">
+        <p className="text-sm">{message}</p>
+      </div>
+    </Card>
+  );
+};
+
+const OpponentResponse = ({ type, isActive, message }: ResponseProps) => {
+  return (
+    <Card
+      className={`flex items-center gap-4 p-4 ${isActive ? "border-primary" : ""}`}
+    >
+      <div className="flex-1">
+        <p className="text-right text-sm">{message}</p>
+      </div>
+      <Avatar>
+        <AvatarImage
+          src={type === "bot" ? "/bot.png" : "/opponent-avatar.png"}
+          className="w-12 rounded"
+        />
+        <AvatarFallback>{type === "bot" ? "B" : "O"}</AvatarFallback>
+      </Avatar>
+    </Card>
+  );
+};
 
 const ChatBox = ({
   gameStarted,
@@ -215,18 +245,16 @@ const ChatBox = ({
           )}
         </div>
       </div>
-
-      <Card className="h-[50vh] w-full shadow">
-        <CardContent className="h-[40vh] overflow-y-auto p-4">
-          <div className="space-y-4">
-            {messages.map((message) => (
-              <MessageBubble key={message.id} message={message} />
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
-        </CardContent>
-
-        {!isBotMode && (
+      {!isBotMode && (
+        <Card className="h-[50vh] w-full shadow">
+          <CardContent className="h-[40vh] overflow-y-auto p-4">
+            <div className="space-y-4">
+              {messages.map((message) => (
+                <MessageBubble key={message.id} message={message} />
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
+          </CardContent>
           <CardFooter>
             <form onSubmit={handleSendMessage} className="flex w-full gap-2">
               <Input
@@ -242,10 +270,37 @@ const ChatBox = ({
               </Button>
             </form>
           </CardFooter>
-        )}
-      </Card>
+        </Card>
+      )}
+
+      {isBotMode && (
+        <>
+          <PlayerResponse
+            type="player"
+            isActive={activeBoard === "bot"}
+            message={getPlayerResponseMessage(messages)}
+          />
+          <OpponentResponse
+            type="bot"
+            isActive={activeBoard === "player"}
+            message={getBotResponseMessage(messages)}
+          />
+        </>
+      )}
     </div>
   );
+};
+
+const getPlayerResponseMessage = (messages: Message[]) => {
+  const lastMessage = messages[messages.length - 1];
+  if (!lastMessage) return "Waiting for your move...";
+  return lastMessage.sender === "player" ? "Your turn!" : "Bot is thinking...";
+};
+
+const getBotResponseMessage = (messages: Message[]) => {
+  const lastMessage = messages[messages.length - 1];
+  if (!lastMessage) return "Waiting for game to start...";
+  return lastMessage.sender === "bot" ? "Bot's turn!" : "Your move!";
 };
 
 export default memo(ChatBox);

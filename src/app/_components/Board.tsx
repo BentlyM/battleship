@@ -54,8 +54,8 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
     null,
   );
   const [placedShips, setPlacedShips] = React.useState<
-    PlacedShips | undefined
-  >();
+    PlacedShips
+  >({} as PlacedShips);
   const [shipCount, setShipCount] = React.useState<ShipCount>({
     carrier: { count: 1 },
     battleship: { count: 1 },
@@ -100,7 +100,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
     if (id === "bot-board") {
       handleAutoPlace(
         boardData,
-        placedShips!,
+        placedShips || {},
         setPlacedShips,
         setBoardData,
         setShipCount,
@@ -220,7 +220,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
     const [shipType, partIndex] = cell.split("-");
     if (!shipType || !partIndex) return null;
 
-    const ship = placedShips![shipType as ShipType];
+    const ship = placedShips[shipType as ShipType];
     if (!ship) return null;
 
     const index = parseInt(partIndex);
@@ -310,7 +310,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
                 boardData,
                 id,
                 draggedShip,
-                placedShips!,
+                placedShips || {},
                 setPlacedShips,
                 setShipCount,
               )

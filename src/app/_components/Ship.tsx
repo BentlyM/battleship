@@ -5,7 +5,7 @@ import ShipHead from "./ship/ShipHead";
 import ShipBody from "./ship/ShipBody";
 import ShipTail from "./ship/ShipTail";
 import type { ShipProps as PropsForShip } from "~/types/game";
-import { motion } from "framer-motion";
+import { motion, useAnimation } from "framer-motion";
 
 export const shipProps: PropsForShip = {
   carrier: {
@@ -51,8 +51,26 @@ const Ship: React.FC<ShipProps> = ({
   count,
 }) => {
   const [orientation, setOrientation] = useState(initialOrientation);
+  const [isAnimating, setIsAnimating] = useState(true);
+  const controls = useAnimation();
+
+  React.useEffect(() => {
+    const animate = async () => {
+      await controls.start({
+        x: 0,
+        opacity: 1,
+        transition: { duration: 1, ease: "easeInOut" },
+      });
+      setIsAnimating(false);
+    };
+
+    // Start from left and invisible
+    controls.set({ x: -100, opacity: 0 });
+    animate();
+  }, [controls]);
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+    if (isAnimating) return;
     try {
       const shipData = {
         type,
@@ -80,31 +98,33 @@ const Ship: React.FC<ShipProps> = ({
   };
 
   return (
-    <div
-      draggable={active}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-      onClick={handleClick}
-      className="my-2 flex cursor-move select-none items-center justify-center transition-transform duration-300"
-    >
+    <motion.div animate={controls}>
       <div
-        className={`flex ${orientation === "vertical" ? "flex-col" : "flex-row"} relative transition-all duration-300`}
-        role="img"
-        aria-label={`${type} ship`}
+        draggable={active && !isAnimating}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onClick={handleClick}
+        className="my-2 flex cursor-move select-none items-center justify-center transition-transform duration-300"
       >
-        {/* Ship head */}
-        <ShipHead orientation={orientation as "horizontal" | "vertical"} />
+        <div
+          className={`flex ${orientation === "vertical" ? "flex-col" : "flex-row"} relative transition-all duration-300 ${count <= 0 ? "opacity-[0.5]" : "opacity-1"}`}
+          role="img"
+          aria-label={`${type} ship`}
+        >
+          {/* Ship head */}
+          <ShipHead orientation={orientation as "horizontal" | "vertical"} />
 
-        {/* Ship body */}
-        {Array.from({ length: Math.max(0, size - 2) }).map((_, index) => (
-          <ShipBody key={index} index={index} />
-        ))}
+          {/* Ship body */}
+          {Array.from({ length: Math.max(0, size - 2) }).map((_, index) => (
+            <ShipBody key={index} index={index} />
+          ))}
 
-        {/* Ship tail */}
-        <ShipTail orientation={orientation as "horizontal" | "vertical"} />
+          {/* Ship tail */}
+          <ShipTail orientation={orientation as "horizontal" | "vertical"} />
+        </div>
+        <span className="ml-2 select-none text-sm capitalize text-gray-700">{`(${count}) ${type} ship`}</span>
       </div>
-      <span className="ml-2 select-none text-sm capitalize text-gray-700">{`(${count}) ${type} ship`}</span>
-    </div>
+    </motion.div>
   );
 };
 

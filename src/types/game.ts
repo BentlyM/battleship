@@ -16,7 +16,7 @@ export type Ship = {
   type?: ShipType;
 };
 
-export type PlacedShips = Record<ShipType, Ship | undefined>;
+export type PlacedShips = Record<ShipType, Ship>;
 
 export type ShipCount = Record<ShipType, { count: number }>;
 

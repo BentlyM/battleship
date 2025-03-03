@@ -13,18 +13,18 @@ interface FleetProps {
   handleAutoPlace: (
     boardData: BoardType,
     placedShips: PlacedShips,
-    setPlacedShips: Dispatch<SetStateAction<PlacedShips | undefined>>,
+    setPlacedShips: Dispatch<SetStateAction<PlacedShips>>,
     setBoardData: SetBoardData,
     setShipCount: Dispatch<SetStateAction<ShipCount>>,
   ) => void;
-  setPlacedShips: Dispatch<SetStateAction<PlacedShips | undefined>>;
+  setPlacedShips: Dispatch<SetStateAction<PlacedShips>>;
   setShipCount: Dispatch<SetStateAction<ShipCount>>;
   setBoardData: SetBoardData;
   setGameStarted: (gameStarted: boolean) => void;
   gameStarted: boolean;
   boardData: BoardType;
   shipCount: ShipCount;
-  placedShips: PlacedShips | undefined;
+  placedShips: PlacedShips;
   isActive: boolean;
 }
 
@@ -63,7 +63,7 @@ const Fleet = (props: FleetProps) => {
           onClick={() =>
             handleAutoPlace(
               boardData,
-              placedShips!,
+              placedShips,
               setPlacedShips,
               setBoardData,
               setShipCount,
@@ -77,7 +77,7 @@ const Fleet = (props: FleetProps) => {
           variant="outline"
           className="h-8 rounded-full px-3 text-sm"
           onClick={() => {
-            setPlacedShips(undefined);
+            setPlacedShips({} as PlacedShips);
             setShipCount({
               ...shipCount,
               carrier: { count: 1 },
@@ -113,7 +113,12 @@ const Fleet = (props: FleetProps) => {
           src="/water.gif"
           alt=""
           fill
-          style={{ display: `${gameStarted && "none"}` , position: "absolute", zIndex: -1 }}
+          style={{
+            display: `${gameStarted && "none"}`,
+            position: "absolute",
+            zIndex: -1,
+            objectFit: 'cover'
+          }}
           unoptimized
         />
         {!gameStarted &&
