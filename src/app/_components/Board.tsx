@@ -1,8 +1,6 @@
 "use client";
 import React, { useEffect, useRef } from "react";
 import type { Dispatch, SetStateAction } from "react";
-import Ship, { shipProps } from "./Ship";
-import { Button } from "~/components/ui/button";
 import ShipHead from "./ship/ShipHead";
 import ShipBody from "./ship/ShipBody";
 import ShipTail from "./ship/ShipTail";
@@ -28,6 +26,7 @@ import type {
 import TargetPointer from "./TargetPointer";
 import { handlePlayerAttack } from "../helpers/attackHelpers";
 import { motion, stagger, animate, useInView } from "framer-motion";
+import Fleet from "./Fleet";
 interface BoardProps {
   board: {
     id: string;
@@ -240,15 +239,6 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
     }
   };
 
-  const handleStartGame = () => {
-    if (Object.values(shipCount).every((ship) => ship.count === 0)) {
-      setGameStarted(true);
-    } else {
-      alert("Please place all ships before starting the game");
-      return;
-    }
-  };
-
   const tableRef = useRef<HTMLTableElement>(null);
   const isInView = useInView(tableRef, { once: true });
 
@@ -256,33 +246,41 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
     if (isInView && tableRef.current) {
       // Animate the title
       animate("h3", { opacity: 1, y: [20, 0] }, { duration: 0.5 });
-  
+
       // Animate the column headers (A-J)
-      animate("th:not(:first-child)", { opacity: 1, y: [20, 0] }, { 
-        delay: stagger(0.05),
-        duration: 0.3
-      });
-  
+      animate(
+        "th:not(:first-child)",
+        { opacity: 1, y: [20, 0] },
+        {
+          delay: stagger(0.05),
+          duration: 0.3,
+        },
+      );
+
       // Animate the row headers (1-10)
-      animate("th:first-child", { opacity: 1, y: [20, 0] }, { 
-        delay: stagger(0.05),
-        duration: 0.3
-      });
-  
+      animate(
+        "th:first-child",
+        { opacity: 1, y: [20, 0] },
+        {
+          delay: stagger(0.05),
+          duration: 0.3,
+        },
+      );
+
       // Existing cell animation
-      animate("td", 
-        { opacity: 1, y: [50, 0] }, 
-        { 
+      animate(
+        "td",
+        { opacity: 1, y: [50, 0] },
+        {
           delay: (index) => {
             const row = Math.floor(index / 10);
             const col = index % 10;
             return (row + col) * 0.05;
-          }
-        }
+          },
+        },
       );
     }
   }, [isInView]);
-  
 
   return (
     <div
@@ -297,16 +295,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
       <div className="aspect-square w-full">
         <div className="relative overflow-hidden" ref={tableContainerRef}>
           {id === "player-board" && botTargeting && (
-            <div
-              className="pointer-events-none absolute transition-[transform] duration-200 ease-in-out"
-              style={{
-                transform: `translate(${targetTransform.x}px, ${targetTransform.y}px)`,
-                willChange: "transform",
-                zIndex: 1,
-              }}
-            >
-              <TargetPointer x={botTarget.x} y={botTarget.y} />
-            </div>
+            <TargetPointer x={targetTransform.x} y={targetTransform.y} />
           )}
           <table
             ref={tableRef}
@@ -344,7 +333,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
                 {columnHeaders.map((header, index) => (
                   <th
                     key={index}
-                    className={`h-8 w-8 text-center text-sm sm:h-10 sm:w-10 sm:text-base ${isActive ? "text-black" : "text-transparent"} transition-colors duration-300 opacity-0`}
+                    className={`h-8 w-8 text-center text-sm sm:h-10 sm:w-10 sm:text-base ${isActive ? "text-black" : "text-transparent"} opacity-0 transition-colors duration-300`}
                   >
                     {header}
                   </th>
@@ -353,7 +342,7 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
               {boardData.map((row: BoardType[number], rowIndex: number) => (
                 <tr key={rowIndex}>
                   <th
-                    className={`h-8 w-8 text-center text-sm sm:h-10 sm:w-10 sm:text-base ${isActive ? "text-black" : "text-transparent"} transition-colors duration-300 opacity-0`}
+                    className={`h-8 w-8 text-center text-sm sm:h-10 sm:w-10 sm:text-base ${isActive ? "text-black" : "text-transparent"} opacity-0 transition-colors duration-300`}
                   >
                     {rowIndex + 1}
                   </th>
@@ -415,76 +404,18 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
 
       {/* Ships section - only show for player board */}
       {id === "player-board" && (
-        <div
-          className={`w-full rounded-lg border-2 border-gray-200 p-4 ${gameStarted && "mb-[176px]"}`}
-        >
-          <div className="flex flex-row gap-4">
-            <h4 className="mb-4 text-lg font-semibold">Ships</h4>
-            <Button
-              variant="outline"
-              className="h-8 rounded-full px-3 text-sm"
-              onClick={() =>
-                handleAutoPlace(
-                  boardData,
-                  placedShips!,
-                  setPlacedShips,
-                  setBoardData,
-                  setShipCount,
-                )
-              }
-              disabled={!isActive || gameStarted}
-            >
-              Auto-place Ships
-            </Button>
-            <Button
-              variant="outline"
-              className="h-8 rounded-full px-3 text-sm"
-              onClick={() => {
-                setPlacedShips(undefined);
-                setShipCount({
-                  ...shipCount,
-                  carrier: { count: 1 },
-                  battleship: { count: 1 },
-                  cruiser: { count: 1 },
-                  submarine: { count: 1 },
-                  destroyer: { count: 1 },
-                });
-                setBoardData(
-                  Array.from(
-                    { length: 10 },
-                    (): string[] => Array(10).fill("") as string[],
-                  ) as BoardType,
-                );
-              }}
-              disabled={!isActive || gameStarted}
-            >
-              Remove Ships
-            </Button>
-            <Button
-              variant="outline"
-              className="h-8 rounded-full bg-green-500 px-3 text-sm text-white hover:bg-green-600"
-              onClick={handleStartGame}
-              disabled={gameStarted}
-            >
-              Start Game
-            </Button>
-          </div>
-          <div
-            className={`flex flex-wrap justify-center gap-4 overflow-hidden transition-all duration-300 ${gameStarted ? "h-0 opacity-0" : "h-[176px] opacity-100"}`}
-          >
-            {!gameStarted &&
-              Object.entries(shipProps).map(([type, props]) => (
-                <Ship
-                  key={type}
-                  type={type}
-                  size={props.size}
-                  orientation={props.orientation}
-                  active={isActive}
-                  count={shipCount[type as keyof typeof shipCount]?.count || 0}
-                />
-              ))}
-          </div>
-        </div>
+        <Fleet
+          placedShips={placedShips}
+          setGameStarted={setGameStarted}
+          setShipCount={setShipCount}
+          boardData={boardData}
+          handleAutoPlace={handleAutoPlace}
+          setPlacedShips={setPlacedShips}
+          setBoardData={setBoardData}
+          gameStarted={gameStarted}
+          shipCount={shipCount}
+          isActive={isActive}
+        />
       )}
     </div>
   );

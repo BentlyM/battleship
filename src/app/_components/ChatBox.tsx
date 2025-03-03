@@ -1,7 +1,9 @@
 import { Bot, Send, User, Users } from "lucide-react";
-import {
+import type {
   Dispatch,
   SetStateAction,
+} from "react";
+import {
   useState,
   useRef,
   useEffect,
@@ -64,10 +66,10 @@ const MessageBubble = memo(({ message }: { message: Message }) => {
       className={`flex items-start space-x-2 ${isPlayer ? "flex-row-reverse space-x-reverse" : ""}`}
     >
       <div
-        className={`flex h-8 w-8 items-center justify-center rounded-full ${isPlayer ? "bg-primary" : "bg-muted"}`}
+        className={`flex h-8 w-8 items-center justify-center rounded-full ${!isPlayer ? "bg-muted" : ""}`}
       >
         {isPlayer ? (
-          <User className="h-4 w-4 text-primary-foreground" />
+          <User imageRendering={'test'} className="h-4 w-4" />
         ) : (
           <Bot className="h-4 w-4" />
         )}
@@ -75,7 +77,7 @@ const MessageBubble = memo(({ message }: { message: Message }) => {
       <motion.div
         className={`rounded-lg px-3 py-2 ${
           isPlayer
-            ? "bg-primary text-primary-foreground"
+            ? "bg-muted"
             : "bg-muted text-foreground"
         }`}
         initial={{ opacity: 0, scale: 0.5 }}
@@ -97,6 +99,8 @@ const MessageBubble = memo(({ message }: { message: Message }) => {
   );
 });
 
+MessageBubble.displayName = 'MessageBubble';
+
 const ChatBox = ({
   gameStarted,
   activeBoard,
@@ -105,7 +109,7 @@ const ChatBox = ({
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isBotMode, setIsBotMode] = useState(true);
-  const [difficulty, setDifficulty] = useState("medium");
+  const [difficulty, setDifficulty] = useState("easy");
   const [firstMove, setFirstMove] = useState<"player" | "bot" | "random">(
     "random",
   );

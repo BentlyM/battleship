@@ -5,6 +5,7 @@ import ShipHead from "./ship/ShipHead";
 import ShipBody from "./ship/ShipBody";
 import ShipTail from "./ship/ShipTail";
 import type { ShipProps as PropsForShip } from "~/types/game";
+import { motion } from "framer-motion";
 
 export const shipProps: PropsForShip = {
   carrier: {
@@ -102,7 +103,7 @@ const Ship: React.FC<ShipProps> = ({
         {/* Ship tail */}
         <ShipTail orientation={orientation as "horizontal" | "vertical"} />
       </div>
-      <span className="ml-2 select-none text-sm capitalize text-gray-600">{`(${count}) ${type} ship`}</span>
+      <span className="ml-2 select-none text-sm capitalize text-gray-700">{`(${count}) ${type} ship`}</span>
     </div>
   );
 };
