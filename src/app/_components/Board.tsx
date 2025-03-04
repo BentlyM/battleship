@@ -40,7 +40,7 @@ interface BoardProps {
   onClick?: () => void;
 }
 
-const Board: React.FC<BoardProps> = ({ board, onClick }) => {
+const Board: React.FC<BoardProps> = ({ board }) => {
   const {
     id,
     boardData,
@@ -53,9 +53,9 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
   const [draggedShip, setDraggedShip] = React.useState<ShipStructure | null>(
     null,
   );
-  const [placedShips, setPlacedShips] = React.useState<
-    PlacedShips
-  >({} as PlacedShips);
+  const [placedShips, setPlacedShips] = React.useState<PlacedShips>(
+    {} as PlacedShips,
+  );
   const [shipCount, setShipCount] = React.useState<ShipCount>({
     carrier: { count: 1 },
     battleship: { count: 1 },
@@ -168,7 +168,6 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
           }, 500);
           return;
         }
-        console.log(`Steps: ${steps} compared to maxSteps: ${maxSteps} `);
 
         // Random movement to adjacent cell
         const possibleMoves = [
@@ -285,7 +284,6 @@ const Board: React.FC<BoardProps> = ({ board, onClick }) => {
   return (
     <div
       className="mx-auto flex w-full max-w-[600px] flex-col items-center p-4"
-      onClick={onClick}
       onDragStart={(e) => handleDragStart(e, setDraggedShip)}
       onDragEnd={() => handleDragEnd(setDraggedShip)}
     >

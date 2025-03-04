@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import { Bot, Send, User, Users } from "lucide-react";
 import type { Dispatch, SetStateAction } from "react";
 import { useState, useRef, useEffect, memo, useCallback } from "react";
@@ -14,10 +14,6 @@ import {
 } from "~/components/ui/select";
 import { motion } from "framer-motion";
 import RecipientResponse from "./RecipientResponse";
-import {
-  getBotResponseMessage,
-  getPlayerResponseMessage,
-} from "../helpers/ChatHelpers";
 export interface Message {
   id: number;
   text: string;
@@ -29,166 +25,84 @@ interface ChatBoxProps {
   gameStarted: boolean;
   activeBoard: "player" | "bot";
   setActiveBoard: Dispatch<SetStateAction<"player" | "bot">>;
+  currentEvent: {
+    player: string;
+    bot: string;
+    trigger: "hit" | "miss" | "turn" | "prologue";
+  };
+  onGameEvent: (trigger: "hit" | "miss") => void;
 }
 
-const useTypewriter = (text: string, speed = 50) => {
+export const useTypewriter = (text: string, speed = 50) => {
   const [displayText, setDisplayText] = useState("");
 
   useEffect(() => {
     let i = 0;
     setDisplayText("");
-
     const timer = setInterval(() => {
       if (i < text.length) {
-        setDisplayText(text.slice(0, i + 1)); // Fix: Use slice instead of charAt
+        setDisplayText(text.slice(0, i + 1));
         i++;
       } else {
         clearInterval(timer);
       }
     }, speed);
-
     return () => clearInterval(timer);
   }, [text, speed]);
 
   return displayText;
 };
 
-const MessageBubble = memo(({ message }: { message: Message }) => {
-  const text = useTypewriter(message.text);
-  const isPlayer = message.sender === "player";
+const MessageBubble = memo(
+  ({ message }: { message: { text: string; sender: "player" | "bot" } }) => {
+    const text = useTypewriter(message.text);
+    const isPlayer = message.sender === "player";
 
-  return (
-    <div
-      className={`flex items-start space-x-2 ${isPlayer ? "flex-row-reverse space-x-reverse" : ""}`}
-    >
+    return (
       <div
-        className={`flex h-8 w-8 items-center justify-center rounded-full ${!isPlayer ? "bg-muted" : ""}`}
+        className={`flex items-start space-x-2 ${isPlayer ? "flex-row-reverse space-x-reverse" : ""}`}
       >
-        {isPlayer ? (
-          <User imageRendering={"test"} className="h-4 w-4" />
-        ) : (
-          <Bot className="h-4 w-4" />
-        )}
+        <div
+          className={`flex h-8 w-8 items-center justify-center rounded-full ${!isPlayer ? "bg-muted" : ""}`}
+        >
+          {isPlayer ? (
+            <User className="h-4 w-4" />
+          ) : (
+            <Bot className="h-4 w-4" />
+          )}
+        </div>
+        <motion.div
+          className={`rounded-lg px-3 py-2 ${isPlayer ? "bg-muted" : "bg-muted text-foreground"}`}
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, ease: [0, 0.71, 0.2, 1.01] }}
+        >
+          {text}
+        </motion.div>
       </div>
-      <motion.div
-        className={`rounded-lg px-3 py-2 ${
-          isPlayer ? "bg-muted" : "bg-muted text-foreground"
-        }`}
-        initial={{ opacity: 0, scale: 0.5 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{
-          duration: 0.5,
-          ease: [0, 0.71, 0.2, 1.01],
-          scale: {
-            type: "spring",
-            damping: 5,
-            stiffness: 100,
-            restDelta: 0.001,
-          },
-        }}
-      >
-        {text}
-      </motion.div>
-    </div>
-  );
-});
+    );
+  },
+);
 
 MessageBubble.displayName = "MessageBubble";
-
-export const prologueMessages = [
-  {
-    text: "Welcome to Battleship! Are you ready to sink some ships?",
-    sender: "player",
-  },
-  {
-    text: "Plan our formation by selecting the axis and dragging and dropping ships on the map.",
-    sender: "player",
-  },
-  { text: "Let's start placing ships...", sender: "bot" },
-  {
-    text: "Remember, you can rotate ships by clicking on them.",
-    sender: "bot",
-  },
-  {
-    text: "Once all ships are placed, we'll begin the battle!",
-    sender: "player",
-  },
-];
 
 const ChatBox = ({
   gameStarted,
   activeBoard,
   setActiveBoard,
+  currentEvent,
+  onGameEvent,
 }: ChatBoxProps) => {
-  const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isBotMode, setIsBotMode] = useState(true);
   const [difficulty, setDifficulty] = useState("easy");
   const [firstMove, setFirstMove] = useState<"player" | "bot" | "random">(
     "random",
   );
+  const [vsPlayerMessages, setVsPlayerMessages] = useState<
+    { text: string; sender: "player" | "bot" }[]
+  >([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [playerMessage, setPlayerMessage] = useState(
-    "Waiting for your move...",
-  );
-  const [botMessage, setBotMessage] = useState("Waiting for game to start...");
-
-  useEffect(() => {
-    if (isBotMode) {
-      if (!gameStarted) {
-        const initialMessages = prologueMessages
-          .slice(0, 3)
-          .map((msg, index) => ({
-            id: index + 1,
-            sender: msg.sender as "player" | "bot",
-            text: msg.text,
-            timestamp: new Date(),
-          }));
-        setMessages(initialMessages);
-      } else {
-        setMessages([]);
-      }
-    } else {
-      setMessages([]);
-    }
-  }, [isBotMode, gameStarted]);
-
-  useEffect(() => {
-    const updateMessages = async () => {
-      const newPlayerMessage = await getPlayerResponseMessage({
-        messages,
-        gameStarted,
-        activeBoard,
-      });
-      const newBotMessage = await getBotResponseMessage({
-        messages,
-        gameStarted,
-        activeBoard,
-      });
-      setPlayerMessage(newPlayerMessage);
-      setBotMessage(newBotMessage);
-    };
-
-    updateMessages();
-  }, [messages, gameStarted, activeBoard]);
-
-  const handleSendMessage = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
-      if (!inputValue.trim()) return;
-
-      const newMessage: Message = {
-        id: Date.now(),
-        text: inputValue,
-        sender: "player",
-        timestamp: new Date(),
-      };
-
-      setMessages((prev) => [...prev, newMessage]);
-      setInputValue("");
-    },
-    [inputValue],
-  );
 
   const handleFirstMoveChange = useCallback(
     (value: "player" | "bot" | "random") => {
@@ -200,6 +114,20 @@ const ChatBox = ({
       }
     },
     [setActiveBoard],
+  );
+
+  const handleSendMessage = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!inputValue.trim()) return;
+
+      setVsPlayerMessages((prev) => [
+        ...prev,
+        { text: inputValue, sender: "player" },
+      ]);
+      setInputValue("");
+    },
+    [inputValue],
   );
 
   return (
@@ -272,20 +200,16 @@ const ChatBox = ({
         <Card className="h-[50vh] w-full shadow">
           <CardContent className="h-[40vh] overflow-y-auto p-4">
             <div className="space-y-4">
-              {messages.map((message) => (
-                <MessageBubble key={message.id} message={message} />
+              {vsPlayerMessages.map((message, index) => (
+                <MessageBubble key={index} message={message} />
               ))}
-              <div ref={messagesEndRef} />
             </div>
           </CardContent>
           <CardFooter>
             <form onSubmit={handleSendMessage} className="flex w-full gap-2">
               <Input
                 value={inputValue}
-                onChange={(e) => {
-                  console.log("something is changing");
-                  setInputValue(e.target.value);
-                }}
+                onChange={(e) => setInputValue(e.target.value)}
                 placeholder="Type message..."
               />
               <Button type="submit" size="icon">
@@ -298,10 +222,9 @@ const ChatBox = ({
 
       {isBotMode && (
         <RecipientResponse
-          playerMessage={playerMessage}
-          botMessage={botMessage}
-          gameStarted={gameStarted}
+          currentEvent={currentEvent}
           activeBoard={activeBoard}
+          gameStarted={gameStarted}
         />
       )}
     </div>

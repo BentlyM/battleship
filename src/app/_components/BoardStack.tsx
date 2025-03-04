@@ -1,10 +1,11 @@
 // src/components/BoardStack.tsx
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Board } from "./Board";
 import type { Board as BoardType } from "~/types/game";
 import ChatBox from "./ChatBox";
 import DetailsBox from "./DetailsBox";
+import { gameEventMessages, prologueMessages } from "../helpers/ChatHelpers";
 
 export const BOARD_SIZE = 10;
 export const createBoard = (): BoardType =>
@@ -18,6 +19,35 @@ export const BoardStack = () => {
   const [playerBoard, setPlayerBoard] = useState<BoardType>(createBoard());
   const [botBoard, setBotBoard] = useState<BoardType>(createBoard());
   const [gameStarted, setGameStarted] = useState(false);
+  const [currentEventIndex, setCurrentEventIndex] = useState(0);
+  const [currentGameEvent, setCurrentGameEvent] = useState(prologueMessages[0]);
+
+  useEffect(() => {
+    if (!gameStarted) {
+      // Cycle through prologue messages
+      const timer = setInterval(() => {
+        setCurrentEventIndex((prev) =>
+          Math.min(prev + 1, prologueMessages.length - 1),
+        );
+      }, 3000);
+      return () => clearInterval(timer);
+    }
+  }, [gameStarted]);
+
+  useEffect(() => {
+    const source = gameStarted ? gameEventMessages : prologueMessages;
+    setCurrentGameEvent(source[currentEventIndex]);
+  }, [currentEventIndex, gameStarted]);
+
+  const handleGameEvent = (trigger: "hit" | "miss") => {
+    if (gameStarted) {
+      setCurrentEventIndex((prev) => (prev + 1) % gameEventMessages.length);
+      setCurrentGameEvent(
+        gameEventMessages.find((m) => m.trigger === trigger) ||
+          gameEventMessages[0],
+      );
+    }
+  };
 
   return (
     <div className="flex h-full w-full items-center justify-evenly">
@@ -65,11 +95,13 @@ export const BoardStack = () => {
           />
         </div>
       </div>
-      <div>
+      <div className="flex flex-col gap-4">
         <ChatBox
           gameStarted={gameStarted}
           activeBoard={activeBoard}
           setActiveBoard={setActiveBoard}
+          onGameEvent={handleGameEvent}
+          currentEvent={currentGameEvent!}
         />
       </div>
     </div>

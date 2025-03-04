@@ -1,72 +1,76 @@
+// src/components/RecipientResponse.tsx
 import React from "react";
 import { Card } from "~/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
+import type { GameEventMessage } from "~/types/game";
+import { useTypewriter } from "./ChatBox";
 
-interface ResponseProps {
-  type: "player" | "bot";
-  isActive: boolean;
-  message: string;
+interface ResponseType {
+  currentEvent: GameEventMessage;
+  activeBoard: "player" | "bot";
+  gameStarted: boolean;
 }
 
-type ResponseType = {
-  playerMessage: string;
-  botMessage: string;
-  gameStarted: boolean;
-  activeBoard: "player" | "bot";
-};
+const PlayerResponse = ({
+  message,
+  isActive,
+}: {
+  message: string;
+  isActive: boolean;
+}) => (
+  <Card
+    className={`flex items-center gap-4 p-4 ${isActive ? "border-primary" : ""}`}
+  >
+    <Avatar>
+      <AvatarImage src="/idle.jpg" className="w-12 rounded" />
+      <AvatarFallback>P</AvatarFallback>
+    </Avatar>
+    <div className="flex-1">
+      <p className="text-sm">{message}</p>
+    </div>
+  </Card>
+);
 
-const PlayerResponse = ({ type, isActive, message }: ResponseProps) => {
-  return (
-    <Card
-      className={`flex items-center gap-4 p-4 ${isActive ? "border-primary" : ""}`}
-    >
-      <Avatar>
-        <AvatarImage src="/idle.jpg" className="w-12 rounded" />
-        <AvatarFallback>P</AvatarFallback>
-      </Avatar>
-      <div className="flex-1">
-        <p className="text-sm">{message}</p>
-      </div>
-    </Card>
-  );
-};
-
-const OpponentResponse = ({ type, isActive, message }: ResponseProps) => {
-  return (
-    <Card
-      className={`flex items-center gap-4 p-4 ${isActive ? "border-primary" : ""}`}
-    >
-      <div className="flex-1">
-        <p className="text-right text-sm">{message}</p>
-      </div>
-      <Avatar>
-        <AvatarImage
-          src={type === "bot" ? "/bot.png" : "/opponent-avatar.png"}
-          className="w-12 rounded"
-        />
-        <AvatarFallback>{type === "bot" ? "B" : "O"}</AvatarFallback>
-      </Avatar>
-    </Card>
-  );
-};
+const OpponentResponse = ({
+  message,
+  isActive,
+}: {
+  message: string;
+  isActive: boolean;
+}) => (
+  <Card
+    className={`flex items-center gap-4 p-4 ${isActive ? "border-primary" : ""}`}
+  >
+    <div className="flex-1">
+      <p className="text-right text-sm">{message}</p>
+    </div>
+    <Avatar>
+      <AvatarImage src="/bot.png" className="w-12 rounded" />
+      <AvatarFallback>B</AvatarFallback>
+    </Avatar>
+  </Card>
+);
 
 const RecipientResponse = ({
-  playerMessage,
-  botMessage,
+  currentEvent,
   activeBoard,
   gameStarted,
 }: ResponseType) => {
+  const showPrologue = !gameStarted;
+
   return (
     <>
       <PlayerResponse
-        type="player"
+        message={useTypewriter(
+          showPrologue ? currentEvent.player : currentEvent.player,
+        )}
         isActive={activeBoard === "bot" && gameStarted}
-        message={playerMessage}
       />
       <OpponentResponse
-        type="bot"
+        message={useTypewriter(
+          showPrologue ? currentEvent.bot : currentEvent.bot,
+        )}
         isActive={activeBoard === "player" && gameStarted}
-        message={botMessage}
       />
     </>
   );

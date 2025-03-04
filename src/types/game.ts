@@ -32,13 +32,20 @@ export type BoardProps = {
   onClick?: () => void;
 };
 
-type ShipDetails = {
-    size: number;
-    orientation: Orientation;
-    count: number;
+// types/game.ts
+export type GameEventMessage = {
+  player: string;
+  bot: string;
+  trigger: "hit" | "miss" | "turn" | "prologue";
 };
 
-export type ShipProps = Record<string, ShipDetails>
+type ShipDetails = {
+  size: number;
+  orientation: Orientation;
+  count: number;
+};
+
+export type ShipProps = Record<string, ShipDetails>;
 
 export type DraggedShip = Ship | null;
 

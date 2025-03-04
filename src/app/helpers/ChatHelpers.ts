@@ -1,41 +1,52 @@
-"use server";
+// src/helpers/ChatHelpers.ts
+import type { GameEventMessage } from "~/types/game";
 
-import { Message, prologueMessages } from "../_components/ChatBox";
+export const prologueMessages: GameEventMessage[] = [
+  {
+    player: "Welcome Captain!",
+    bot: "AI opponent ready",
+    trigger: "prologue",
+  },
+  {
+    player: "Place your ships by dragging them",
+    bot: "I've already positioned my fleet",
+    trigger: "prologue",
+  },
+  {
+    player: "Attack by clicking enemy grid",
+    bot: "I'll be watching your every move.",
+    trigger: "prologue",
+  },
+];
 
-// ... existing code ...
+export const gameEventMessages: GameEventMessage[] = [
+  {
+    player: "Ready for your command",
+    bot: "Scanning for targets...",
+    trigger: "turn",
+  },
+  {
+    player: "Direct hit! Your turn",
+    bot: "Damage sustained!",
+    trigger: "hit",
+  },
+  {
+    player: "Missed! Enemy's turn",
+    bot: "Target acquisition...",
+    trigger: "miss",
+  },
+];
 
-export const getPlayerResponseMessage = async ({
-  messages,
-  gameStarted,
-  activeBoard,
-}: {
-  messages: Message[];
-  gameStarted: boolean;
-  activeBoard: "player" | "bot";
-}) => {
-  if (!gameStarted) {
-    return "Waiting for next instruction...";
-  }
-  const lastMessage = messages[messages.length - 1];
-  if (!lastMessage) return "Waiting for your move...";
-  return lastMessage.sender === "player"
-    ? "Alright captain take a shot"
-    : "What could they be planning...";
-};
+export const getGameMessage = (
+  trigger: GameEventMessage["trigger"],
+  isPlayer: boolean,
+) => {
+  const defaultMessages = {
+    player: "Awaiting orders",
+    bot: "Processing strategy",
+  };
 
-export const getBotResponseMessage = async ({
-  messages,
-  gameStarted,
-  activeBoard,
-}: {
-  messages: Message[];
-  gameStarted: boolean;
-  activeBoard: "player" | "bot";
-}) => {
-  if (!gameStarted) {
-    return "Waiting for next instruction...";
-  }
-  const lastMessage = messages[messages.length - 1];
-  if (!lastMessage) return "Waiting for game to start...";
-  return lastMessage.sender === "bot" ? "I'll show you!" : "...";
+  const message =
+    gameEventMessages.find((m) => m.trigger === trigger) || defaultMessages;
+  return isPlayer ? message.player : message.bot;
 };
