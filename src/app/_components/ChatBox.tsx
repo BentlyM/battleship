@@ -1,3 +1,4 @@
+'use client';
 import { Bot, Send, User, Users } from "lucide-react";
 import type { Dispatch, SetStateAction } from "react";
 import { useState, useRef, useEffect, memo, useCallback } from "react";
@@ -12,8 +13,12 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { motion } from "framer-motion";
-import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
-interface Message {
+import RecipientResponse from "./RecipientResponse";
+import {
+  getBotResponseMessage,
+  getPlayerResponseMessage,
+} from "../helpers/ChatHelpers";
+export interface Message {
   id: number;
   text: string;
   sender: "player" | "bot";
@@ -90,46 +95,25 @@ const MessageBubble = memo(({ message }: { message: Message }) => {
 
 MessageBubble.displayName = "MessageBubble";
 
-interface ResponseProps {
-  type: "player" | "bot";
-  isActive: boolean;
-  message: string;
-}
-
-const PlayerResponse = ({ type, isActive, message }: ResponseProps) => {
-  return (
-    <Card
-      className={`flex items-center gap-4 p-4 ${isActive ? "border-primary" : ""}`}
-    >
-      <Avatar>
-        <AvatarImage src="/idle.jpg" className="w-12 rounded" />
-        <AvatarFallback>P</AvatarFallback>
-      </Avatar>
-      <div className="flex-1">
-        <p className="text-sm">{message}</p>
-      </div>
-    </Card>
-  );
-};
-
-const OpponentResponse = ({ type, isActive, message }: ResponseProps) => {
-  return (
-    <Card
-      className={`flex items-center gap-4 p-4 ${isActive ? "border-primary" : ""}`}
-    >
-      <div className="flex-1">
-        <p className="text-right text-sm">{message}</p>
-      </div>
-      <Avatar>
-        <AvatarImage
-          src={type === "bot" ? "/bot.png" : "/opponent-avatar.png"}
-          className="w-12 rounded"
-        />
-        <AvatarFallback>{type === "bot" ? "B" : "O"}</AvatarFallback>
-      </Avatar>
-    </Card>
-  );
-};
+export const prologueMessages = [
+  {
+    text: "Welcome to Battleship! Are you ready to sink some ships?",
+    sender: "player",
+  },
+  {
+    text: "Plan our formation by selecting the axis and dragging and dropping ships on the map.",
+    sender: "player",
+  },
+  { text: "Let's start placing ships...", sender: "bot" },
+  {
+    text: "Remember, you can rotate ships by clicking on them.",
+    sender: "bot",
+  },
+  {
+    text: "Once all ships are placed, we'll begin the battle!",
+    sender: "player",
+  },
+];
 
 const ChatBox = ({
   gameStarted,
@@ -144,10 +128,49 @@ const ChatBox = ({
     "random",
   );
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [playerMessage, setPlayerMessage] = useState(
+    "Waiting for your move...",
+  );
+  const [botMessage, setBotMessage] = useState("Waiting for game to start...");
 
   useEffect(() => {
-    setMessages([]);
-  }, [isBotMode]);
+    if (isBotMode) {
+      if (!gameStarted) {
+        const initialMessages = prologueMessages
+          .slice(0, 3)
+          .map((msg, index) => ({
+            id: index + 1,
+            sender: msg.sender as "player" | "bot",
+            text: msg.text,
+            timestamp: new Date(),
+          }));
+        setMessages(initialMessages);
+      } else {
+        setMessages([]);
+      }
+    } else {
+      setMessages([]);
+    }
+  }, [isBotMode, gameStarted]);
+
+  useEffect(() => {
+    const updateMessages = async () => {
+      const newPlayerMessage = await getPlayerResponseMessage({
+        messages,
+        gameStarted,
+        activeBoard,
+      });
+      const newBotMessage = await getBotResponseMessage({
+        messages,
+        gameStarted,
+        activeBoard,
+      });
+      setPlayerMessage(newPlayerMessage);
+      setBotMessage(newBotMessage);
+    };
+
+    updateMessages();
+  }, [messages, gameStarted, activeBoard]);
 
   const handleSendMessage = useCallback(
     (e: React.FormEvent) => {
@@ -274,33 +297,15 @@ const ChatBox = ({
       )}
 
       {isBotMode && (
-        <>
-          <PlayerResponse
-            type="player"
-            isActive={activeBoard === "bot"}
-            message={getPlayerResponseMessage(messages)}
-          />
-          <OpponentResponse
-            type="bot"
-            isActive={activeBoard === "player"}
-            message={getBotResponseMessage(messages)}
-          />
-        </>
+        <RecipientResponse
+          playerMessage={playerMessage}
+          botMessage={botMessage}
+          gameStarted={gameStarted}
+          activeBoard={activeBoard}
+        />
       )}
     </div>
   );
-};
-
-const getPlayerResponseMessage = (messages: Message[]) => {
-  const lastMessage = messages[messages.length - 1];
-  if (!lastMessage) return "Waiting for your move...";
-  return lastMessage.sender === "player" ? "Your turn!" : "Bot is thinking...";
-};
-
-const getBotResponseMessage = (messages: Message[]) => {
-  const lastMessage = messages[messages.length - 1];
-  if (!lastMessage) return "Waiting for game to start...";
-  return lastMessage.sender === "bot" ? "Bot's turn!" : "Your move!";
 };
 
 export default memo(ChatBox);

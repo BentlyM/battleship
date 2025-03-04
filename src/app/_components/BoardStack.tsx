@@ -65,7 +65,7 @@ export const BoardStack = () => {
           />
         </div>
       </div>
-      <div className="h-[50vh]">
+      <div>
         <ChatBox
           gameStarted={gameStarted}
           activeBoard={activeBoard}
