@@ -102,7 +102,6 @@ const ChatBox = ({
   const [vsPlayerMessages, setVsPlayerMessages] = useState<
     { text: string; sender: "player" | "bot" }[]
   >([]);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const handleFirstMoveChange = useCallback(
     (value: "player" | "bot" | "random") => {

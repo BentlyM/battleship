@@ -6,6 +6,7 @@ export const handlePlayerAttack = (
   boardData: Board,
   setBoardData: SetBoardData,
   setActiveBoard: Dispatch<SetStateAction<"player" | "bot">>,
+  handleAttackResult: (isHit: boolean) => void,
 ) => {
   const target = e.target as HTMLElement;
   if (target.tagName === "TD") {
@@ -20,14 +21,19 @@ export const handlePlayerAttack = (
 
     // Update the board data based on the attack
     const newBoardData = boardData.map((row, rowIndex) =>
-      row.map((cell, colIndex) =>
-        boardData[y]?.[x] // Using optional chaining
-          ? rowIndex === y && colIndex === x && boardData[rowIndex]![colIndex]
-            ? "hit"
-            : cell
-          : (setActiveBoard("player"),
-            rowIndex === y && colIndex === x ? "miss" : cell),
-      ),
+      row.map((cell, colIndex) => {
+        if (rowIndex === y && colIndex === x) {
+          if (boardData[y]?.[x]) {
+            handleAttackResult(true);
+            return "hit";
+          } else {
+            handleAttackResult(false);
+            setActiveBoard("player");
+            return "miss";
+          }
+        }
+        return cell;
+      }),
     );
     setBoardData(newBoardData);
 

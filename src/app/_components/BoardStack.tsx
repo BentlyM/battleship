@@ -1,11 +1,15 @@
 // src/components/BoardStack.tsx
 "use client";
-import { useEffect, useState } from "react";
+import { act, useEffect, useState } from "react";
 import { Board } from "./Board";
-import type { Board as BoardType } from "~/types/game";
+import type { Board as BoardType, GameEventMessage } from "~/types/game";
 import ChatBox from "./ChatBox";
 import DetailsBox from "./DetailsBox";
-import { gameEventMessages, prologueMessages } from "../helpers/ChatHelpers";
+import {
+  gameEventMessages,
+  getGameMessage,
+  prologueMessages,
+} from "../helpers/ChatHelpers";
 
 export const BOARD_SIZE = 10;
 export const createBoard = (): BoardType =>
@@ -35,17 +39,43 @@ export const BoardStack = () => {
   }, [gameStarted]);
 
   useEffect(() => {
-    const source = gameStarted ? gameEventMessages : prologueMessages;
-    setCurrentGameEvent(source[currentEventIndex]);
-  }, [currentEventIndex, gameStarted]);
-
-  const handleGameEvent = (trigger: "hit" | "miss") => {
-    if (gameStarted) {
-      setCurrentEventIndex((prev) => (prev + 1) % gameEventMessages.length);
-      setCurrentGameEvent(
-        gameEventMessages.find((m) => m.trigger === trigger) ||
-          gameEventMessages[0],
+    if (!gameStarted) {
+      // For prologue, just use the current index
+      setCurrentGameEvent(prologueMessages[currentEventIndex]);
+    } else {
+      // For game events, find the first message set and use its turn message
+      const turnMessage = gameEventMessages[0]?.find(
+        (msg) => msg.trigger === "turn" && msg.active !== activeBoard,
       );
+      if (turnMessage) {
+        setCurrentGameEvent(turnMessage);
+      }
+    }
+  }, [currentEventIndex, gameStarted, activeBoard]);
+
+  const handleGameEvent = (trigger: GameEventMessage["trigger"]) => {
+    if (gameStarted) {
+      // Find the message set that contains the matching trigger
+      const messageSet = gameEventMessages.find((messages) =>
+        messages.some((msg) => msg.trigger === trigger),
+      );
+
+      if (messageSet) {
+        // Find the specific message for this trigger and active board
+        const message = messageSet.find((msg) => {
+          return msg.trigger === trigger && msg.active !== activeBoard;
+        });
+
+        if (message) {
+          console.log(message);
+          setCurrentGameEvent({
+            player: message.player,
+            bot: message.bot,
+            trigger: trigger,
+            active: message.active,
+          });
+        }
+      }
     }
   };
 
@@ -70,6 +100,7 @@ export const BoardStack = () => {
               setBoardData: setPlayerBoard,
               gameStarted,
               setGameStarted,
+              onGameEvent: handleGameEvent,
             }}
           />
         </div>
@@ -91,6 +122,7 @@ export const BoardStack = () => {
               setBoardData: setBotBoard,
               gameStarted,
               setGameStarted,
+              onGameEvent: handleGameEvent,
             }}
           />
         </div>

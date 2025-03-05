@@ -37,6 +37,7 @@ export type GameEventMessage = {
   player: string;
   bot: string;
   trigger: "hit" | "miss" | "turn" | "prologue";
+  active?: 'player' | 'bot'
 };
 
 type ShipDetails = {

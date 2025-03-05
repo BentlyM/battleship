@@ -36,6 +36,7 @@ interface BoardProps {
     setBoardData: SetBoardData;
     gameStarted: boolean;
     setGameStarted: (gameStarted: boolean) => void;
+    onGameEvent: (trigger: "hit" | "miss") => void;
   };
   onClick?: () => void;
 }
@@ -49,6 +50,7 @@ const Board: React.FC<BoardProps> = ({ board }) => {
     gameStarted,
     setGameStarted,
     setActiveBoard,
+    onGameEvent,
   }: BoardProps["board"] = board;
   const [draggedShip, setDraggedShip] = React.useState<ShipStructure | null>(
     null,
@@ -74,6 +76,10 @@ const Board: React.FC<BoardProps> = ({ board }) => {
   const isActive =
     (id === "player-board" && activeBoard === "player") ||
     (id === "bot-board" && activeBoard === "bot");
+
+  const handleAttackResult = (isHit: boolean) => {
+    onGameEvent(isHit ? "hit" : "miss");
+  };
 
   // Column headers for the game board (A to J)
   const columnHeaders = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
@@ -148,6 +154,7 @@ const Board: React.FC<BoardProps> = ({ board }) => {
                   ),
                 ),
               );
+              handleAttackResult(true);
               consecutiveHits++;
               steps = 0;
               maxSteps = baseSteps + consecutiveHits * 2;
@@ -161,6 +168,7 @@ const Board: React.FC<BoardProps> = ({ board }) => {
                   ),
                 );
               });
+              handleAttackResult(false);
               setActiveBoard("bot");
               setBotTargeting(false);
               consecutiveHits = 0;
@@ -321,6 +329,7 @@ const Board: React.FC<BoardProps> = ({ board }) => {
                       boardData,
                       setBoardData,
                       setActiveBoard,
+                      handleAttackResult,
                     )
                 : undefined
             }
