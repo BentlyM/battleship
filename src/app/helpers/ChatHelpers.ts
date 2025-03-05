@@ -63,7 +63,7 @@ export const gameEventMessages: GameEventMessage[][] = [
 export const getGameMessage = (
   trigger: GameEventMessage["trigger"],
   isPlayer: boolean,
-  messageSetIndex: number = 0,
+  messageSetIndex = 0,
 ) => {
   const defaultMessages = {
     player: "Awaiting orders",
@@ -75,7 +75,7 @@ export const getGameMessage = (
 
   // Find the specific message for the trigger
   const message =
-    messageSet?.find((m) => m.trigger === trigger) || defaultMessages;
+    messageSet?.find((m) => m.trigger === trigger) ?? defaultMessages;
 
   return isPlayer ? message.player : message.bot;
 };

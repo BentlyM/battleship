@@ -188,7 +188,7 @@ export const handleDrop = (
 
     if (id === "player-board") {
       if (placedShips[shipData.type]) {
-        const oldShip = placedShips[shipData.type]!;
+        const oldShip = placedShips[shipData.type];
 
         if (oldShip.orientation === "horizontal") {
           for (let i = 0; i < oldShip.size; i++) {

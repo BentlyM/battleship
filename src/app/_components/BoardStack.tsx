@@ -1,13 +1,12 @@
 // src/components/BoardStack.tsx
 "use client";
-import { act, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Board } from "./Board";
 import type { Board as BoardType, GameEventMessage } from "~/types/game";
 import ChatBox from "./ChatBox";
 import DetailsBox from "./DetailsBox";
 import {
   gameEventMessages,
-  getGameMessage,
   prologueMessages,
 } from "../helpers/ChatHelpers";
 
@@ -67,7 +66,6 @@ export const BoardStack = () => {
         });
 
         if (message) {
-          console.log(message);
           setCurrentGameEvent({
             player: message.player,
             bot: message.bot,
@@ -132,7 +130,6 @@ export const BoardStack = () => {
           gameStarted={gameStarted}
           activeBoard={activeBoard}
           setActiveBoard={setActiveBoard}
-          onGameEvent={handleGameEvent}
           currentEvent={currentGameEvent!}
         />
       </div>

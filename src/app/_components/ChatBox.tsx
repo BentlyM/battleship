@@ -1,7 +1,7 @@
 "use client";
 import { Bot, Send, User, Users } from "lucide-react";
 import type { Dispatch, SetStateAction } from "react";
-import { useState, useRef, useEffect, memo, useCallback } from "react";
+import { useState, useEffect, memo, useCallback } from "react";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardFooter } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
@@ -30,7 +30,6 @@ interface ChatBoxProps {
     bot: string;
     trigger: "hit" | "miss" | "turn" | "prologue";
   };
-  onGameEvent: (trigger: "hit" | "miss") => void;
 }
 
 export const useTypewriter = (text: string, speed = 50) => {
@@ -91,7 +90,6 @@ const ChatBox = ({
   activeBoard,
   setActiveBoard,
   currentEvent,
-  onGameEvent,
 }: ChatBoxProps) => {
   const [inputValue, setInputValue] = useState("");
   const [isBotMode, setIsBotMode] = useState(true);

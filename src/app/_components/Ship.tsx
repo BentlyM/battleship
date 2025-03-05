@@ -66,7 +66,13 @@ const Ship: React.FC<ShipProps> = ({
 
     // Start from left and invisible
     controls.set({ x: -100, opacity: 0 });
-    animate();
+    animate()
+      .then()
+      .catch((err: unknown) => {
+        if (err instanceof Error) {
+          console.log(err.message);
+        }
+      });
   }, [controls]);
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
