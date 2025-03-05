@@ -64,7 +64,6 @@ const Ship: React.FC<ShipProps> = ({
       setIsAnimating(false);
     };
 
-    // Start from left and invisible
     controls.set({ x: -100, opacity: 0 });
     animate()
       .then()

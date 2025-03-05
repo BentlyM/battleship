@@ -8,7 +8,7 @@ import DetailsBox from "./DetailsBox";
 import {
   gameEventMessages,
   prologueMessages,
-} from "../helpers/ChatHelpers";
+} from "../helpers/chatHelpers";
 
 export const BOARD_SIZE = 10;
 export const createBoard = (): BoardType =>
@@ -27,7 +27,6 @@ export const BoardStack = () => {
 
   useEffect(() => {
     if (!gameStarted) {
-      // Cycle through prologue messages
       const timer = setInterval(() => {
         setCurrentEventIndex((prev) =>
           Math.min(prev + 1, prologueMessages.length - 1),
@@ -39,14 +38,12 @@ export const BoardStack = () => {
 
   useEffect(() => {
     if (!gameStarted) {
-      // For prologue, just use the current index
       setCurrentGameEvent(prologueMessages[currentEventIndex]);
     } else {
-      // For game events, find the first message set and use its turn message
       const turnMessage = gameEventMessages[0]?.find(
         (msg) => msg.trigger === "turn" && msg.active !== activeBoard,
       );
-      if (turnMessage) {
+      if (turnMessage && currentGameEvent?.trigger !== 'miss') {
         setCurrentGameEvent(turnMessage);
       }
     }
@@ -54,13 +51,11 @@ export const BoardStack = () => {
 
   const handleGameEvent = (trigger: GameEventMessage["trigger"]) => {
     if (gameStarted) {
-      // Find the message set that contains the matching trigger
       const messageSet = gameEventMessages.find((messages) =>
         messages.some((msg) => msg.trigger === trigger),
       );
 
       if (messageSet) {
-        // Find the specific message for this trigger and active board
         const message = messageSet.find((msg) => {
           return msg.trigger === trigger && msg.active !== activeBoard;
         });

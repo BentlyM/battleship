@@ -19,13 +19,11 @@ export const isPlacementValid = (
   shipType: ShipType | undefined,
 ): boolean => {
   const currentBoard = boardToCheck;
-  // Check boundaries
   if (orientation === "horizontal" && x + size > currentBoard[0]!.length)
     return false;
   if (orientation === "vertical" && y + size > currentBoard.length)
     return false;
 
-  // Check for collisions with other ships and adjacent cells
   for (
     let row = Math.max(0, y - 1);
     row <=
@@ -47,7 +45,6 @@ export const isPlacementValid = (
       const cell = currentBoard[row]![col];
       if (cell) {
         const [existingShipType] = cell.split("-");
-        // Allow overlap with the same ship (for repositioning)
         if (shipType && existingShipType === shipType) continue;
         return false;
       }
@@ -68,7 +65,6 @@ export const handleAutoPlace = (
 
   (Object.entries(shipProps) as [ShipType, { size: number }][]).forEach(
     ([shipType, { size }]) => {
-      // Remove existing ship of the same type
       const existingShip = newPlacedShips[shipType];
       if (existingShip) {
         if (existingShip.orientation === "horizontal") {
@@ -100,7 +96,6 @@ export const handleAutoPlace = (
         }
 
         if (isPlacementValid(x, y, size, orientation, newBoardData, shipType)) {
-          // Place the ship on newBoardData
           if (orientation === "horizontal") {
             for (let i = 0; i < size; i++) {
               newBoardData[y]![x + i] = `${shipType}-${i}`;
@@ -211,7 +206,6 @@ export const handleDrop = (
           shipData.type,
         )
       ) {
-        // Place the ship
         if (shipData.orientation === "horizontal") {
           for (let i = 0; i < shipData.size; i++) {
             boardData[adjustedY]![adjustedX + i] = `${shipData.type}-${i}`;

@@ -34,7 +34,7 @@ export const gameEventMessages: GameEventMessage[][] = [
       active: "bot",
     },
     {
-      player: "Direct hit! Your turn",
+      player: "Direct hit! Your turn, Captain",
       bot: "Damage sustained!",
       trigger: "hit",
       active: "player",
@@ -46,8 +46,8 @@ export const gameEventMessages: GameEventMessage[][] = [
       active: "player",
     },
     {
-      player: "We're hit! Your turn",
-      bot: "Direct hit! Your move, human",
+      player: "We're hit!",
+      bot: "Direct hit! Scanning for targets",
       trigger: "hit",
       active: "bot",
     },
@@ -70,10 +70,8 @@ export const getGameMessage = (
     bot: "Processing strategy",
   };
 
-  // Find the message set (use the first one by default)
   const messageSet = gameEventMessages[messageSetIndex];
 
-  // Find the specific message for the trigger
   const message =
     messageSet?.find((m) => m.trigger === trigger) ?? defaultMessages;
 

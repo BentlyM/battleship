@@ -13,13 +13,11 @@ export const handlePlayerAttack = (
     const x = parseInt(target.getAttribute("data-x")!);
     const y = parseInt(target.getAttribute("data-y")!);
 
-    // Check if the cell has already been attacked
     if (boardData[y]![x] === "hit" || boardData[y]![x] === "miss") {
       console.log("you already hit or missed this cell");
-      return; // Ignore already attacked cells
-    } // should probably handle this but idk what to make it do lol
+      return;
+    } 
 
-    // Update the board data based on the attack
     const newBoardData = boardData.map((row, rowIndex) =>
       row.map((cell, colIndex) => {
         if (rowIndex === y && colIndex === x) {

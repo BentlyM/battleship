@@ -81,7 +81,6 @@ const Board: React.FC<BoardProps> = ({ board }) => {
     onGameEvent(isHit ? "hit" : "miss");
   };
 
-  // Column headers for the game board (A to J)
   const columnHeaders = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
 
   useEffect(() => {
@@ -121,14 +120,13 @@ const Board: React.FC<BoardProps> = ({ board }) => {
         x: Math.floor(Math.random() * 10),
         y: Math.floor(Math.random() * 10),
       };
-      const baseSteps = 5; // Base number of steps
+      const baseSteps = 5; 
       let maxSteps = baseSteps;
       let steps = 0;
       let consecutiveHits = 0;
 
       const moveTarget = () => {
         if (steps >= maxSteps) {
-          // Final target selection
           const finalX = Math.floor(Math.random() * 10);
           const finalY = Math.floor(Math.random() * 10);
           setBotTarget({ x: finalX, y: finalY });
@@ -136,16 +134,14 @@ const Board: React.FC<BoardProps> = ({ board }) => {
           setTimeout(() => {
             const targetCell = boardData[finalY]?.[finalX];
 
-            // If cell is already hit or missed, reTarget
             if (targetCell === "hit" || targetCell === "miss") {
               setReTarget(true);
               setBotTargeting(true);
               steps = 0;
-              maxSteps = baseSteps + consecutiveHits * 2; // Increase steps based on consecutive hits
+              maxSteps = baseSteps + consecutiveHits * 2;
               return moveTarget();
             }
 
-            // If cell contains a ship part
             if (targetCell && targetCell !== "hit" && targetCell !== "miss") {
               setBoardData((prevBoard) =>
                 prevBoard.map((row, y) =>
@@ -177,7 +173,6 @@ const Board: React.FC<BoardProps> = ({ board }) => {
           return;
         }
 
-        // Random movement to adjacent cell
         const possibleMoves = [
           { dx: 1, dy: 0 },
           { dx: -1, dy: 0 },
@@ -251,10 +246,8 @@ const Board: React.FC<BoardProps> = ({ board }) => {
 
   useEffect(() => {
     if (isInView && tableRef.current) {
-      // Animate the title
       animate("h3", { opacity: 1, y: [20, 0] }, { duration: 0.5 });
 
-      // Animate the column headers (A-J)
       animate(
         "th:not(:first-child)",
         { opacity: 1, y: [20, 0] },
@@ -264,7 +257,6 @@ const Board: React.FC<BoardProps> = ({ board }) => {
         },
       );
 
-      // Animate the row headers (1-10)
       animate(
         "th:first-child",
         { opacity: 1, y: [20, 0] },
@@ -274,7 +266,6 @@ const Board: React.FC<BoardProps> = ({ board }) => {
         },
       );
 
-      // Existing cell animation
       animate(
         "td",
         { opacity: 1, y: [50, 0] },
@@ -409,7 +400,6 @@ const Board: React.FC<BoardProps> = ({ board }) => {
         </div>
       </div>
 
-      {/* Ships section - only show for player board */}
       {id === "player-board" && (
         <Fleet
           placedShips={placedShips}
