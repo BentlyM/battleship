@@ -1,9 +1,9 @@
 "use client";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
-import ShipHead from "./ship/ShipHead";
-import ShipBody from "./ship/ShipBody";
-import ShipTail from "./ship/ShipTail";
+import ShipHead, { AttackedShipHead } from "./ship/ShipHead";
+import ShipBody, { AttackedShipBody } from "./ship/ShipBody";
+import ShipTail, { AttackedShipTail } from "./ship/ShipTail";
 import {
   handleDragEnd,
   handleDragEnter,
@@ -133,6 +133,7 @@ const Board: React.FC<BoardProps> = ({ board }) => {
 
           setTimeout(() => {
             const targetCell = boardData[finalY]?.[finalX];
+            
 
             if (targetCell === "hit" || targetCell === "miss") {
               setReTarget(true);
@@ -388,25 +389,19 @@ const Board: React.FC<BoardProps> = ({ board }) => {
                               : ""
                           } ${cell === "hit" && id === 'player-board' ? "bg-red-600" : ""} relative transition-colors duration-200`}
                         >
-                          <div  className="flex items-center justify-center">
+                          <div className="flex items-center justify-center">
                             {cell === "miss" &&
                               (id !== "bot-board" ? (
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                  <div className="size-4 rounded-[50px] bg-sky-700 opacity-30"></div>
-                                </div>
+                                <div className="size-4 rounded-[50px] bg-sky-700 opacity-30"></div>
                               ) : (
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                  <div className="size-4 rounded-[50px] bg-gray-700 opacity-30"></div>
-                                </div>
+                                <div className="size-4 rounded-[50px] bg-gray-700 opacity-30"></div>
                               ))}
                             {cell && renderShipPart(cell)}
                             {cell === "hit" &&
                               (id !== "bot-board" ? (
                                 <div></div>
                               ) : (
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                  <div className="size-4 rounded-[50px] bg-red-500 opacity-80"></div>
-                                </div>
+                                <div className="size-4 rounded-[50px] bg-red-500 opacity-80"></div>
                               ))}
                           </div>
                         </motion.td>

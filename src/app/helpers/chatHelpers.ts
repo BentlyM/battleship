@@ -47,7 +47,7 @@ export const gameEventMessages: GameEventMessage[][] = [
     },
     {
       player: "We're hit!",
-      bot: "Direct hit! Scanning for targets",
+      bot: "Direct hit! Scanning for more targets",
       trigger: "hit",
       active: "bot",
     },
