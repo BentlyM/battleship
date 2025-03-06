@@ -120,7 +120,7 @@ const Board: React.FC<BoardProps> = ({ board }) => {
         x: Math.floor(Math.random() * 10),
         y: Math.floor(Math.random() * 10),
       };
-      const baseSteps = 5; 
+      const baseSteps = 5;
       let maxSteps = baseSteps;
       let steps = 0;
       let consecutiveHits = 0;
@@ -386,9 +386,29 @@ const Board: React.FC<BoardProps> = ({ board }) => {
                                 ? "bg-green-200"
                                 : "bg-red-200"
                               : ""
-                          } ${cell === "hit" ? "bg-red-600" : ""} relative transition-colors duration-200`}
+                          } ${cell === "hit" && id === 'player-board' ? "bg-red-600" : ""} relative transition-colors duration-200`}
                         >
-                          {cell && renderShipPart(cell)}
+                          <div  className="flex items-center justify-center">
+                            {cell === "miss" &&
+                              (id !== "bot-board" ? (
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                  <div className="size-4 rounded-[50px] bg-sky-700 opacity-30"></div>
+                                </div>
+                              ) : (
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                  <div className="size-4 rounded-[50px] bg-gray-700 opacity-30"></div>
+                                </div>
+                              ))}
+                            {cell && renderShipPart(cell)}
+                            {cell === "hit" &&
+                              (id !== "bot-board" ? (
+                                <div></div>
+                              ) : (
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                  <div className="size-4 rounded-[50px] bg-red-500 opacity-80"></div>
+                                </div>
+                              ))}
+                          </div>
                         </motion.td>
                       );
                     },
