@@ -21,7 +21,7 @@ export const AttackedShipHead: React.FC<ShipHeadProps> = ({ orientation }) => {
     <div
       className={`relative flex h-8 w-8 items-center justify-center rounded-sm bg-gray-400 ${orientation === "horizontal" ? "rounded-l-full" : "rounded-t-full"} transition-all duration-300`}
     >
-      <div className="size-3 rounded-full bg-red-600" />
+      <div className="size-2 rounded-full bg-red-600" />
     </div>
   );
 };

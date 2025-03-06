@@ -133,9 +133,13 @@ const Board: React.FC<BoardProps> = ({ board }) => {
 
           setTimeout(() => {
             const targetCell = boardData[finalY]?.[finalX];
-            
 
-            if (targetCell === "hit" || targetCell === "miss") {
+            const [shipType, partIndex] = targetCell!.split("-");
+
+            if (
+              targetCell?.split("-").includes("hit") ||
+              targetCell === "miss"
+            ) {
               setReTarget(true);
               setBotTargeting(true);
               steps = 0;
@@ -147,7 +151,9 @@ const Board: React.FC<BoardProps> = ({ board }) => {
               setBoardData((prevBoard) =>
                 prevBoard.map((row, y) =>
                   row.map((cell, x) =>
-                    x === finalX && y === finalY ? "hit" : cell,
+                    x === finalX && y === finalY
+                      ? `${shipType}-hit-${partIndex}`
+                      : cell,
                   ),
                 ),
               );
@@ -229,7 +235,7 @@ const Board: React.FC<BoardProps> = ({ board }) => {
     const index = parseInt(partIndex);
     if (isNaN(index)) return null;
 
-    if (id === "player-board") {
+    if (id === "player-board" && shipType !== "hit") {
       if (index === 0) {
         return <ShipHead orientation={ship.orientation} />;
       } else if (index === ship.size - 1) {
@@ -387,7 +393,7 @@ const Board: React.FC<BoardProps> = ({ board }) => {
                                 ? "bg-green-200"
                                 : "bg-red-200"
                               : ""
-                          } ${cell === "hit" && id === 'player-board' ? "bg-red-600" : ""} relative transition-colors duration-200`}
+                          } relative transition-colors duration-200`}
                         >
                           <div className="flex items-center justify-center">
                             {cell === "miss" &&
@@ -397,9 +403,32 @@ const Board: React.FC<BoardProps> = ({ board }) => {
                                 <div className="size-4 rounded-[50px] bg-gray-700 opacity-30"></div>
                               ))}
                             {cell && renderShipPart(cell)}
-                            {cell === "hit" &&
+                            {cell.split("-").includes("hit") &&
                               (id !== "bot-board" ? (
-                                <div></div>
+                                parseInt(cell.split("-")[2]!) === 0 ? (
+                                  <AttackedShipHead
+                                    orientation={
+                                      placedShips[
+                                        cell.split("-")[0] as ShipType
+                                      ]?.orientation || "horizontal"
+                                    }
+                                  />
+                                ) : parseInt(cell.split("-")[2]!) ===
+                                  placedShips[cell.split("-")[0] as ShipType]
+                                    ?.size -
+                                    1 ? (
+                                  <AttackedShipTail
+                                    orientation={
+                                      placedShips[
+                                        cell.split("-")[0] as ShipType
+                                      ]?.orientation || "horizontal"
+                                    }
+                                  />
+                                ) : (
+                                  <AttackedShipBody
+                                    index={parseInt(cell.split("-")[2]!)}
+                                  />
+                                )
                               ) : (
                                 <div className="size-4 rounded-[50px] bg-red-500 opacity-80"></div>
                               ))}
