@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import ShipHead, { AttackedShipHead } from "./ship/ShipHead";
 import ShipBody, { AttackedShipBody } from "./ship/ShipBody";
@@ -140,8 +140,6 @@ const Board: React.FC<BoardProps> = ({ board }) => {
           setTimeout(() => {
             const targetCell = boardData[finalY]?.[finalX];
 
-            const [shipType, partIndex] = targetCell!.split("-");
-
             if (
               targetCell?.split("-").includes("hit") ||
               targetCell === "miss"
@@ -154,16 +152,22 @@ const Board: React.FC<BoardProps> = ({ board }) => {
             }
 
             if (targetCell && targetCell !== "hit" && targetCell !== "miss") {
+              const [shipType, partIndex] = targetCell.split("-");
               if (shipType && partIndex) {
-                setBoardData((prevBoard) =>
-                  prevBoard.map((row, y) =>
+                setBoardData((prevBoard) => {
+                  const newBoard = prevBoard.map((row, y) =>
                     row.map((cell, x) =>
                       x === finalX && y === finalY
                         ? `${shipType}-hit-${partIndex}`
                         : cell,
                     ),
-                  ),
-                );
+                  );
+                  if (checkForWinner(newBoard)) {
+                    setIsGameOver(true);
+                    console.log("Bot won");
+                  }
+                  return newBoard;
+                });
               }
               handleAttackResult(true);
               consecutiveHits++;
@@ -173,11 +177,12 @@ const Board: React.FC<BoardProps> = ({ board }) => {
               return moveTarget();
             } else {
               setBoardData((prevBoard: BoardType): BoardType => {
-                return prevBoard.map((row, y) =>
+                const newBoard = prevBoard.map((row, y) =>
                   row.map((cell, x) =>
                     x === finalX && y === finalY ? "miss" : cell,
                   ),
                 );
+                return newBoard;
               });
               handleAttackResult(false);
               setActiveBoard("bot");
