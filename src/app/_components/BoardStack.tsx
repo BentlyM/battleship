@@ -2,13 +2,14 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Board } from "./Board";
-import type { Board as BoardType, GameEventMessage } from "~/types/game";
+import type {
+  Board as BoardType,
+  GameEventMessage,
+  ShipType,
+} from "~/types/game";
 import ChatBox from "./ChatBox";
 import DetailsBox from "./DetailsBox";
-import {
-  gameEventMessages,
-  prologueMessages,
-} from "../helpers/chatHelpers";
+import { gameEventMessages, prologueMessages } from "../helpers/chatHelpers";
 
 export const BOARD_SIZE = 10;
 export const createBoard = (): BoardType =>
@@ -24,6 +25,14 @@ export const BoardStack = () => {
   const [gameStarted, setGameStarted] = useState(false);
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
   const [currentGameEvent, setCurrentGameEvent] = useState(prologueMessages[0]);
+  const [isGameOver, setIsGameOver] = useState<boolean>(false);
+  const [sunkShips, setSunkShips] = useState<Record<ShipType, boolean>>({
+    carrier: false,
+    battleship: false,
+    cruiser: false,
+    submarine: false,
+    destroyer: false,
+  });
 
   useEffect(() => {
     if (!gameStarted) {
@@ -72,6 +81,34 @@ export const BoardStack = () => {
     }
   };
 
+  const checkForWinner = (boardData: BoardType) => {
+    const shipTypes: ShipType[] = [
+      "carrier",
+      "battleship",
+      "cruiser",
+      "submarine",
+      "destroyer",
+    ];
+    const shipSizes: Record<ShipType, number> = {
+      carrier: 5,
+      battleship: 4,
+      cruiser: 3,
+      submarine: 3,
+      destroyer: 2,
+    };
+
+    // Check if all ships are sunk
+    const allShipsSunk = shipTypes.every((shipType) => {
+      const shipSize = shipSizes[shipType];
+      const hitCount = boardData
+        .flat()
+        .filter((cell) => cell?.startsWith(`${shipType}-hit`)).length;
+      return hitCount === shipSize;
+    });
+
+    return allShipsSunk;
+  };
+
   return (
     <div className="flex h-full w-full items-center justify-evenly">
       <DetailsBox />
@@ -94,6 +131,9 @@ export const BoardStack = () => {
               gameStarted,
               setGameStarted,
               onGameEvent: handleGameEvent,
+              setIsGameOver: setIsGameOver,
+              checkForWinner,
+              setSunkShips
             }}
           />
         </div>
@@ -116,6 +156,9 @@ export const BoardStack = () => {
               gameStarted,
               setGameStarted,
               onGameEvent: handleGameEvent,
+              setIsGameOver: setIsGameOver,
+              checkForWinner,
+              setSunkShips
             }}
           />
         </div>
@@ -126,6 +169,7 @@ export const BoardStack = () => {
           activeBoard={activeBoard}
           setActiveBoard={setActiveBoard}
           currentEvent={currentGameEvent!}
+          sunkShips={sunkShips}
         />
       </div>
     </div>

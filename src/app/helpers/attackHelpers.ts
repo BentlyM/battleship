@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
-import type { Board, SetBoardData } from "~/types/game";
+import type { Board, SetBoardData, ShipType } from "~/types/game";
 
 export const handlePlayerAttack = (
   e: React.MouseEvent<HTMLTableElement>,
@@ -7,6 +7,8 @@ export const handlePlayerAttack = (
   setBoardData: SetBoardData,
   setActiveBoard: Dispatch<SetStateAction<"player" | "bot">>,
   handleAttackResult: (isHit: boolean) => void,
+  checkForWinner: (boardData: Board) => boolean,
+  setSunkShips: Dispatch<SetStateAction<Record<ShipType, boolean>>>,
 ) => {
   const target = e.target as HTMLElement;
   if (target.tagName === "TD") {
@@ -16,14 +18,15 @@ export const handlePlayerAttack = (
     if (boardData[y]![x] === "hit" || boardData[y]![x] === "miss") {
       console.log("you already hit or missed this cell");
       return;
-    } 
+    }
 
     const newBoardData = boardData.map((row, rowIndex) =>
       row.map((cell, colIndex) => {
         if (rowIndex === y && colIndex === x) {
           if (boardData[y]?.[x]) {
-            handleAttackResult(true);
-            return "hit";
+            const [shipType] = boardData[y]?.[x].split("-");
+            handleAttackResult(true); // Notify a hit (not sunk yet)
+            return `${shipType}-hit`;
           } else {
             handleAttackResult(false);
             setActiveBoard("player");
@@ -35,6 +38,38 @@ export const handlePlayerAttack = (
     );
     setBoardData(newBoardData);
 
-    // Trigger any additional game logic (e.g., check if a ship was sunk)
+    // Check if a ship is sunk
+    const shipTypes: ShipType[] = [
+      "carrier",
+      "battleship",
+      "cruiser",
+      "submarine",
+      "destroyer",
+    ];
+    const shipSizes: Record<ShipType, number> = {
+      carrier: 5,
+      battleship: 4,
+      cruiser: 3,
+      submarine: 3,
+      destroyer: 2,
+    };
+
+    shipTypes.forEach((shipType) => {
+      const shipSize = shipSizes[shipType];
+      const hitCount = newBoardData
+        .flat()
+        .filter((cell) => cell?.startsWith(`${shipType}-hit`)).length;
+
+      if (hitCount === shipSize) {
+        setSunkShips((prev) => ({ ...prev, [shipType]: true }));
+        handleAttackResult(true); // Notify a sunk ship
+        console.log(`${shipType} has been sunk!`);
+      }
+    });
+
+    // Check for winner
+    if (checkForWinner(newBoardData)) {
+      console.log("Game Over! You win!");
+    }
   }
 };

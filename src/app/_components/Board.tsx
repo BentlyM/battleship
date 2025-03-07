@@ -22,6 +22,7 @@ import type {
   SetBoardData,
   PlacedShips,
   ShipCount,
+  CheckForWinner,
 } from "~/types/game";
 import TargetPointer from "./TargetPointer";
 import { handlePlayerAttack } from "../helpers/attackHelpers";
@@ -37,6 +38,9 @@ interface BoardProps {
     gameStarted: boolean;
     setGameStarted: (gameStarted: boolean) => void;
     onGameEvent: (trigger: "hit" | "miss") => void;
+    setIsGameOver: Dispatch<SetStateAction<boolean>>;
+    checkForWinner: CheckForWinner;
+    setSunkShips: Dispatch<SetStateAction<Record<ShipType, boolean>>>;
   };
   onClick?: () => void;
 }
@@ -51,6 +55,9 @@ const Board: React.FC<BoardProps> = ({ board }) => {
     setGameStarted,
     setActiveBoard,
     onGameEvent,
+    setIsGameOver,
+    checkForWinner,
+    setSunkShips,
   }: BoardProps["board"] = board;
   const [draggedShip, setDraggedShip] = React.useState<ShipStructure | null>(
     null,
@@ -78,7 +85,7 @@ const Board: React.FC<BoardProps> = ({ board }) => {
     (id === "bot-board" && activeBoard === "bot");
 
   const handleAttackResult = (isHit: boolean) => {
-    onGameEvent(isHit ? "hit" : "miss");
+    onGameEvent(isHit ? "hit" : "miss")
   };
 
   const columnHeaders = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
@@ -235,7 +242,7 @@ const Board: React.FC<BoardProps> = ({ board }) => {
     const index = parseInt(partIndex);
     if (isNaN(index)) return null;
 
-    if (id === "player-board" && shipType !== "hit") {
+    if (id === "player-board") {
       if (index === 0) {
         return <ShipHead orientation={ship.orientation} />;
       } else if (index === ship.size - 1) {
@@ -328,6 +335,8 @@ const Board: React.FC<BoardProps> = ({ board }) => {
                       setBoardData,
                       setActiveBoard,
                       handleAttackResult,
+                      checkForWinner,
+                      setSunkShips
                     )
                 : undefined
             }

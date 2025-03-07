@@ -55,7 +55,7 @@ const Fleet = (props: FleetProps) => {
     <div
       className={`w-full rounded-lg border-2 border-gray-200 p-4 ${gameStarted && "mb-[176px]"}`}
     >
-      <div className="flex flex-row gap-4">
+      <div className="flex flex-row gap-4 justify-center">
         <h4 className="mb-4 text-lg font-semibold">Fleet</h4>
         <Button
           variant="outline"

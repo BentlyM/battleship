@@ -14,6 +14,7 @@ import {
 } from "~/components/ui/select";
 import { motion } from "framer-motion";
 import RecipientResponse from "./RecipientResponse";
+import { ShipType } from "~/types/game";
 export interface Message {
   id: number;
   text: string;
@@ -30,6 +31,7 @@ interface ChatBoxProps {
     bot: string;
     trigger: "hit" | "miss" | "turn" | "prologue";
   };
+  sunkShips: Record<ShipType, boolean>;
 }
 
 export const useTypewriter = (text: string, speed = 50) => {
@@ -90,6 +92,7 @@ const ChatBox = ({
   activeBoard,
   setActiveBoard,
   currentEvent,
+  sunkShips,
 }: ChatBoxProps) => {
   const [inputValue, setInputValue] = useState("");
   const [isBotMode, setIsBotMode] = useState(true);
@@ -222,6 +225,7 @@ const ChatBox = ({
           currentEvent={currentEvent}
           activeBoard={activeBoard}
           gameStarted={gameStarted}
+          sunkShips={sunkShips}
         />
       )}
     </div>

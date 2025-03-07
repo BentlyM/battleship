@@ -1,14 +1,15 @@
 // src/components/RecipientResponse.tsx
-import React from "react";
+import React, { useEffect } from "react";
 import { Card } from "~/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
-import type { GameEventMessage } from "~/types/game";
+import type { GameEventMessage, ShipType } from "~/types/game";
 import { useTypewriter } from "./ChatBox";
 
 interface ResponseType {
   currentEvent: GameEventMessage;
   activeBoard: "player" | "bot";
   gameStarted: boolean;
+  sunkShips: Record<ShipType, boolean>; // Add this
 }
 
 const PlayerResponse = ({
@@ -55,8 +56,26 @@ const RecipientResponse = ({
   currentEvent,
   activeBoard,
   gameStarted,
+  sunkShips,
 }: ResponseType) => {
   const showPrologue = !gameStarted;
+
+  // Announce sunk ships
+  useEffect(() => {
+    const shipNames: Record<ShipType, string> = {
+      carrier: "Carrier",
+      battleship: "Battleship",
+      cruiser: "Cruiser",
+      submarine: "Submarine",
+      destroyer: "Destroyer",
+    };
+
+    Object.entries(sunkShips).forEach(([shipType, isSunk]) => {
+      if (isSunk) {
+        console.log(`${shipNames[shipType as ShipType]} has been sunk!`);
+      }
+    });
+  }, [sunkShips]);
 
   return (
     <>
