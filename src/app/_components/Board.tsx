@@ -42,7 +42,6 @@ interface BoardProps {
     checkForWinner: CheckForWinner;
     setSunkShips: Dispatch<SetStateAction<Record<ShipType, boolean>>>;
   };
-  onClick?: () => void;
 }
 
 const Board: React.FC<BoardProps> = ({ board }) => {
@@ -85,7 +84,7 @@ const Board: React.FC<BoardProps> = ({ board }) => {
     (id === "bot-board" && activeBoard === "bot");
 
   const handleAttackResult = (isHit: boolean) => {
-    onGameEvent(isHit ? "hit" : "miss")
+    onGameEvent(isHit ? "hit" : "miss");
   };
 
   const columnHeaders = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
@@ -155,15 +154,17 @@ const Board: React.FC<BoardProps> = ({ board }) => {
             }
 
             if (targetCell && targetCell !== "hit" && targetCell !== "miss") {
-              setBoardData((prevBoard) =>
-                prevBoard.map((row, y) =>
-                  row.map((cell, x) =>
-                    x === finalX && y === finalY
-                      ? `${shipType}-hit-${partIndex}`
-                      : cell,
+              if (shipType && partIndex) {
+                setBoardData((prevBoard) =>
+                  prevBoard.map((row, y) =>
+                    row.map((cell, x) =>
+                      x === finalX && y === finalY
+                        ? `${shipType}-hit-${partIndex}`
+                        : cell,
+                    ),
                   ),
-                ),
-              );
+                );
+              }
               handleAttackResult(true);
               consecutiveHits++;
               steps = 0;
@@ -327,7 +328,7 @@ const Board: React.FC<BoardProps> = ({ board }) => {
               )
             }
             onClick={
-              id === "bot-board" && gameStarted
+              activeBoard === "bot" && gameStarted
                 ? (e) =>
                     handlePlayerAttack(
                       e,
@@ -336,7 +337,8 @@ const Board: React.FC<BoardProps> = ({ board }) => {
                       setActiveBoard,
                       handleAttackResult,
                       checkForWinner,
-                      setSunkShips
+                      setSunkShips,
+                      setIsGameOver,
                     )
                 : undefined
             }

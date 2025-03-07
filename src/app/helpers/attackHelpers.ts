@@ -9,6 +9,7 @@ export const handlePlayerAttack = (
   handleAttackResult: (isHit: boolean) => void,
   checkForWinner: (boardData: Board) => boolean,
   setSunkShips: Dispatch<SetStateAction<Record<ShipType, boolean>>>,
+  setIsGameOver: React.Dispatch<React.SetStateAction<boolean>>,
 ) => {
   const target = e.target as HTMLElement;
   if (target.tagName === "TD") {
@@ -38,7 +39,6 @@ export const handlePlayerAttack = (
     );
     setBoardData(newBoardData);
 
-    // Check if a ship is sunk
     const shipTypes: ShipType[] = [
       "carrier",
       "battleship",
@@ -62,14 +62,12 @@ export const handlePlayerAttack = (
 
       if (hitCount === shipSize) {
         setSunkShips((prev) => ({ ...prev, [shipType]: true }));
-        handleAttackResult(true); // Notify a sunk ship
-        console.log(`${shipType} has been sunk!`);
       }
     });
 
-    // Check for winner
     if (checkForWinner(newBoardData)) {
-      console.log("Game Over! You win!");
+      console.log("player won")
+      setIsGameOver(true);
     }
   }
 };

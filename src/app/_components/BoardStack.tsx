@@ -52,7 +52,7 @@ export const BoardStack = () => {
       const turnMessage = gameEventMessages[0]?.find(
         (msg) => msg.trigger === "turn" && msg.active !== activeBoard,
       );
-      if (turnMessage && currentGameEvent?.trigger !== 'miss') {
+      if (turnMessage && currentGameEvent?.trigger !== "miss") {
         setCurrentGameEvent(turnMessage);
       }
     }
@@ -81,7 +81,9 @@ export const BoardStack = () => {
     }
   };
 
-  const checkForWinner = (boardData: BoardType) => {
+  const checkForWinner = (
+    boardData: BoardType,
+  ) => {
     const shipTypes: ShipType[] = [
       "carrier",
       "battleship",
@@ -105,7 +107,6 @@ export const BoardStack = () => {
         .filter((cell) => cell?.startsWith(`${shipType}-hit`)).length;
       return hitCount === shipSize;
     });
-
     return allShipsSunk;
   };
 
@@ -133,7 +134,7 @@ export const BoardStack = () => {
               onGameEvent: handleGameEvent,
               setIsGameOver: setIsGameOver,
               checkForWinner,
-              setSunkShips
+              setSunkShips,
             }}
           />
         </div>
@@ -158,7 +159,7 @@ export const BoardStack = () => {
               onGameEvent: handleGameEvent,
               setIsGameOver: setIsGameOver,
               checkForWinner,
-              setSunkShips
+              setSunkShips,
             }}
           />
         </div>
