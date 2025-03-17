@@ -120,6 +120,7 @@ const Fleet = (props: FleetProps) => {
             objectFit: 'cover'
           }}
           unoptimized
+          priority
         />
         {!gameStarted &&
           Object.entries(shipProps).map(([type, props]) => (

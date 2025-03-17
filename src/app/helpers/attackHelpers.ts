@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
-import type { Board, SetBoardData, ShipType } from "~/types/game";
+import type { Board, SetBoardData, ShipType, Stats } from "~/types/game";
 
 export const handlePlayerAttack = (
   e: React.MouseEvent<HTMLTableElement>,
@@ -10,6 +10,7 @@ export const handlePlayerAttack = (
   checkForWinner: (boardData: Board) => boolean,
   setSunkShips: Dispatch<SetStateAction<Record<ShipType, boolean>>>,
   setIsGameOver: React.Dispatch<React.SetStateAction<boolean>>,
+  setCurrentStats: Dispatch<SetStateAction<Stats>>,
 ) => {
   const target = e.target as HTMLElement;
   if (target.tagName === "TD") {
@@ -37,6 +38,22 @@ export const handlePlayerAttack = (
         return cell;
       }),
     );
+
+    const hits = newBoardData
+    
+      .flat()
+      .filter((v) => v?.endsWith("-hit")).length;
+    const misses = newBoardData.flat().filter((v) => v === "miss").length;
+    const totalShots = hits + misses;
+    const currentAccuracy = totalShots > 0 ? (hits / totalShots) * 100 : 0;
+
+    // Update stats with calculated accuracy
+    setCurrentStats((prev) => ({
+      ...prev,
+      accuracy: Number(currentAccuracy.toFixed(2)),
+      shots: prev.shots + 1,
+    }));
+
     setBoardData(newBoardData);
 
     const shipTypes: ShipType[] = [
@@ -66,7 +83,7 @@ export const handlePlayerAttack = (
     });
 
     if (checkForWinner(newBoardData)) {
-      console.log("player won")
+      console.log("player won");
       setIsGameOver(true);
     }
   }

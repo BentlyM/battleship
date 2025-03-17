@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useEffect, type Dispatch, type SetStateAction } from "react";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { RadioGroup } from "radix-ui";
+import { Stats } from "~/types/game";
 
 const mockData = {
   current: {
@@ -30,14 +31,35 @@ const mockData = {
   ],
 };
 
-const DetailsBox = () => {
-  const [selectedView, setSelectedView] = React.useState("overall");
+interface StatsProps {
+  gameStarted: boolean;
+  isGameOver: boolean;
+  currentStats: Stats;
+  setCurrentStats: Dispatch<SetStateAction<Stats>>;
+}
+
+const DetailsBox = ({ props }: { props: StatsProps }) => {
+  const { gameStarted, isGameOver, currentStats, setCurrentStats } = props;
+
+  const [selectedView, setSelectedView] = React.useState<
+    "current" | "overall" | "previous" | "leaderboard"
+  >("overall");
+
+  useEffect(() => {
+    if (gameStarted) {
+      setSelectedView("current");
+    }
+  }, [gameStarted]);
 
   return (
     <div className="flex w-[18vw] flex-col gap-2">
       <RadioGroup.Root
         value={selectedView}
-        onValueChange={setSelectedView}
+        onValueChange={(value) =>
+          setSelectedView(
+            value as "current" | "overall" | "previous" | "leaderboard",
+          )
+        }
         className="flex gap-1 overflow-x-auto"
       >
         <RadioGroup.Item value="current" asChild>
@@ -46,16 +68,12 @@ const DetailsBox = () => {
           </Button>
         </RadioGroup.Item>
         <RadioGroup.Item value="overall" asChild>
-          <Button
-            variant={selectedView === "overall" ? "default" : "outline"}
-          >
+          <Button variant={selectedView === "overall" ? "default" : "outline"}>
             Overall
           </Button>
         </RadioGroup.Item>
         <RadioGroup.Item value="previous" asChild>
-          <Button
-            variant={selectedView === "previous" ? "default" : "outline"}
-          >
+          <Button variant={selectedView === "previous" ? "default" : "outline"}>
             Previous
           </Button>
         </RadioGroup.Item>
@@ -72,9 +90,9 @@ const DetailsBox = () => {
         {selectedView === "current" && (
           <div className="space-y-3">
             <h3 className="text-lg font-bold">Current Match</h3>
-            <StatItem label="Accuracy" value={mockData.current.accuracy} />
-            <StatItem label="Ships Sunk" value={mockData.current.shipsSunk} />
-            <StatItem label="Shots Fired" value={mockData.current.shots} />
+            <StatItem label="Accuracy" value={currentStats.accuracy} />
+            <StatItem label="Ships Sunk" value={currentStats.sunkShips} />
+            <StatItem label="Shots Fired" value={currentStats.shots} />
             <StatItem label="Time Elapsed" value={mockData.current.time} />
             <span
               className={

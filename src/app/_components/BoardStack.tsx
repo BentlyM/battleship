@@ -6,6 +6,7 @@ import type {
   Board as BoardType,
   GameEventMessage,
   ShipType,
+  Stats,
 } from "~/types/game";
 import ChatBox from "./ChatBox";
 import DetailsBox from "./DetailsBox";
@@ -33,6 +34,13 @@ export const BoardStack = () => {
     submarine: false,
     destroyer: false,
   });
+  const [currentStats, setCurrentStats] = useState<Stats>({
+    accuracy: 0,
+    sunkShips: 0,
+    shots: 0,
+    time: 0,
+    win: undefined,
+  });
 
   useEffect(() => {
     if (!gameStarted) {
@@ -46,7 +54,7 @@ export const BoardStack = () => {
   }, [gameStarted]);
 
   useEffect(() => {
-    if (!gameStarted) {
+        if (!gameStarted) {
       setCurrentGameEvent(prologueMessages[currentEventIndex]);
     } else {
       const turnMessage = gameEventMessages[0]?.find(
@@ -81,9 +89,7 @@ export const BoardStack = () => {
     }
   };
 
-  const checkForWinner = (
-    boardData: BoardType,
-  ) => {
+  const checkForWinner = (boardData: BoardType) => {
     const shipTypes: ShipType[] = [
       "carrier",
       "battleship",
@@ -112,7 +118,14 @@ export const BoardStack = () => {
 
   return (
     <div className="flex h-full w-full items-center justify-evenly">
-      <DetailsBox />
+      <DetailsBox 
+        props={{
+          gameStarted,
+          isGameOver,
+          currentStats,
+          setCurrentStats
+        }}
+      />
       <div className="relative h-[600px] w-[545px]">
         {/* Player Board */}
         <div
@@ -135,6 +148,7 @@ export const BoardStack = () => {
               setIsGameOver: setIsGameOver,
               checkForWinner,
               setSunkShips,
+              setCurrentStats
             }}
           />
         </div>
@@ -160,6 +174,7 @@ export const BoardStack = () => {
               setIsGameOver: setIsGameOver,
               checkForWinner,
               setSunkShips,
+              setCurrentStats
             }}
           />
         </div>

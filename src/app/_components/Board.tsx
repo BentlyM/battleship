@@ -23,6 +23,7 @@ import type {
   PlacedShips,
   ShipCount,
   CheckForWinner,
+  Stats,
 } from "~/types/game";
 import TargetPointer from "./TargetPointer";
 import { handlePlayerAttack } from "../helpers/attackHelpers";
@@ -41,6 +42,7 @@ interface BoardProps {
     setIsGameOver: Dispatch<SetStateAction<boolean>>;
     checkForWinner: CheckForWinner;
     setSunkShips: Dispatch<SetStateAction<Record<ShipType, boolean>>>;
+    setCurrentStats: Dispatch<SetStateAction<Stats>>;
   };
 }
 
@@ -57,6 +59,7 @@ const Board: React.FC<BoardProps> = ({ board }) => {
     setIsGameOver,
     checkForWinner,
     setSunkShips,
+    setCurrentStats,
   }: BoardProps["board"] = board;
   const [draggedShip, setDraggedShip] = React.useState<ShipStructure | null>(
     null,
@@ -344,6 +347,7 @@ const Board: React.FC<BoardProps> = ({ board }) => {
                       checkForWinner,
                       setSunkShips,
                       setIsGameOver,
+                      setCurrentStats
                     )
                 : undefined
             }

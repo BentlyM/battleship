@@ -40,6 +40,14 @@ export type GameEventMessage = {
   active?: 'player' | 'bot'
 };
 
+export type Stats = {
+  accuracy: number,
+  sunkShips: number,
+  shots: number,
+  time: number,
+  win: 'win' | 'lose' | undefined
+}
+
 type ShipDetails = {
   size: number;
   orientation: Orientation;
