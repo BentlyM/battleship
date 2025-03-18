@@ -43,6 +43,7 @@ interface BoardProps {
     checkForWinner: CheckForWinner;
     setSunkShips: Dispatch<SetStateAction<Record<ShipType, boolean>>>;
     setCurrentStats: Dispatch<SetStateAction<Stats>>;
+    sunkShips:  Record<ShipType, boolean>
   };
 }
 
@@ -60,6 +61,7 @@ const Board: React.FC<BoardProps> = ({ board }) => {
     checkForWinner,
     setSunkShips,
     setCurrentStats,
+    sunkShips
   }: BoardProps["board"] = board;
   const [draggedShip, setDraggedShip] = React.useState<ShipStructure | null>(
     null,
@@ -166,8 +168,12 @@ const Board: React.FC<BoardProps> = ({ board }) => {
                     ),
                   );
                   if (checkForWinner(newBoard)) {
-                    setIsGameOver(true);
                     console.log("Bot won");
+                    setCurrentStats((prev) => ({
+                      ...prev,
+                      gameOutcome: 'lose'
+                    }))
+                    setIsGameOver(true);
                   }
                   return newBoard;
                 });
@@ -347,7 +353,8 @@ const Board: React.FC<BoardProps> = ({ board }) => {
                       checkForWinner,
                       setSunkShips,
                       setIsGameOver,
-                      setCurrentStats
+                      setCurrentStats,
+                      sunkShips
                     )
                 : undefined
             }

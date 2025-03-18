@@ -96,12 +96,12 @@ const DetailsBox = ({ props }: { props: StatsProps }) => {
             <StatItem label="Time Elapsed" value={mockData.current.time} />
             <span
               className={
-                mockData.current.result === "Win"
+                currentStats.gameOutcome === "win"
                   ? "text-green-500"
                   : "text-red-500"
               }
             >
-              {mockData.current.result}
+              {currentStats.gameOutcome || 'undetermined'}
             </span>
           </div>
         )}

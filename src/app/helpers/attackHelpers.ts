@@ -11,6 +11,7 @@ export const handlePlayerAttack = (
   setSunkShips: Dispatch<SetStateAction<Record<ShipType, boolean>>>,
   setIsGameOver: React.Dispatch<React.SetStateAction<boolean>>,
   setCurrentStats: Dispatch<SetStateAction<Stats>>,
+  sunkShips: Record<ShipType, boolean>
 ) => {
   const target = e.target as HTMLElement;
   if (target.tagName === "TD") {
@@ -39,10 +40,7 @@ export const handlePlayerAttack = (
       }),
     );
 
-    const hits = newBoardData
-    
-      .flat()
-      .filter((v) => v?.endsWith("-hit")).length;
+    const hits = newBoardData.flat().filter((v) => v?.endsWith("-hit")).length;
     const misses = newBoardData.flat().filter((v) => v === "miss").length;
     const totalShots = hits + misses;
     const currentAccuracy = totalShots > 0 ? (hits / totalShots) * 100 : 0;
@@ -63,28 +61,54 @@ export const handlePlayerAttack = (
       "submarine",
       "destroyer",
     ];
-    const shipSizes: Record<ShipType, number> = {
-      carrier: 5,
-      battleship: 4,
-      cruiser: 3,
-      submarine: 3,
-      destroyer: 2,
-    };
 
-    shipTypes.forEach((shipType) => {
-      const shipSize = shipSizes[shipType];
-      const hitCount = newBoardData
-        .flat()
-        .filter((cell) => cell?.startsWith(`${shipType}-hit`)).length;
+    // Get current sunk ships state
+    const currentSunkShips = sunkShips; // Assuming this function exists
 
-      if (hitCount === shipSize) {
-        setSunkShips((prev) => ({ ...prev, [shipType]: true }));
+    // Check which ships are sunk in the new board state
+    const newSunkShips = shipTypes.reduce(
+      (acc, shipType) => {
+        const shipCells = newBoardData
+          .flat()
+          .filter(
+            (cell) => cell?.startsWith(shipType) && !cell.endsWith("-hit"),
+          );
+        acc[shipType] = shipCells.length === 0;
+        return acc;
+      },
+      {} as Record<ShipType, boolean>,
+    );
+
+    // Find newly sunk ships
+    const newlySunk = shipTypes.filter(
+      (shipType) => newSunkShips[shipType] && !currentSunkShips[shipType],
+    );
+
+    // Update state if any ships were newly sunk
+    if (newlySunk.length > 0) {
+      setSunkShips((prev) => ({
+        ...prev,
+        ...newSunkShips,
+      }));
+
+      setCurrentStats((prev) => ({
+        ...prev,
+        sunkShips: prev.sunkShips + newlySunk.length,
+      }));
+
+      // Trigger any sunk ship events
+      // newlySunk.forEach((shipType) => {
+      //   handleSunkShipEvent(shipType); // Assuming this function exists
+      // });
+
+      if (checkForWinner(newBoardData)) {
+        console.log("player won");
+        setCurrentStats((prev) => ({
+          ...prev,
+          gameOutcome: 'win'
+        }))
+        setIsGameOver(true);
       }
-    });
-
-    if (checkForWinner(newBoardData)) {
-      console.log("player won");
-      setIsGameOver(true);
     }
   }
 };

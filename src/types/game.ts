@@ -45,7 +45,7 @@ export type Stats = {
   sunkShips: number,
   shots: number,
   time: number,
-  win: 'win' | 'lose' | undefined
+  gameOutcome: 'win' | 'lose' | undefined
 }
 
 type ShipDetails = {

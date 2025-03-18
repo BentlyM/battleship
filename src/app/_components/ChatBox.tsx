@@ -137,8 +137,9 @@ const ChatBox = ({
           <Button
             variant={isBotMode ? "outline" : "default"}
             onClick={() => !gameStarted && setIsBotMode(false)}
-            disabled={gameStarted}
+            disabled={true}
             className="w-full"
+            aria-label="coming soon"
           >
             <Users className="mr-2 h-4 w-4" />
             vs Player

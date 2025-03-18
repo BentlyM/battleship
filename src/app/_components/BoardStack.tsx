@@ -39,7 +39,7 @@ export const BoardStack = () => {
     sunkShips: 0,
     shots: 0,
     time: 0,
-    win: undefined,
+    gameOutcome: undefined,
   });
 
   useEffect(() => {
@@ -147,6 +147,7 @@ export const BoardStack = () => {
               onGameEvent: handleGameEvent,
               setIsGameOver: setIsGameOver,
               checkForWinner,
+              sunkShips,
               setSunkShips,
               setCurrentStats
             }}
@@ -173,6 +174,7 @@ export const BoardStack = () => {
               onGameEvent: handleGameEvent,
               setIsGameOver: setIsGameOver,
               checkForWinner,
+              sunkShips,
               setSunkShips,
               setCurrentStats
             }}
