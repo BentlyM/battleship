@@ -5,13 +5,6 @@ import { RadioGroup } from "radix-ui";
 import { Stats } from "~/types/game";
 
 const mockData = {
-  current: {
-    accuracy: "0%",
-    shipsSunk: 0,
-    shots: 0,
-    time: "0s",
-    result: "undetermined",
-  },
   overall: {
     accuracy: "78%",
     totalGames: 45,
@@ -45,11 +38,37 @@ const DetailsBox = ({ props }: { props: StatsProps }) => {
     "current" | "overall" | "previous" | "leaderboard"
   >("overall");
 
+  const [startTime, setStartTime] = React.useState<number | null>(null);
+  const [elapsedTime, setElapsedTime] = React.useState<string>("0s");
+
   useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+
     if (gameStarted) {
       setSelectedView("current");
+      const start = performance.now();
+      setStartTime(start);
+
+      interval = setInterval(() => {
+        const now = performance.now();
+        const elapsedSeconds = (now - start) / 1000;
+
+        const minutes = Math.floor(elapsedSeconds / 60);
+        const seconds = (elapsedSeconds % 60).toFixed(0);
+        setElapsedTime(`${minutes}m ${seconds}s`);
+      }, 100);
     }
-  }, [gameStarted]);
+
+    if (isGameOver && interval && startTime !== null) {
+      clearInterval(interval);
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [gameStarted, isGameOver, startTime]);
 
   return (
     <div className="flex w-[18vw] flex-col gap-2">
@@ -93,7 +112,7 @@ const DetailsBox = ({ props }: { props: StatsProps }) => {
             <StatItem label="Accuracy" value={currentStats.accuracy} />
             <StatItem label="Ships Sunk" value={currentStats.sunkShips} />
             <StatItem label="Shots Fired" value={currentStats.shots} />
-            <StatItem label="Time Elapsed" value={mockData.current.time} />
+            <StatItem label="Time Elapsed" value={elapsedTime} />
             <span
               className={
                 currentStats.gameOutcome === "win"
@@ -101,7 +120,7 @@ const DetailsBox = ({ props }: { props: StatsProps }) => {
                   : "text-red-500"
               }
             >
-              {currentStats.gameOutcome || 'undetermined'}
+              {currentStats.gameOutcome || "undetermined"}
             </span>
           </div>
         )}
