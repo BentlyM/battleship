@@ -8,6 +8,7 @@ import type {
   ShipCount,
 } from "~/types/game";
 import Image from "next/image";
+import { createBoard } from "./BoardStack";
 
 interface FleetProps {
   handleAutoPlace: (
@@ -26,6 +27,8 @@ interface FleetProps {
   shipCount: ShipCount;
   placedShips: PlacedShips;
   isActive: boolean;
+  setIsGameOver: React.Dispatch<React.SetStateAction<boolean>>;
+  isGameOver: boolean;
 }
 
 const Fleet = (props: FleetProps) => {
@@ -40,9 +43,12 @@ const Fleet = (props: FleetProps) => {
     shipCount,
     placedShips,
     isActive,
+    setIsGameOver,
+    isGameOver,
   } = props;
 
   const handleStartGame = () => {
+    if (isGameOver) setIsGameOver(false);
     if (Object.values(shipCount).every((ship) => ship.count === 0)) {
       setGameStarted(true);
     } else {
@@ -51,52 +57,62 @@ const Fleet = (props: FleetProps) => {
     }
   };
 
+  const handleEndGame = () => {
+    if (gameStarted && !isGameOver) {
+      setGameStarted(false);
+      setIsGameOver(true);
+      handleRemoveShips();
+    }
+    console.log("tried to end game");
+  };
+
+  const handleRemoveShips = () => {
+    setPlacedShips({} as PlacedShips);
+    setShipCount({
+      ...shipCount,
+      carrier: { count: 1 },
+      battleship: { count: 1 },
+      cruiser: { count: 1 },
+      submarine: { count: 1 },
+      destroyer: { count: 1 },
+    });
+    setBoardData(createBoard());
+  };
+
   return (
     <div
       className={`w-full rounded-lg border-2 border-gray-200 p-4 ${gameStarted && "mb-[176px]"}`}
     >
-      <div className="flex flex-row gap-4 justify-center">
+      <div className="flex flex-row justify-center gap-4">
         <h4 className="mb-4 text-lg font-semibold">Fleet</h4>
-        <Button
-          variant="outline"
-          className="h-8 rounded-full px-3 text-sm"
-          onClick={() =>
-            handleAutoPlace(
-              boardData,
-              placedShips,
-              setPlacedShips,
-              setBoardData,
-              setShipCount,
-            )
-          }
-          disabled={!isActive || gameStarted}
-        >
-          Auto-place Ships
-        </Button>
-        <Button
-          variant="outline"
-          className="h-8 rounded-full px-3 text-sm"
-          onClick={() => {
-            setPlacedShips({} as PlacedShips);
-            setShipCount({
-              ...shipCount,
-              carrier: { count: 1 },
-              battleship: { count: 1 },
-              cruiser: { count: 1 },
-              submarine: { count: 1 },
-              destroyer: { count: 1 },
-            });
-            setBoardData(
-              Array.from(
-                { length: 10 },
-                (): string[] => Array(10).fill("") as string[],
-              ) as BoardType,
-            );
-          }}
-          disabled={!isActive || gameStarted}
-        >
-          Remove Ships
-        </Button>
+        {!gameStarted && (
+          <Button
+            variant="outline"
+            className="h-8 rounded-full px-3 text-sm"
+            onClick={() =>
+              handleAutoPlace(
+                boardData,
+                placedShips,
+                setPlacedShips,
+                setBoardData,
+                setShipCount,
+              )
+            }
+            disabled={!isActive || gameStarted}
+          >
+            Auto-place Ships
+          </Button>
+        )}
+        {!gameStarted && (
+          <Button
+            variant="outline"
+            className="h-8 rounded-full px-3 text-sm"
+            onClick={handleRemoveShips}
+            disabled={!isActive || gameStarted}
+          >
+            Remove Ships
+          </Button>
+        )}
         <Button
           variant="outline"
           className="h-8 rounded-full bg-green-500 px-3 text-sm text-white hover:bg-green-600"
@@ -105,6 +121,14 @@ const Fleet = (props: FleetProps) => {
         >
           Start Game
         </Button>
+        {gameStarted && (
+          <Button
+            className="h-8 rounded-full bg-red-500 px-3 text-sm text-white hover:bg-red-600"
+            onClick={handleEndGame}
+          >
+            End Game
+          </Button>
+        )}
       </div>
       <div
         className={`flex flex-wrap justify-center gap-4 overflow-hidden transition-all duration-300 ${gameStarted ? "h-0 opacity-0" : "relative h-[176px] rounded opacity-100"}`}
@@ -117,7 +141,7 @@ const Fleet = (props: FleetProps) => {
             display: `${gameStarted && "none"}`,
             position: "absolute",
             zIndex: -1,
-            objectFit: 'cover'
+            objectFit: "cover",
           }}
           unoptimized
           priority

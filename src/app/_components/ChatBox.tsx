@@ -14,7 +14,7 @@ import {
 } from "~/components/ui/select";
 import { motion } from "framer-motion";
 import RecipientResponse from "./RecipientResponse";
-import { ShipType } from "~/types/game";
+import { type ShipType } from "~/types/game";
 export interface Message {
   id: number;
   text: string;

@@ -29,6 +29,7 @@ import TargetPointer from "./TargetPointer";
 import { handlePlayerAttack } from "../helpers/attackHelpers";
 import { motion, stagger, animate, useInView } from "framer-motion";
 import Fleet from "./Fleet";
+import { createBoard } from "./BoardStack";
 interface BoardProps {
   board: {
     id: string;
@@ -43,7 +44,8 @@ interface BoardProps {
     checkForWinner: CheckForWinner;
     setSunkShips: Dispatch<SetStateAction<Record<ShipType, boolean>>>;
     setCurrentStats: Dispatch<SetStateAction<Stats>>;
-    sunkShips:  Record<ShipType, boolean>
+    sunkShips: Record<ShipType, boolean>;
+    isGameOver: boolean;
   };
 }
 
@@ -61,7 +63,8 @@ const Board: React.FC<BoardProps> = ({ board }) => {
     checkForWinner,
     setSunkShips,
     setCurrentStats,
-    sunkShips
+    sunkShips,
+    isGameOver,
   }: BoardProps["board"] = board;
   const [draggedShip, setDraggedShip] = React.useState<ShipStructure | null>(
     null,
@@ -113,7 +116,7 @@ const Board: React.FC<BoardProps> = ({ board }) => {
   }, [botTarget, botTargeting]);
 
   useEffect(() => {
-    if (id === "bot-board") {
+    if (id === "bot-board" && !isGameOver) {
       handleAutoPlace(
         boardData,
         placedShips || {},
@@ -121,8 +124,10 @@ const Board: React.FC<BoardProps> = ({ board }) => {
         setBoardData,
         setShipCount,
       );
+    } else if (id === "bot-board" && isGameOver) {
+      setBoardData(createBoard());
     }
-  }, [id]);
+  }, [id, isGameOver]);
 
   useEffect(() => {
     if (id === "player-board" && gameStarted && activeBoard === "player") {
@@ -171,8 +176,8 @@ const Board: React.FC<BoardProps> = ({ board }) => {
                     console.log("Bot won");
                     setCurrentStats((prev) => ({
                       ...prev,
-                      gameOutcome: 'lose'
-                    }))
+                      gameOutcome: "lose",
+                    }));
                     setIsGameOver(true);
                   }
                   return newBoard;
@@ -354,7 +359,7 @@ const Board: React.FC<BoardProps> = ({ board }) => {
                       setSunkShips,
                       setIsGameOver,
                       setCurrentStats,
-                      sunkShips
+                      sunkShips,
                     )
                 : undefined
             }
@@ -483,6 +488,8 @@ const Board: React.FC<BoardProps> = ({ board }) => {
           gameStarted={gameStarted}
           shipCount={shipCount}
           isActive={isActive}
+          setIsGameOver={setIsGameOver}
+          isGameOver={isGameOver}
         />
       )}
     </div>

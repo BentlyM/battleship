@@ -2,7 +2,7 @@ import React, { useEffect, type Dispatch, type SetStateAction } from "react";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { RadioGroup } from "radix-ui";
-import { Stats } from "~/types/game";
+import type { Stats } from "~/types/game";
 
 const mockData = {
   overall: {
@@ -124,7 +124,7 @@ const DetailsBox = ({ props }: { props: StatsProps }) => {
                   : "text-red-500"
               }
             >
-              {currentStats.gameOutcome || "undetermined"}
+              {currentStats.gameOutcome ?? "undetermined"}
             </span>
           </div>
         )}

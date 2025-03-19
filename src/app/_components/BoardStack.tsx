@@ -38,7 +38,7 @@ export const BoardStack = () => {
     accuracy: 0,
     sunkShips: 0,
     shots: 0,
-    time: '',
+    time: "",
     gameOutcome: undefined,
   });
 
@@ -49,9 +49,15 @@ export const BoardStack = () => {
           Math.min(prev + 1, prologueMessages.length - 1),
         );
       }, 3000);
+
+      if (isGameOver) {
+        setCurrentEventIndex(0);
+        clearInterval(timer);
+      }
+
       return () => clearInterval(timer);
     }
-  }, [gameStarted]);
+  }, [gameStarted, isGameOver]);
 
   useEffect(() => {
     if (!gameStarted) {
@@ -150,6 +156,7 @@ export const BoardStack = () => {
               sunkShips,
               setSunkShips,
               setCurrentStats,
+              isGameOver,
             }}
           />
         </div>
@@ -177,6 +184,7 @@ export const BoardStack = () => {
               sunkShips,
               setSunkShips,
               setCurrentStats,
+              isGameOver,
             }}
           />
         </div>
