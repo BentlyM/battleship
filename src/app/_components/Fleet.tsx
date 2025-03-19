@@ -9,6 +9,7 @@ import type {
 } from "~/types/game";
 import Image from "next/image";
 import { createBoard } from "./BoardStack";
+import { isatty } from "tty";
 
 interface FleetProps {
   handleAutoPlace: (
@@ -125,6 +126,7 @@ const Fleet = (props: FleetProps) => {
           <Button
             className="h-8 rounded-full bg-red-500 px-3 text-sm text-white hover:bg-red-600"
             onClick={handleEndGame}
+            disabled={isActive}
           >
             End Game
           </Button>

@@ -347,7 +347,7 @@ const Board: React.FC<BoardProps> = ({ board }) => {
               )
             }
             onClick={
-              activeBoard === "bot" && gameStarted
+              activeBoard === "bot" && gameStarted && !isGameOver
                 ? (e) =>
                     handlePlayerAttack(
                       e,
