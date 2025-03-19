@@ -37,16 +37,16 @@ export type GameEventMessage = {
   player: string;
   bot: string;
   trigger: "hit" | "miss" | "turn" | "prologue";
-  active?: 'player' | 'bot'
+  active?: "player" | "bot";
 };
 
 export type Stats = {
-  accuracy: number,
-  sunkShips: number,
-  shots: number,
-  time: number,
-  gameOutcome: 'win' | 'lose' | undefined
-}
+  accuracy: number;
+  sunkShips: number;
+  shots: number;
+  time: string;
+  gameOutcome: "win" | "lose" | undefined;
+};
 
 type ShipDetails = {
   size: number;

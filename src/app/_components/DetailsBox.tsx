@@ -61,6 +61,10 @@ const DetailsBox = ({ props }: { props: StatsProps }) => {
 
     if (isGameOver && interval && startTime !== null) {
       clearInterval(interval);
+      setCurrentStats((prev) => ({
+        ...prev,
+        time: elapsedTime
+      }))
     }
 
     return () => {

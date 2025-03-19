@@ -38,7 +38,7 @@ export const BoardStack = () => {
     accuracy: 0,
     sunkShips: 0,
     shots: 0,
-    time: 0,
+    time: '',
     gameOutcome: undefined,
   });
 
@@ -54,7 +54,7 @@ export const BoardStack = () => {
   }, [gameStarted]);
 
   useEffect(() => {
-        if (!gameStarted) {
+    if (!gameStarted) {
       setCurrentGameEvent(prologueMessages[currentEventIndex]);
     } else {
       const turnMessage = gameEventMessages[0]?.find(
@@ -118,12 +118,12 @@ export const BoardStack = () => {
 
   return (
     <div className="flex h-full w-full items-center justify-evenly">
-      <DetailsBox 
+      <DetailsBox
         props={{
           gameStarted,
           isGameOver,
           currentStats,
-          setCurrentStats
+          setCurrentStats,
         }}
       />
       <div className="relative h-[600px] w-[545px]">
@@ -149,7 +149,7 @@ export const BoardStack = () => {
               checkForWinner,
               sunkShips,
               setSunkShips,
-              setCurrentStats
+              setCurrentStats,
             }}
           />
         </div>
@@ -176,7 +176,7 @@ export const BoardStack = () => {
               checkForWinner,
               sunkShips,
               setSunkShips,
-              setCurrentStats
+              setCurrentStats,
             }}
           />
         </div>
