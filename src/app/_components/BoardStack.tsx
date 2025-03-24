@@ -119,6 +119,11 @@ export const BoardStack = () => {
         .filter((cell) => cell?.startsWith(`${shipType}-hit`)).length;
       return hitCount === shipSize;
     });
+
+    if(allShipsSunk){
+      setGameStarted(false);
+    }
+
     return allShipsSunk;
   };
 

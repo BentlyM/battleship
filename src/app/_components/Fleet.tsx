@@ -1,4 +1,4 @@
-import type { Dispatch, SetStateAction } from "react";
+import { useEffect, type Dispatch, type SetStateAction } from "react";
 import Ship, { shipProps } from "./Ship";
 import { Button } from "~/components/ui/button";
 import type {
@@ -9,7 +9,6 @@ import type {
 } from "~/types/game";
 import Image from "next/image";
 import { createBoard } from "./BoardStack";
-import { isatty } from "tty";
 
 interface FleetProps {
   handleAutoPlace: (
@@ -48,6 +47,10 @@ const Fleet = (props: FleetProps) => {
     isGameOver,
   } = props;
 
+  useEffect(() => {
+    handleRemoveShips();
+  }, [isGameOver])
+
   const handleStartGame = () => {
     if (isGameOver) setIsGameOver(false);
     if (Object.values(shipCount).every((ship) => ship.count === 0)) {
@@ -64,7 +67,6 @@ const Fleet = (props: FleetProps) => {
       setIsGameOver(true);
       handleRemoveShips();
     }
-    console.log("tried to end game");
   };
 
   const handleRemoveShips = () => {
