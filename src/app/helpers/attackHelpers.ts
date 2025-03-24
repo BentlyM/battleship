@@ -45,7 +45,6 @@ export const handlePlayerAttack = (
     const totalShots = hits + misses;
     const currentAccuracy = totalShots > 0 ? (hits / totalShots) * 100 : 0;
 
-    // Update stats with calculated accuracy
     setCurrentStats((prev) => ({
       ...prev,
       accuracy: Number(currentAccuracy.toFixed(2)),
@@ -62,10 +61,8 @@ export const handlePlayerAttack = (
       "destroyer",
     ];
 
-    // Get current sunk ships state
-    const currentSunkShips = sunkShips; // Assuming this function exists
+    const currentSunkShips = sunkShips;
 
-    // Check which ships are sunk in the new board state
     const newSunkShips = shipTypes.reduce(
       (acc, shipType) => {
         const shipCells = newBoardData
@@ -79,12 +76,10 @@ export const handlePlayerAttack = (
       {} as Record<ShipType, boolean>,
     );
 
-    // Find newly sunk ships
     const newlySunk = shipTypes.filter(
       (shipType) => newSunkShips[shipType] && !currentSunkShips[shipType],
     );
 
-    // Update state if any ships were newly sunk
     if (newlySunk.length > 0) {
       setSunkShips((prev) => ({
         ...prev,

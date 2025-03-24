@@ -9,7 +9,7 @@ interface ResponseType {
   currentEvent: GameEventMessage;
   activeBoard: "player" | "bot";
   gameStarted: boolean;
-  sunkShips: Record<ShipType, boolean>; // Add this
+  sunkShips: Record<ShipType, boolean>;
 }
 
 const PlayerResponse = ({
@@ -60,7 +60,6 @@ const RecipientResponse = ({
 }: ResponseType) => {
   const showPrologue = !gameStarted;
 
-  // Announce sunk ships
   useEffect(() => {
     const shipNames: Record<ShipType, string> = {
       carrier: "Carrier",

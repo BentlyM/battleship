@@ -111,7 +111,6 @@ export const BoardStack = () => {
       destroyer: 2,
     };
 
-    // Check if all ships are sunk
     const allShipsSunk = shipTypes.every((shipType) => {
       const shipSize = shipSizes[shipType];
       const hitCount = boardData
@@ -122,6 +121,13 @@ export const BoardStack = () => {
 
     if(allShipsSunk){
       setGameStarted(false);
+      setCurrentStats({
+        accuracy: 0,
+        sunkShips: 0,
+        shots: 0,
+        time: "",
+        gameOutcome: undefined,
+      })
     }
 
     return allShipsSunk;

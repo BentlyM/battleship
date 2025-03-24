@@ -385,7 +385,6 @@ const Board: React.FC<BoardProps> = ({ board }) => {
                   </th>
                   {row.map(
                     (cell: BoardType[number][number], columnIndex: number) => {
-                      // Calculate highlight area
                       const isHighlighted =
                         draggedShip &&
                         ((draggedShip.orientation === "horizontal" &&

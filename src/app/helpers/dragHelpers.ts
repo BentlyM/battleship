@@ -55,11 +55,9 @@ export const handleDragOver = (
   const cellSize = 32;
   const borderSpacing = 3;
 
-  // Snap to grid calculation
   const x = Math.floor(mouseX / (cellSize + borderSpacing)) - 1;
   const y = Math.floor(mouseY / (cellSize + borderSpacing)) - 1;
 
-  // Adjust position based on orientation and size to keep highlight centered
   const adjustedX =
     draggedShip.orientation === "horizontal"
       ? Math.max(0, Math.min(x, boardData.length - draggedShip.size))
