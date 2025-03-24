@@ -1,5 +1,3 @@
-// schema.prisma
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -10,21 +8,21 @@ generator client {
 }
 
 model User {
-  id             Int       @id @default(autoincrement())
-  username       String    @unique
-  email          String    @unique
+  id             Int             @id @default(autoincrement())
+  username       String          @unique
+  email          String          @unique
   passwordHash   String
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  games          Game[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  gamesAsPlayer1 Game[]          @relation("Player1Games")
+  gamesAsPlayer2 Game[]          @relation("Player2Games")
   statistics     UserStatistics?
   achievements   Achievement[]
-  leaderboard     LeaderboardEntry[]
+  boards         Board[]
+
+  LeaderboardEntry LeaderboardEntry[]
 
   Move Move[]
-
-  player1Games Game[] @relation("Player1Games")
-  player2Games Game[] @relation("Player2Games")
 }
 
 model Game {
@@ -32,51 +30,67 @@ model Game {
   player1Id      Int
   player2Id      Int
   winnerId       Int?
+  currentTurn    Int       // 1 = player1, 2 = player2
+  status         String    // "waiting", "active", "completed"
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
   player1        User      @relation("Player1Games", fields: [player1Id], references: [id])
   player2        User      @relation("Player2Games", fields: [player2Id], references: [id])
+  boards         Board[]
   moves          Move[]
+}
 
-  User User[]
+model Board {
+  id             Int       @id @default(autoincrement())
+  userId         Int
+  gameId         Int
+  ships          Json      // JSON array of ship positions/orientations
+  hits           String[]  // Array of hit positions (e.g., ["A1", "B2"])
+  misses         String[]  // Array of miss positions
+  user           User      @relation(fields: [userId], references: [id])
+  game           Game      @relation(fields: [gameId], references: [id])
 }
 
 model Move {
   id             Int       @id @default(autoincrement())
   gameId         Int
   playerId       Int
-  position       String    // e.g., "A1", "B2"
-  hit            Boolean
+  target         String    // Coordinate (e.g., "A1")
+  result         String    // "hit", "miss", "sunk"
+  shipType       String?   // Type of ship hit (e.g., "carrier")
   createdAt      DateTime  @default(now())
   game           Game      @relation(fields: [gameId], references: [id])
   player         User      @relation(fields: [playerId], references: [id])
 }
 
 model UserStatistics {
-  id             Int       @id @default(autoincrement())
-  userId         Int       @unique
-  totalGames     Int       @default(0)
-  wins           Int       @default(0)
-  losses         Int       @default(0)
-  draws          Int       @default(0)
-  averageDuration Float     @default(0) // Average game duration in seconds
-  user           User      @relation(fields: [userId], references: [id])
+  id             Int     @id @default(autoincrement())
+  userId         Int     @unique
+  totalGames     Int     @default(0)
+  wins           Int     @default(0)
+  losses         Int     @default(0)
+  totalShots     Int     @default(0)
+  totalHits      Int     @default(0)
+  shipsSunk      Int     @default(0)
+  accuracy       Float   @default(0)
+  user           User    @relation(fields: [userId], references: [id])
 }
 
 model Achievement {
   id             Int       @id @default(autoincrement())
   userId         Int
-  title          String
+  title          String    // e.g., "First Blood", "Fleet Destroyer"
   description    String
-  createdAt      DateTime  @default(now())
+  unlockedAt     DateTime  @default(now())
   user           User      @relation(fields: [userId], references: [id])
 }
 
 model LeaderboardEntry {
   id             Int       @id @default(autoincrement())
   userId         Int
-  rank           Int
-  score          Int       // Could be based on wins, points, etc.
-  createdAt      DateTime  @default(now())
+  winRate        Float     // Wins/total games
+  totalWins      Int
+  totalSunk      Int
+  averageAccuracy Float
   user           User      @relation(fields: [userId], references: [id])
 }
