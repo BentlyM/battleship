@@ -1,0 +1,44 @@
+features: 
+  - name: "Bot Board"
+    description: "The bot board is a grid that the player can find the bot's ships on."
+    status: "in progress"
+    dueDate: "before the end of this week"
+    priority: "high"
+    notes: "The bot board should randomly place the ships on the board before the first turn. (completed)",
+    " The bot board should have the capability to navigate the players board (completed)",
+    "The bot board should have the capability to attack the player's board (completed)",
+  - name: "Player Board"
+    description: "The player board is a grid that the player can see their ships on."
+    status: "in progress"
+    dueDate: "before the end of this week"
+    priority: "high"
+    notes: "The player board should have a button to auto-place the ship on the board. (completed)",
+          "The player board should have a button to remove the ship from the board. (completed)",
+          "The player board should have a button to rotate the ship. (completed)",
+          "The player board should have the capability to drag and drop the ship to the desired location. (completed)",
+          " the player board ships should be visible to the player (completed)",
+          "The player board should have the capability to attack the bot's board (completed),
+  - name: "Game Logic"
+    description: "The game logic is the logic that the game follows."
+    status: "in progress"
+    dueDate: "before the end of this week"
+    priority: "high"
+    notes: "The game logic should have the capability to check if the player has won the game. (in progress)",
+    "The game logic should have the capability to check if the bot has won the game. (in progress)",
+    "The game logic should have the capability to allow the user to decided who makes the first move. (implemented "improve")",
+    "the game logic should have the capability to check previous matches (in progress)",
+    "the game logic should have the capability to save the player's progress (in progress)",
+  - name: "Game UI"
+    description: "The game UI is the UI of the game."
+    status: "in progress"
+    dueDate: "before the end of this week"
+    priority: "high"
+    note: "the ship inner circle should turn red when attacked"
+          "the grid should turn a inner circle blue when missed"
+          "the grid color should be light blue by default when untouched"
+bugs:
+  - name: "Hit to Miss",
+    note: "this is a bug where it finds it final area checks if its a hit or miss and if its a hit it'll attack but still navigate to another board to hit again due to the current game logic it should just skip the hit board" (fixed)
+  - name: "Quick Double Attack",
+    note: "this is a bug where the player can attack another quick between the transition of boards"
+  

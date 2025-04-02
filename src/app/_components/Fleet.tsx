@@ -48,10 +48,10 @@ const Fleet = (props: FleetProps) => {
   } = props;
 
   useEffect(() => {
-    handleRemoveShips();
+    if (isGameOver) handleRemoveShips();
   }, [isGameOver])
 
-  const handleStartGame = () => {
+  const handleStartGame = async () => {
     if (isGameOver) setIsGameOver(false);
     if (Object.values(shipCount).every((ship) => ship.count === 0)) {
       setGameStarted(true);

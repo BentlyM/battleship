@@ -11,6 +11,7 @@ import type {
 import ChatBox from "./ChatBox";
 import DetailsBox from "./DetailsBox";
 import { gameEventMessages, prologueMessages } from "../helpers/chatHelpers";
+import { login } from "./_actions/login";
 
 export const BOARD_SIZE = 10;
 export const createBoard = (): BoardType =>
@@ -119,7 +120,7 @@ export const BoardStack = () => {
       return hitCount === shipSize;
     });
 
-    if(allShipsSunk){
+    if (allShipsSunk) {
       setGameStarted(false);
       setCurrentStats({
         accuracy: 0,
@@ -127,7 +128,7 @@ export const BoardStack = () => {
         shots: 0,
         time: "",
         gameOutcome: undefined,
-      })
+      });
     }
 
     return allShipsSunk;
@@ -201,6 +202,13 @@ export const BoardStack = () => {
         </div>
       </div>
       <div className="flex flex-col gap-4">
+        <div>
+          <form action={login} className="flex flex-col gap-4">
+            <input type="email" name="email" />
+            <input type="password" name="password" />
+            <button type="submit">Login</button>
+          </form>
+        </div>
         <ChatBox
           gameStarted={gameStarted}
           activeBoard={activeBoard}
