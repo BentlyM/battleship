@@ -20,7 +20,7 @@ const PlayerResponse = ({
   isActive: boolean;
 }) => (
   <Card
-    className={`flex items-center gap-4 p-4 ${isActive ? "border-primary" : ""}`}
+    className={`flex items-center gap-4 p-4 ${isActive ? "border-primary dark:border-[3px]" : ""} dark:bg-[#080808] dark:border-gray-600 dark:text-white`}
   >
     <Avatar>
       <AvatarImage src="/idle.jpg" className="w-12 rounded" />
@@ -40,7 +40,7 @@ const OpponentResponse = ({
   isActive: boolean;
 }) => (
   <Card
-    className={`flex items-center gap-4 p-4 ${isActive ? "border-primary" : ""}`}
+    className={`flex items-center gap-4 p-4 ${isActive ? "border-primary dark:border-white border-[3px]" : ""} dark:bg-[#080808] dark:border-gray-600 dark:text-white`}
   >
     <div className="flex-1">
       <p className="text-right text-sm">{message}</p>

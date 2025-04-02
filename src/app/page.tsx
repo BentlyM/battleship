@@ -4,7 +4,7 @@ import { BoardStack } from "./_components/BoardStack";
 export default async function Home() {  
   return (
     <HydrateClient>
-      <main className="flex items-center justify-center h-screen w-screen bg-[#f7f7f7]">
+      <main className="flex items-center justify-center h-screen w-screen dark:bg-[#080808]">
         <BoardStack />
       </main>
     </HydrateClient>

@@ -320,7 +320,7 @@ const Board: React.FC<BoardProps> = ({ board }) => {
       onDragStart={(e) => handleDragStart(e, setDraggedShip)}
       onDragEnd={() => handleDragEnd(setDraggedShip)}
     >
-      <h3 className="mb-6 text-center text-xl font-semibold opacity-0">
+      <h3 className="mb-6 text-center text-xl font-semibold opacity-0 dark:text-white">
         {id === "player-board" ? "Player Board" : "Bot Board"}
       </h3>
       <div className="aspect-square w-full">
@@ -370,7 +370,7 @@ const Board: React.FC<BoardProps> = ({ board }) => {
                 {columnHeaders.map((header, index) => (
                   <th
                     key={index}
-                    className={`h-8 w-8 text-center text-sm sm:h-10 sm:w-10 sm:text-base ${isActive ? "text-black" : "text-transparent"} opacity-0 transition-colors duration-300`}
+                    className={`h-8 w-8 text-center text-sm sm:h-10 sm:w-10 sm:text-base ${isActive ? "dark:text-white text-black" : "text-transparent"} opacity-0 transition-colors duration-300`}
                   >
                     {header}
                   </th>
@@ -379,7 +379,7 @@ const Board: React.FC<BoardProps> = ({ board }) => {
               {boardData.map((row: BoardType[number], rowIndex: number) => (
                 <tr key={rowIndex}>
                   <th
-                    className={`h-8 w-8 text-center text-sm sm:h-10 sm:w-10 sm:text-base ${isActive ? "text-black" : "text-transparent"} opacity-0 transition-colors duration-300`}
+                    className={`h-8 w-8 text-center text-sm sm:h-10 sm:w-10 sm:text-base ${isActive ? "dark:text-white text-black" : "text-transparent"} opacity-0 transition-colors duration-300`}
                   >
                     {rowIndex + 1}
                   </th>
@@ -409,8 +409,8 @@ const Board: React.FC<BoardProps> = ({ board }) => {
 
                       const cellClass =
                         id === "player-board"
-                          ? "bg-board-cell"
-                          : "cursor-pointer bg-gray-200 hover:bg-board-cell-hover";
+                          ? "bg-board-cell dark:bg-gray-700"
+                          : "cursor-pointer bg-gray-200 hover:bg-board-cell-hover dark:bg-gray-700 dark:hover:bg-board-cell-hover";
 
                       return (
                         <motion.td
@@ -421,17 +421,17 @@ const Board: React.FC<BoardProps> = ({ board }) => {
                           className={`h-8 w-8 rounded-sm sm:h-10 sm:w-10 ${cellClass} ${
                             isHighlighted
                               ? isValid
-                                ? "bg-green-200"
-                                : "bg-red-200"
+                                ? "bg-green-200 dark:bg-green-700"
+                                : "bg-red-200 dark:bg-red-700"
                               : ""
                           } relative transition-colors duration-200`}
                         >
                           <div className="flex items-center justify-center">
                             {cell === "miss" &&
                               (id !== "bot-board" ? (
-                                <div className="size-4 rounded-[50px] bg-sky-700 opacity-30"></div>
+                                <div className="size-4 rounded-[50px] bg-sky-700 opacity-30 dark:bg-sky-600"></div>
                               ) : (
-                                <div className="size-4 rounded-[50px] bg-gray-700 opacity-30"></div>
+                                <div className="size-4 rounded-[50px] bg-gray-700 opacity-30 dark:bg-gray-400"></div>
                               ))}
                             {cell && renderShipPart(cell)}
                             {cell.split("-").includes("hit") &&

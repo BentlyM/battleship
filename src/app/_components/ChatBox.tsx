@@ -138,10 +138,10 @@ const ChatBox = ({
             variant={isBotMode ? "outline" : "default"}
             onClick={() => !gameStarted && setIsBotMode(false)}
             disabled={true}
-            className="w-full"
+            className="w-full dark:bg-[#080808] dark:border-gray-600 border dark:text-white"
             aria-label="coming soon"
           >
-            <Users className="mr-2 h-4 w-4" />
+            <Users className="mr-2 h-4 w-4 dark:text-white" />
             vs Player
           </Button>
           <Button
@@ -161,10 +161,10 @@ const ChatBox = ({
             onValueChange={handleFirstMoveChange}
             disabled={gameStarted}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full dark:bg-[#080808] dark:border-gray-600 dark:text-white">
               <SelectValue placeholder="First Move" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="dark:bg-[#080808] dark:border-gray-600 dark:text-white">
               <SelectItem value="random">Random</SelectItem>
               <SelectItem value="bot">
                 {isBotMode ? "Player First" : "Player 1"}
@@ -181,10 +181,10 @@ const ChatBox = ({
               onValueChange={setDifficulty}
               disabled={gameStarted}
             >
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="w-full dark:bg-[#080808] dark:border-gray-600 dark:text-white">
                 <SelectValue placeholder="Difficulty" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="dark:bg-[#080808] dark:border-gray-600 dark:text-white">
                 <SelectItem value="easy">Easy (brute force)</SelectItem>
                 <SelectItem value="medium">
                   Medium (simply knows where some are)

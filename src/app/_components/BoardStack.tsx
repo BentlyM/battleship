@@ -135,7 +135,7 @@ export const BoardStack = () => {
   };
 
   return (
-    <div className="flex h-full w-full items-center justify-evenly">
+    <div className="flex h-full w-full items-center justify-evenly dark:bg-[#080808]">
       <DetailsBox
         props={{
           gameStarted,
@@ -203,11 +203,6 @@ export const BoardStack = () => {
       </div>
       <div className="flex flex-col gap-4">
         <div>
-          <form action={login} className="flex flex-col gap-4">
-            <input type="email" name="email" />
-            <input type="password" name="password" />
-            <button type="submit">Login</button>
-          </form>
         </div>
         <ChatBox
           gameStarted={gameStarted}

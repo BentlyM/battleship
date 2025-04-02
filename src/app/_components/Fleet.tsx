@@ -84,14 +84,14 @@ const Fleet = (props: FleetProps) => {
 
   return (
     <div
-      className={`w-full rounded-lg border-2 border-gray-200 p-4 ${gameStarted && "mb-[176px]"}`}
+      className={`w-full rounded-lg border-2 border-gray-200 dark:border-gray-600 p-4 ${gameStarted && "mb-[176px]"}`}
     >
       <div className="flex flex-row justify-center gap-4">
-        <h4 className="mb-4 text-lg font-semibold">Fleet</h4>
+        <h4 className="mb-4 text-lg font-semibold dark:text-white">Fleet</h4>
         {!gameStarted && (
           <Button
             variant="outline"
-            className="h-8 rounded-full px-3 text-sm"
+            className="h-8 rounded-full px-3 text-sm dark:bg-[#080808] dark:border-gray-600 dark:text-white"
             onClick={() =>
               handleAutoPlace(
                 boardData,
@@ -109,7 +109,7 @@ const Fleet = (props: FleetProps) => {
         {!gameStarted && (
           <Button
             variant="outline"
-            className="h-8 rounded-full px-3 text-sm"
+            className="h-8 rounded-full px-3 text-sm dark:bg-[#080808] dark:border-gray-600 dark:text-white"
             onClick={handleRemoveShips}
             disabled={!isActive || gameStarted}
           >
@@ -118,7 +118,7 @@ const Fleet = (props: FleetProps) => {
         )}
         <Button
           variant="outline"
-          className="h-8 rounded-full bg-green-500 px-3 text-sm text-white hover:bg-green-600"
+          className="h-8 rounded-full bg-green-500 px-3 text-sm text-white hover:bg-green-600 border-none"
           onClick={handleStartGame}
           disabled={gameStarted}
         >

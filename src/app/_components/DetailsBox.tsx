@@ -45,7 +45,7 @@ const DetailsBox = ({ props }: { props: StatsProps }) => {
     let interval: NodeJS.Timeout | null = null;
 
     if (gameStarted) {
-      setSelectedView("current");
+      if (selectedView !== "current") setSelectedView("current");
       const start = performance.now();
       setStartTime(start);
 
@@ -83,36 +83,38 @@ const DetailsBox = ({ props }: { props: StatsProps }) => {
             value as "current" | "overall" | "previous" | "leaderboard",
           )
         }
-        className="flex gap-1 overflow-x-auto"
+        className="flex gap-1 overflow-x-auto dark:text-white"
       >
         <RadioGroup.Item value="current" asChild>
-          <Button variant={selectedView === "current" ? "default" : "outline"}>
+            <Button variant={selectedView === "current" ? "default" : "outline"} className="dark:bg-[#080808] dark:border-gray-600" onClick={() => setSelectedView("current")}>
             Current
           </Button>
         </RadioGroup.Item>
         <RadioGroup.Item value="overall" asChild>
-          <Button variant={selectedView === "overall" ? "default" : "outline"}>
+          <Button variant={selectedView === "overall" ? "default" : "outline"} className="dark:bg-[#080808] dark:border-gray-600" onClick={() => setSelectedView("overall")}>
             Overall
           </Button>
         </RadioGroup.Item>
         <RadioGroup.Item value="previous" asChild>
-          <Button variant={selectedView === "previous" ? "default" : "outline"}>
+          <Button variant={selectedView === "previous" ? "default" : "outline"} className="dark:bg-[#080808] dark:border-gray-600" onClick={() => setSelectedView("previous")}>
             Previous
           </Button>
         </RadioGroup.Item>
         <RadioGroup.Item value="leaderboard" asChild>
           <Button
             variant={selectedView === "leaderboard" ? "default" : "outline"}
+            className="dark:bg-[#080808] dark:border-gray-600"
+            onClick={() => setSelectedView("leaderboard")}
           >
             Leaderboard
           </Button>
         </RadioGroup.Item>
       </RadioGroup.Root>
 
-      <Card className="h-[50vh] w-full overflow-y-auto p-4 shadow">
+      <Card className="h-[50vh] w-full overflow-y-auto p-4 shadow dark:bg-[#080808] dark:border-gray-600 border">
         {selectedView === "current" && (
           <div className="space-y-3">
-            <h3 className="text-lg font-bold">Current Match</h3>
+            <h3 className="text-lg font-bold dark:text-white">Current Match</h3>
             <StatItem label="Accuracy" value={currentStats.accuracy} />
             <StatItem label="Ships Sunk" value={currentStats.sunkShips} />
             <StatItem label="Shots Fired" value={currentStats.shots} />
@@ -131,7 +133,7 @@ const DetailsBox = ({ props }: { props: StatsProps }) => {
 
         {selectedView === "overall" && (
           <div className="space-y-3">
-            <h3 className="text-lg font-bold">Career Stats</h3>
+            <h3 className="text-lg font-bold dark:text-white">Career Stats</h3>
             <StatItem label="Accuracy" value={mockData.overall.accuracy} />
             <StatItem label="Total Games" value={mockData.overall.totalGames} />
             <StatItem label="Ships Sunk" value={mockData.overall.shipsSunk} />
@@ -145,11 +147,11 @@ const DetailsBox = ({ props }: { props: StatsProps }) => {
 
         {selectedView === "previous" && (
           <div className="space-y-4">
-            <h3 className="text-lg font-bold">Last 3 Matches</h3>
+            <h3 className="text-lg font-bold dark:text-white">Last 3 Matches</h3>
             {mockData.previousMatches.map((match, i) => (
-              <div key={i} className="rounded-lg bg-muted p-3">
+              <div key={i} className="rounded-lg bg-muted p-3 dark:bg-[#080808] dark:border-gray-600 dark:border">
                 <div className="flex justify-between">
-                  <span className="font-medium">{match.date}</span>
+                  <span className="font-medium dark:text-white">{match.date}</span>
                   <span
                     className={
                       match.result === "Win" ? "text-green-500" : "text-red-500"
@@ -170,19 +172,19 @@ const DetailsBox = ({ props }: { props: StatsProps }) => {
 
         {selectedView === "leaderboard" && (
           <div className="space-y-3">
-            <h3 className="text-lg font-bold">Top Commanders</h3>
+            <h3 className="text-lg font-bold dark:text-white">Top Commanders</h3>
             {mockData.leaderboard.map((entry) => (
               <div
                 key={entry.rank}
-                className="flex items-center justify-between rounded-lg bg-muted p-2"
+                className="flex items-center justify-between rounded-lg bg-muted p-2 dark:bg-[#080808] dark:border-gray-600 dark:border"
               >
                 <div className="flex items-center gap-2">
-                  <span className="font-medium">#{entry.rank}</span>
-                  <span>{entry.name}</span>
+                  <span className="font-medium dark:text-white">#{entry.rank}</span>
+                  <span className="dark:text-white">{entry.name}</span>
                 </div>
                 <div className="text-right">
-                  <div>{entry.wins} Wins</div>
-                  <div className="text-sm">{entry.accuracy} Accuracy</div>
+                  <div className="dark:text-white">{entry.wins} Wins</div>
+                  <div className="text-sm dark:text-white">{entry.accuracy} Accuracy</div>
                 </div>
               </div>
             ))}
@@ -203,10 +205,10 @@ const StatItem = ({
   small?: boolean;
 }) => (
   <div className={`${small ? "space-y-0" : "space-y-1"}`}>
-    <div className={`text-muted-foreground ${small ? "text-xs" : "text-sm"}`}>
+    <div className={`dark:text-muted-foreground ${small ? "text-xs" : "text-sm"}`}>
       {label}
     </div>
-    <div className={`font-medium ${small ? "text-base" : "text-xl"}`}>
+    <div className={`font-medium dark:text-white ${small ? "text-base" : "text-xl"}`}>
       {value}
     </div>
   </div>
