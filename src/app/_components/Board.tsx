@@ -316,15 +316,15 @@ const Board: React.FC<BoardProps> = ({ board }) => {
 
   return (
     <div
-      className="mx-auto flex w-full max-w-[600px] flex-col items-center p-4"
+      className="flex w-full flex-col items-center p-1 sm:p-4"
       onDragStart={(e) => handleDragStart(e, setDraggedShip)}
       onDragEnd={() => handleDragEnd(setDraggedShip)}
     >
       <h3 className="mb-6 text-center text-xl font-semibold opacity-0 dark:text-white">
         {id === "player-board" ? "Player Board" : "Bot Board"}
       </h3>
-      <div className="aspect-square w-full">
-        <div className="relative overflow-hidden" ref={tableContainerRef}>
+      <div className="w-full md:aspect-square">
+        <div className="relative" ref={tableContainerRef}>
           {id === "player-board" && botTargeting && (
             <TargetPointer x={targetTransform.x} y={targetTransform.y} />
           )}
@@ -475,7 +475,7 @@ const Board: React.FC<BoardProps> = ({ board }) => {
         </div>
       </div>
 
-      {id === "player-board" && (
+      {/* {id === "player-board" && (
         <Fleet
           placedShips={placedShips}
           setGameStarted={setGameStarted}
@@ -490,7 +490,7 @@ const Board: React.FC<BoardProps> = ({ board }) => {
           setIsGameOver={setIsGameOver}
           isGameOver={isGameOver}
         />
-      )}
+      )} */}
     </div>
   );
 };

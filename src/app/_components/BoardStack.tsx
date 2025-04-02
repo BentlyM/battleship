@@ -135,16 +135,16 @@ export const BoardStack = () => {
   };
 
   return (
-    <div className="flex h-full w-full items-center justify-evenly dark:bg-[#080808]">
-      <DetailsBox
+    <div className="flex items-center justify-evenly dark:bg-[#080808]">
+      {/* <DetailsBox
         props={{
           gameStarted,
           isGameOver,
           currentStats,
           setCurrentStats,
         }}
-      />
-      <div className="relative h-[600px] w-[545px]">
+      /> */}
+      <div className="relative w-[90vw] max-w-[388px] sm:max-w-[545px]">
         {/* Player Board */}
         <div
           className={`absolute left-1/2 top-1/2 w-full -translate-x-1/2 -translate-y-1/2 transition-all duration-500 ease-in-out ${
@@ -201,17 +201,17 @@ export const BoardStack = () => {
           />
         </div>
       </div>
-      <div className="flex flex-col gap-4">
+      {/* <div className="flex flex-col gap-4">
         <div>
         </div>
-        <ChatBox
+         <ChatBox
           gameStarted={gameStarted}
           activeBoard={activeBoard}
           setActiveBoard={setActiveBoard}
           currentEvent={currentGameEvent!}
           sunkShips={sunkShips}
-        />
-      </div>
+        /> 
+      </div> */}
     </div>
   );
 };

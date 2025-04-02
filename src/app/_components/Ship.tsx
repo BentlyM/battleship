@@ -127,7 +127,7 @@ const Ship: React.FC<ShipProps> = ({
           {/* Ship tail */}
           <ShipTail orientation={orientation as "horizontal" | "vertical"} />
         </div>
-        <span className="ml-2 select-none text-sm capitalize text-gray-700">{`(${count}) ${type} ship`}</span>
+        <span className="select-none text-sm capitalize text-gray-700">{`(${count}) `}<span className="ml-1">{type} ship</span></span>
       </div>
     </motion.div>
   );

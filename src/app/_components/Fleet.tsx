@@ -86,7 +86,7 @@ const Fleet = (props: FleetProps) => {
     <div
       className={`w-full rounded-lg border-2 border-gray-200 dark:border-gray-600 p-4 ${gameStarted && "mb-[176px]"}`}
     >
-      <div className="flex flex-row justify-center gap-4">
+      <div className="flex flex-row justify-between overflow-x-auto">
         <h4 className="mb-4 text-lg font-semibold dark:text-white">Fleet</h4>
         {!gameStarted && (
           <Button
@@ -135,7 +135,7 @@ const Fleet = (props: FleetProps) => {
         )}
       </div>
       <div
-        className={`flex flex-wrap justify-center gap-4 overflow-hidden transition-all duration-300 ${gameStarted ? "h-0 opacity-0" : "relative h-[176px] rounded opacity-100"}`}
+        className={`flex flex-wrap justify-center gap-4 overflow-hidden transition-all duration-300 ${gameStarted ? "h-0 opacity-0" : "relative h-0 md:h-[176px] rounded opacity-100"}`}
       >
         <Image
           src="/water.gif"
