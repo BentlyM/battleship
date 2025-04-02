@@ -84,10 +84,10 @@ const Fleet = (props: FleetProps) => {
 
   return (
     <div
-      className={`w-full rounded-lg border-2 border-gray-200 dark:border-gray-600 p-4 ${gameStarted && "mb-[176px]"}`}
+      className={`rounded-lg md:border-2 border-gray-200 dark:border-gray-600 p-4 ${gameStarted && "md:mb-[176px]"}`}
     >
       <div className="flex flex-row justify-between overflow-x-auto">
-        <h4 className="mb-4 text-lg font-semibold dark:text-white">Fleet</h4>
+        <h4 className="hidden md:block mb-4 text-lg font-semibold dark:text-white">Fleet</h4>
         {!gameStarted && (
           <Button
             variant="outline"

@@ -323,7 +323,7 @@ const Board: React.FC<BoardProps> = ({ board }) => {
       <h3 className="mb-6 text-center text-xl font-semibold opacity-0 dark:text-white">
         {id === "player-board" ? "Player Board" : "Bot Board"}
       </h3>
-      <div className="w-full md:aspect-square">
+      <div className="w-full">
         <div className="relative" ref={tableContainerRef}>
           {id === "player-board" && botTargeting && (
             <TargetPointer x={targetTransform.x} y={targetTransform.y} />
@@ -366,7 +366,7 @@ const Board: React.FC<BoardProps> = ({ board }) => {
           >
             <tbody className="board" id={id}>
               <tr>
-                <th className="h-8 w-8 sm:h-10 sm:w-10"></th>
+                <th className="h-4 w-4 sm:h-10 sm:w-10"></th>
                 {columnHeaders.map((header, index) => (
                   <th
                     key={index}
@@ -475,7 +475,7 @@ const Board: React.FC<BoardProps> = ({ board }) => {
         </div>
       </div>
 
-      {/* {id === "player-board" && (
+      {id === "player-board" && (
         <Fleet
           placedShips={placedShips}
           setGameStarted={setGameStarted}
@@ -490,7 +490,7 @@ const Board: React.FC<BoardProps> = ({ board }) => {
           setIsGameOver={setIsGameOver}
           isGameOver={isGameOver}
         />
-      )} */}
+      )}
     </div>
   );
 };
