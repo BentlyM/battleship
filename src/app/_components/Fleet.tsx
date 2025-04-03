@@ -49,7 +49,7 @@ const Fleet = (props: FleetProps) => {
 
   useEffect(() => {
     if (isGameOver) handleRemoveShips();
-  }, [isGameOver])
+  }, [isGameOver]);
 
   const handleStartGame = async () => {
     if (isGameOver) setIsGameOver(false);
@@ -84,14 +84,18 @@ const Fleet = (props: FleetProps) => {
 
   return (
     <div
-      className={`rounded-lg md:border-2 border-gray-200 dark:border-gray-600 p-4 ${gameStarted && "md:mb-[176px]"}`}
+      className={`rounded-lg border-gray-200 p-4 ${!gameStarted && "md:border-2"} dark:border-gray-600 ${gameStarted && "md:mb-[176px]"}`}
     >
-      <div className="flex flex-row justify-between overflow-x-auto">
-        <h4 className="hidden md:block mb-4 text-lg font-semibold dark:text-white">Fleet</h4>
+      <div className="flex flex-row justify-evenly flex-wrap gap-2 overflow-x-auto">
+        {!gameStarted && (
+            <h4 className="mb-4 hidden text-lg font-semibold md:block dark:text-white">
+              Fleet
+            </h4>
+          )}
         {!gameStarted && (
           <Button
             variant="outline"
-            className="h-8 rounded-full px-3 text-sm dark:bg-[#080808] dark:border-gray-600 dark:text-white"
+            className="h-8 rounded-full px-3 text-sm dark:border-gray-600 dark:bg-[#080808] dark:text-white"
             onClick={() =>
               handleAutoPlace(
                 boardData,
@@ -109,7 +113,7 @@ const Fleet = (props: FleetProps) => {
         {!gameStarted && (
           <Button
             variant="outline"
-            className="h-8 rounded-full px-3 text-sm dark:bg-[#080808] dark:border-gray-600 dark:text-white"
+            className="h-8 rounded-full px-3 text-sm dark:border-gray-600 dark:bg-[#080808] dark:text-white"
             onClick={handleRemoveShips}
             disabled={!isActive || gameStarted}
           >
@@ -118,7 +122,7 @@ const Fleet = (props: FleetProps) => {
         )}
         <Button
           variant="outline"
-          className="h-8 rounded-full bg-green-500 px-3 text-sm text-white hover:bg-green-600 border-none"
+          className="h-8 rounded-full border-none bg-green-500 px-3 text-sm text-white hover:bg-green-600"
           onClick={handleStartGame}
           disabled={gameStarted}
         >
@@ -135,7 +139,7 @@ const Fleet = (props: FleetProps) => {
         )}
       </div>
       <div
-        className={`flex flex-wrap justify-center gap-4 overflow-hidden transition-all duration-300 ${gameStarted ? "h-0 opacity-0" : "relative h-0 md:h-[176px] rounded opacity-100"}`}
+        className={`flex flex-wrap justify-center gap-4 overflow-hidden transition-all duration-300 ${gameStarted ? "h-0 opacity-0" : "relative h-0 rounded opacity-100 md:h-[176px]"}`}
       >
         <Image
           src="/water.gif"

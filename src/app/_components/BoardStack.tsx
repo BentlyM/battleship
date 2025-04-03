@@ -135,7 +135,7 @@ export const BoardStack = () => {
   };
 
   return (
-    <div className="relative bottom-[15%] sm:bottom-0 flex justify-evenly dark:bg-[#080808]">
+    <div className="relative bottom-[15%] flex justify-evenly sm:bottom-0 dark:bg-[#080808]">
       {/* <DetailsBox
         props={{
           gameStarted,
@@ -147,10 +147,10 @@ export const BoardStack = () => {
       <div className="relative w-[90vw] max-w-[388px] sm:max-w-[545px]">
         {/* Player Board */}
         <div
-          className={`absolute left-1/2 transition-all duration-500 ease-in-out ${
+          className={`absolute left-1/2 transition-all duration-500 ease-in-out ${activeBoard === "player" ? "visible" : "invisible md:visible"} ${
             activeBoard === "player"
-              ? "z-30 translate-x-[-50%] translate-y-[-50%]"
-              : "z-20 translate-x-[-45%] translate-y-[-47%] opacity-75"
+              ? "z-30 translate-x-[-50%] translate-y-[-50%] md:translate-x-[-50%] md:translate-y-[-50%]"
+              : "z-20 translate-x-[100%] translate-y-[-70%] opacity-75 md:translate-x-[-45%] md:translate-y-[-47%]"
           }`}
         >
           <Board
@@ -175,10 +175,10 @@ export const BoardStack = () => {
 
         {/* Bot Board */}
         <div
-          className={`absolute left-1/2 transition-all duration-500 ease-in-out ${
+          className={`absolute left-1/2 transition-all duration-500 ease-in-out ${activeBoard === "bot" ? "visible" : "invisible md:visible"} ${
             activeBoard === "bot"
-              ? "z-30 translate-x-[-50%] translate-y-[-72%]"
-              : "z-20 translate-x-[-45%] translate-y-[-67%] opacity-75"
+              ? "z-30 translate-x-[-50%] translate-y-[-58%] md:translate-x-[-50%] md:translate-y-[-72%]"
+              : "z-20 translate-x-[-200%] translate-y-[-70%] opacity-75 md:translate-x-[-45%] md:translate-y-[-67%]"
           }`}
         >
           <Board

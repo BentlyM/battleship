@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import ShipHead, { AttackedShipHead } from "./ship/ShipHead";
 import ShipBody, { AttackedShipBody } from "./ship/ShipBody";
@@ -87,6 +87,12 @@ const Board: React.FC<BoardProps> = ({ board }) => {
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const [targetTransform, setTargetTransform] = React.useState({ x: 0, y: 0 });
   const [reTarget, setReTarget] = React.useState<boolean>(false);
+  const [initialScreenIsDesktop, setInitialScreenIsDesktop] = useState(
+    // Initialize with correct value using a function
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(min-width: 768px)").matches,
+  );
   const isActive =
     (id === "player-board" && activeBoard === "player") ||
     (id === "bot-board" && activeBoard === "bot");
@@ -279,25 +285,30 @@ const Board: React.FC<BoardProps> = ({ board }) => {
   const isInView = useInView(tableRef, { once: true });
 
   useEffect(() => {
-    if (isInView && tableRef.current) {
+    const mediaQuery = window.matchMedia("(min-width: 768px)");
+    if (!isInView || !tableRef.current) return;
+
+    // Immediately show all elements if initial load was mobile
+    if (!initialScreenIsDesktop) {
+      animate("td, th, h3", { opacity: 1 }, { duration: 0 });
+      return;
+    }
+
+    // Handle desktop animations only if initial load was desktop
+    if (mediaQuery.matches) {
       animate("h3", { opacity: 1, y: [20, 0] }, { duration: 0.5 });
 
+      // Your desktop animation logic
       animate(
         "th:not(:first-child)",
         { opacity: 1, y: [20, 0] },
-        {
-          delay: stagger(0.05),
-          duration: 0.3,
-        },
+        { delay: stagger(0.05), duration: 0.3 },
       );
 
       animate(
         "th:first-child",
         { opacity: 1, y: [20, 0] },
-        {
-          delay: stagger(0.05),
-          duration: 0.3,
-        },
+        { delay: stagger(0.05), duration: 0.3 },
       );
 
       animate(
@@ -312,7 +323,7 @@ const Board: React.FC<BoardProps> = ({ board }) => {
         },
       );
     }
-  }, [isInView]);
+  }, [isInView, initialScreenIsDesktop]);
 
   return (
     <div
@@ -320,7 +331,7 @@ const Board: React.FC<BoardProps> = ({ board }) => {
       onDragStart={(e) => handleDragStart(e, setDraggedShip)}
       onDragEnd={() => handleDragEnd(setDraggedShip)}
     >
-      <h3 className="mb-6 text-center text-xl font-semibold opacity-0 dark:text-white">
+      <h3 className="text-center text-xl font-semibold opacity-0 md:mb-6 dark:text-white">
         {id === "player-board" ? "Player Board" : "Bot Board"}
       </h3>
       <div className="w-full">
@@ -370,7 +381,7 @@ const Board: React.FC<BoardProps> = ({ board }) => {
                 {columnHeaders.map((header, index) => (
                   <th
                     key={index}
-                    className={`h-8 w-8 text-center text-sm sm:h-10 sm:w-10 sm:text-base ${isActive ? "dark:text-white text-black" : "text-transparent"} opacity-0 transition-colors duration-300`}
+                    className={`h-8 w-8 text-center text-sm sm:h-10 sm:w-10 sm:text-base ${isActive ? "text-black dark:text-white" : "text-transparent"} opacity-0 transition-colors duration-300`}
                   >
                     {header}
                   </th>
@@ -379,7 +390,7 @@ const Board: React.FC<BoardProps> = ({ board }) => {
               {boardData.map((row: BoardType[number], rowIndex: number) => (
                 <tr key={rowIndex}>
                   <th
-                    className={`h-8 w-8 text-center text-sm sm:h-10 sm:w-10 sm:text-base ${isActive ? "dark:text-white text-black" : "text-transparent"} opacity-0 transition-colors duration-300`}
+                    className={`h-8 w-8 text-center text-sm sm:h-10 sm:w-10 sm:text-base ${isActive ? "text-black dark:text-white" : "text-transparent"} opacity-0 transition-colors duration-300`}
                   >
                     {rowIndex + 1}
                   </th>
