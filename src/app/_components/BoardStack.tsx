@@ -154,8 +154,8 @@ export const BoardStack = () => {
         <div
           className={`absolute left-1/2 transition-all duration-500 ease-in-out ${activeBoard === "player" ? "visible" : "invisible md:visible"} ${
             activeBoard === "player"
-              ? "z-30 translate-x-[-50%] translate-y-[-50%] md:translate-x-[-50%] md:translate-y-[-50%]"
-              : "z-20 translate-x-[100%] translate-y-[-70%] opacity-75 md:translate-x-[-45%] md:translate-y-[-47%]"
+              ? "z-30 -translate-x-1/2 -translate-y-1/2"
+              : "z-20 -translate-y-[70%] translate-x-[100%] opacity-75 md:-translate-x-[45%] md:-translate-y-[47%]"
           }`}
         >
           <Board
@@ -183,8 +183,8 @@ export const BoardStack = () => {
         <div
           className={`absolute left-1/2 transition-all duration-500 ease-in-out ${activeBoard === "bot" ? "visible" : "invisible md:visible"} ${
             activeBoard === "bot"
-              ? "z-30 translate-x-[-50%] translate-y-[-58%] md:translate-x-[-50%] md:translate-y-[-72%]"
-              : "z-20 translate-x-[-200%] translate-y-[-70%] opacity-75 md:translate-x-[-45%] md:translate-y-[-67%]"
+              ? "z-30 -translate-x-1/2 -translate-y-[58%] md:-translate-x-1/2 md:-translate-y-[72%]"
+              : "z-20 -translate-x-[200%] -translate-y-[70%] opacity-75 md:-translate-x-[45%] md:-translate-y-[67%]"
           }`}
         >
           <Board
