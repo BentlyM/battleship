@@ -140,7 +140,7 @@ export const BoardStack = () => {
   };
 
   return (
-    <div className="relative h-full flex justify-evenly flex-col-reverse items-center lg:flex-row dark:bg-[#080808]">
+    <div className="relative h-full w-full flex justify-evenly flex-col-reverse items-center lg:flex-row dark:bg-[#080808]">
       <DetailsBox
         props={{
           gameStarted,
