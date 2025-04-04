@@ -132,8 +132,8 @@ const ChatBox = ({
   );
 
   return (
-    <div className="flex w-full flex-col gap-4">
-      <div className={`space-y-4 ${gameStarted ? "hidden md:block" : ""}`}>
+    <div className="flex w-full flex-col md:flex-row lg:flex-col items-center gap-4">
+      <div className={`space-y-4 ${gameStarted ? "hidden lg:block" : ""}`}>
         <div className="grid grid-cols-2 gap-2">
           <Button
             variant={isBotMode ? "outline" : "default"}

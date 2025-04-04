@@ -139,21 +139,8 @@ const Fleet = (props: FleetProps) => {
         )}
       </div>
       <div
-        className={`flex flex-wrap justify-center gap-4 overflow-hidden transition-all duration-300 ${gameStarted ? "h-0 opacity-0" : "relative h-0 rounded opacity-100 md:h-[176px]"}`}
+        className={`flex flex-wrap justify-center gap-4 overflow-y-auto transition-all duration-300 ${gameStarted ? "h-0 opacity-0" : "relative h-0 rounded opacity-100 md:h-[176px]"}`}
       >
-        <Image
-          src="/water.gif"
-          alt=""
-          fill
-          style={{
-            display: `${gameStarted && "none"}`,
-            position: "absolute",
-            zIndex: -1,
-            objectFit: "cover",
-          }}
-          unoptimized
-          priority
-        />
         {!gameStarted &&
           Object.entries(shipProps).map(([type, props]) => (
             <Ship

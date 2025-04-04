@@ -330,7 +330,8 @@ const Board: React.FC<BoardProps> = ({ board }) => {
       <h3 className="text-center text-xl font-semibold opacity-0 md:mb-6 dark:text-white">
         {id === "player-board" ? "Player Board" : "Bot Board"}
       </h3>
-      <div className="w-full">
+      <div className="flex flex-col md:flex-row lg:flex-col justify-center items-center">
+        <div className="w-full">
         <div className="relative" ref={tableContainerRef}>
           {id === "player-board" && botTargeting && (
             <TargetPointer x={targetTransform.x} y={targetTransform.y} />
@@ -498,6 +499,8 @@ const Board: React.FC<BoardProps> = ({ board }) => {
           isGameOver={isGameOver}
         />
       )}
+      </div>
+      
     </div>
   );
 };
