@@ -46,6 +46,7 @@ interface BoardProps {
     setCurrentStats: Dispatch<SetStateAction<Stats>>;
     sunkShips: Record<ShipType, boolean>;
     isGameOver: boolean;
+    initialScreenIsDesktop: boolean;
   };
 }
 
@@ -65,6 +66,7 @@ const Board: React.FC<BoardProps> = ({ board }) => {
     setCurrentStats,
     sunkShips,
     isGameOver,
+    initialScreenIsDesktop,
   }: BoardProps["board"] = board;
   const [draggedShip, setDraggedShip] = React.useState<ShipStructure | null>(
     null,
@@ -87,12 +89,6 @@ const Board: React.FC<BoardProps> = ({ board }) => {
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const [targetTransform, setTargetTransform] = React.useState({ x: 0, y: 0 });
   const [reTarget, setReTarget] = React.useState<boolean>(false);
-  const [initialScreenIsDesktop, setInitialScreenIsDesktop] = useState(
-    // Initialize with correct value using a function
-    () =>
-      typeof window !== "undefined" &&
-      window.matchMedia("(min-width: 768px)").matches,
-  );
   const isActive =
     (id === "player-board" && activeBoard === "player") ||
     (id === "bot-board" && activeBoard === "bot");

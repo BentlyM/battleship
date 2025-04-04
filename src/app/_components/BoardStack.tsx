@@ -21,6 +21,11 @@ export const createBoard = (): BoardType =>
   ) as BoardType;
 
 export const BoardStack = () => {
+  const [initialScreenIsDesktop, setInitialScreenIsDesktop] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(min-width: 768px)").matches,
+  );
   const [activeBoard, setActiveBoard] = useState<"player" | "bot">("player");
   const [playerBoard, setPlayerBoard] = useState<BoardType>(createBoard());
   const [botBoard, setBotBoard] = useState<BoardType>(createBoard());
@@ -169,6 +174,7 @@ export const BoardStack = () => {
               setSunkShips,
               setCurrentStats,
               isGameOver,
+              initialScreenIsDesktop,
             }}
           />
         </div>
@@ -197,6 +203,7 @@ export const BoardStack = () => {
               setSunkShips,
               setCurrentStats,
               isGameOver,
+              initialScreenIsDesktop,
             }}
           />
         </div>
