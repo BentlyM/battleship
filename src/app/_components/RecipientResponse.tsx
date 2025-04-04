@@ -20,14 +20,14 @@ const PlayerResponse = ({
   isActive: boolean;
 }) => (
   <Card
-    className={`flex items-center gap-4 p-4 ${isActive ? "border-primary dark:border-[3px]" : ""} dark:bg-[#080808] dark:border-gray-600 dark:text-white`}
+    className={`flex items-center gap-4 p-4 ${isActive ? "border-primary dark:border-[3px]" : ""} dark:border-gray-600 dark:bg-[#080808] dark:text-white`}
   >
     <Avatar>
       <AvatarImage src="/idle.jpg" className="w-12 rounded" />
       <AvatarFallback>P</AvatarFallback>
     </Avatar>
     <div className="flex-1">
-      <p className="text-sm">{message}</p>
+      <p className="min-w-[200px] max-w-[200px] text-sm">{message}</p>
     </div>
   </Card>
 );
@@ -40,10 +40,10 @@ const OpponentResponse = ({
   isActive: boolean;
 }) => (
   <Card
-    className={`flex items-center gap-4 p-4 ${isActive ? "border-primary dark:border-white border-[3px]" : ""} dark:bg-[#080808] dark:border-gray-600 dark:text-white`}
+    className={`flex items-center gap-4 p-4 ${isActive ? "border-[3px] border-primary dark:border-white" : ""} dark:border-gray-600 dark:bg-[#080808] dark:text-white`}
   >
     <div className="flex-1">
-      <p className="text-right text-sm">{message}</p>
+      <p className="min-w-[200px] max-w-[200px] text-right text-sm">{message}</p>
     </div>
     <Avatar>
       <AvatarImage src="/bot.png" className="w-12 rounded" />
@@ -77,20 +77,22 @@ const RecipientResponse = ({
   }, [sunkShips]);
 
   return (
-    <>
+    <div className="flex flex-col gap-4">
       <PlayerResponse
         message={useTypewriter(
           showPrologue ? currentEvent.player : currentEvent.player,
+          50,
         )}
         isActive={activeBoard === "bot" && gameStarted}
       />
       <OpponentResponse
         message={useTypewriter(
           showPrologue ? currentEvent.bot : currentEvent.bot,
+          50,
         )}
         isActive={activeBoard === "player" && gameStarted}
       />
-    </>
+    </div>
   );
 };
 

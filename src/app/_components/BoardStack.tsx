@@ -140,19 +140,19 @@ export const BoardStack = () => {
   };
 
   return (
-    <div className="relative bottom-[15%] flex justify-evenly sm:bottom-0 dark:bg-[#080808]">
-      {/* <DetailsBox
+    <div className="relative h-full flex justify-evenly flex-col-reverse items-center lg:flex-row dark:bg-[#080808]">
+      <DetailsBox
         props={{
           gameStarted,
           isGameOver,
           currentStats,
           setCurrentStats,
         }}
-      /> */}
-      <div className="relative w-[90vw] max-w-[388px] sm:max-w-[545px]">
+      />
+      <div className="relative flex justify-center h-full w-[90vw] max-w-[388px] sm:max-w-[545px]">
         {/* Player Board */}
         <div
-          className={`absolute left-1/2 transition-all duration-500 ease-in-out ${activeBoard === "player" ? "visible" : "invisible md:visible"} ${
+          className={`absolute left-1/2 top-1/2 transition-all duration-500 ease-in-out ${activeBoard === "player" ? "visible" : "invisible md:visible"} ${
             activeBoard === "player"
               ? "z-30 -translate-x-1/2 -translate-y-1/2"
               : "z-20 -translate-y-[70%] translate-x-[100%] opacity-75 md:-translate-x-[45%] md:-translate-y-[47%]"
@@ -181,7 +181,7 @@ export const BoardStack = () => {
 
         {/* Bot Board */}
         <div
-          className={`absolute left-1/2 transition-all duration-500 ease-in-out ${activeBoard === "bot" ? "visible" : "invisible md:visible"} ${
+          className={`absolute left-1/2 top-1/2 transition-all duration-500 ease-in-out ${activeBoard === "bot" ? "visible" : "invisible md:visible"} ${
             activeBoard === "bot"
               ? "z-30 -translate-x-1/2 -translate-y-[58%] md:-translate-x-1/2 md:-translate-y-[72%]"
               : "z-20 -translate-x-[200%] -translate-y-[70%] opacity-75 md:-translate-x-[45%] md:-translate-y-[67%]"
@@ -208,7 +208,7 @@ export const BoardStack = () => {
           />
         </div>
       </div>
-      {/* <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4">
         <div>
         </div>
          <ChatBox
@@ -218,7 +218,7 @@ export const BoardStack = () => {
           currentEvent={currentGameEvent!}
           sunkShips={sunkShips}
         /> 
-      </div> */}
+      </div>
     </div>
   );
 };

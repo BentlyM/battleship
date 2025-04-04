@@ -75,7 +75,7 @@ const DetailsBox = ({ props }: { props: StatsProps }) => {
   }, [gameStarted, isGameOver, startTime]);
 
   return (
-    <div className="flex w-[18vw] flex-col gap-2">
+    <div className="flex flex-col items-center gap-2">
       <RadioGroup.Root
         value={selectedView}
         onValueChange={(value) =>
@@ -111,10 +111,10 @@ const DetailsBox = ({ props }: { props: StatsProps }) => {
         </RadioGroup.Item>
       </RadioGroup.Root>
 
-      <Card className="h-[50vh] w-full overflow-y-auto p-4 shadow dark:bg-[#080808] dark:border-gray-600 border">
+      <Card className="w-full overflow-y-auto p-1 shadow dark:bg-[#080808] border-none">
         {selectedView === "current" && (
-          <div className="space-y-3">
-            <h3 className="text-lg font-bold dark:text-white">Current Match</h3>
+          <div className="flex flex-row md:flex-col justify-between space-y-3">
+            <h3 className="hidden md:block text-lg font-bold dark:text-white">Current Match</h3>
             <StatItem label="Accuracy" value={currentStats.accuracy} />
             <StatItem label="Ships Sunk" value={currentStats.sunkShips} />
             <StatItem label="Shots Fired" value={currentStats.shots} />
@@ -132,8 +132,8 @@ const DetailsBox = ({ props }: { props: StatsProps }) => {
         )}
 
         {selectedView === "overall" && (
-          <div className="space-y-3">
-            <h3 className="text-lg font-bold dark:text-white">Career Stats</h3>
+          <div className="flex flex-row md:flex-col justify-between space-y-3">
+            <h3 className="hidden md:block text-lg font-bold dark:text-white">Career Stats</h3>
             <StatItem label="Accuracy" value={mockData.overall.accuracy} />
             <StatItem label="Total Games" value={mockData.overall.totalGames} />
             <StatItem label="Ships Sunk" value={mockData.overall.shipsSunk} />
@@ -146,8 +146,8 @@ const DetailsBox = ({ props }: { props: StatsProps }) => {
         )}
 
         {selectedView === "previous" && (
-          <div className="space-y-4">
-            <h3 className="text-lg font-bold dark:text-white">Last 3 Matches</h3>
+          <div className="flex flex-row md:flex-col justify-between space-y-3 overflow-scroll">
+            <h3 className="hidden md:block text-lg font-bold dark:text-white">Last 3 Matches</h3>
             {mockData.previousMatches.map((match, i) => (
               <div key={i} className="rounded-lg bg-muted p-3 dark:bg-[#080808] dark:border-gray-600 dark:border">
                 <div className="flex justify-between">
@@ -171,8 +171,8 @@ const DetailsBox = ({ props }: { props: StatsProps }) => {
         )}
 
         {selectedView === "leaderboard" && (
-          <div className="space-y-3">
-            <h3 className="text-lg font-bold dark:text-white">Top Commanders</h3>
+          <div className="flex flex-row md:flex-col justify-between space-y-3 overflow-x-scroll">
+            <h3 className="hidden md:block text-lg font-bold dark:text-white">Top Commanders</h3>
             {mockData.leaderboard.map((entry) => (
               <div
                 key={entry.rank}

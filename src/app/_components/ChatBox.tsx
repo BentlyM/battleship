@@ -34,10 +34,11 @@ interface ChatBoxProps {
   sunkShips: Record<ShipType, boolean>;
 }
 
-export const useTypewriter = (text: string, speed = 50) => {
+export const useTypewriter = (text: string, speed = 50, disabled = false) => {
   const [displayText, setDisplayText] = useState("");
 
   useEffect(() => {
+    if (disabled) return;
     let i = 0;
     setDisplayText("");
     const timer = setInterval(() => {
@@ -49,7 +50,7 @@ export const useTypewriter = (text: string, speed = 50) => {
       }
     }, speed);
     return () => clearInterval(timer);
-  }, [text, speed]);
+  }, [text, speed, disabled]);
 
   return displayText;
 };
@@ -131,8 +132,8 @@ const ChatBox = ({
   );
 
   return (
-    <div className="flex w-[18vw] flex-col gap-4">
-      <div className="space-y-4">
+    <div className="flex w-full flex-col gap-4">
+      <div className={`space-y-4 ${gameStarted ? "hidden" : ""}`}>
         <div className="grid grid-cols-2 gap-2">
           <Button
             variant={isBotMode ? "outline" : "default"}
@@ -155,7 +156,7 @@ const ChatBox = ({
           </Button>
         </div>
 
-        <div className="space-y-2">
+        <div className="flex flex-col space-y-2">
           <Select
             value={firstMove}
             onValueChange={handleFirstMoveChange}
