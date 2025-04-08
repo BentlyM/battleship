@@ -155,7 +155,7 @@ export const BoardStack = () => {
           className={`absolute left-1/2 top-1/2 transition-all duration-500 ease-in-out ${activeBoard === "player" ? "visible" : "invisible md:visible"} ${
             activeBoard === "player"
               ? "z-30 -translate-x-1/2 -translate-y-1/2"
-              : "z-20 -translate-y-[70%] translate-x-[100%] opacity-75 md:-translate-x-[37%] md:-translate-y-[57%] lg:-translate-x-[45%] lg:-translate-y-[47%]"
+              : "z-20 -translate-y-[70%] translate-x-[100%] opacity-75 md:-translate-x-[36%] md:-translate-y-[54%] lg:-translate-x-[45%] lg:-translate-y-[47%]"
           }`}
         >
           <Board
