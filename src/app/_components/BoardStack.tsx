@@ -140,7 +140,7 @@ export const BoardStack = () => {
   };
 
   return (
-    <div className="relative h-full w-full flex justify-evenly flex-col-reverse items-center lg:flex-row dark:bg-[#080808]">
+    <div className="relative flex h-full w-full flex-col-reverse items-center justify-evenly lg:flex-row dark:bg-[#080808]">
       <DetailsBox
         props={{
           gameStarted,
@@ -149,7 +149,7 @@ export const BoardStack = () => {
           setCurrentStats,
         }}
       />
-      <div className="relative flex justify-center h-full w-[90vw] max-w-[388px] sm:max-w-[545px]">
+      <div className="relative flex h-full w-[90vw] max-w-[388px] justify-center sm:max-w-[545px]">
         {/* Player Board */}
         <div
           className={`absolute left-1/2 top-1/2 transition-all duration-500 ease-in-out ${activeBoard === "player" ? "visible" : "invisible md:visible"} ${
@@ -209,15 +209,13 @@ export const BoardStack = () => {
         </div>
       </div>
       <div className="flex flex-col gap-4">
-        <div>
-        </div>
-         <ChatBox
+        <ChatBox
           gameStarted={gameStarted}
           activeBoard={activeBoard}
           setActiveBoard={setActiveBoard}
           currentEvent={currentGameEvent!}
           sunkShips={sunkShips}
-        /> 
+        />
       </div>
     </div>
   );

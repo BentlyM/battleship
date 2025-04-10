@@ -1,5 +1,5 @@
 "use client";
-import { Bot, Send, User, Users } from "lucide-react";
+import { Bot, Send, User, Users, Menu, X } from "lucide-react";
 import type { Dispatch, SetStateAction } from "react";
 import { useState, useEffect, memo, useCallback } from "react";
 import { Button } from "~/components/ui/button";
@@ -15,6 +15,8 @@ import {
 import { motion } from "framer-motion";
 import RecipientResponse from "./RecipientResponse";
 import { type ShipType } from "~/types/game";
+import { Drawer } from "./ui/drawer";
+
 export interface Message {
   id: number;
   text: string;
@@ -88,6 +90,100 @@ const MessageBubble = memo(
 
 MessageBubble.displayName = "MessageBubble";
 
+const GameControls = memo(
+  ({
+    gameStarted,
+    isBotMode,
+    setIsBotMode,
+    firstMove,
+    handleFirstMoveChange,
+    difficulty,
+    setDifficulty,
+    isCompact = false,
+  }: {
+    gameStarted: boolean;
+    isBotMode: boolean;
+    setIsBotMode: (value: boolean) => void;
+    firstMove: "player" | "bot" | "random";
+    handleFirstMoveChange: (value: "player" | "bot" | "random") => void;
+    difficulty: string;
+    setDifficulty: (value: string) => void;
+    isCompact?: boolean;
+  }) => (
+    <div className={`space-y-${isCompact ? "3" : "4"}`}>
+      <div className="grid grid-cols-2 gap-2">
+        <Button
+          variant={isBotMode ? "outline" : "default"}
+          onClick={() => !gameStarted && setIsBotMode(false)}
+          disabled={true}
+          className={`w-full border dark:border-gray-600 dark:bg-[#080808] dark:text-white ${isCompact ? "h-8 text-xs" : ""}`}
+          aria-label="coming soon"
+        >
+          <Users
+            className={`mr-2 ${isCompact ? "h-3 w-3" : "h-4 w-4"} dark:text-white`}
+          />
+          vs Player
+        </Button>
+        <Button
+          variant={isBotMode ? "default" : "outline"}
+          onClick={() => !gameStarted && setIsBotMode(true)}
+          disabled={gameStarted}
+          className={`w-full ${isCompact ? "h-8 text-xs" : ""}`}
+        >
+          <Bot className={`mr-2 ${isCompact ? "h-3 w-3" : "h-4 w-4"}`} />
+          vs Bot
+        </Button>
+      </div>
+
+      <div className="flex flex-col space-y-2">
+        <Select
+          value={firstMove}
+          onValueChange={handleFirstMoveChange}
+          disabled={gameStarted}
+        >
+          <SelectTrigger
+            className={`w-full dark:border-gray-600 dark:bg-[#080808] dark:text-white ${isCompact ? "h-8 text-xs" : ""}`}
+          >
+            <SelectValue placeholder="First Move" />
+          </SelectTrigger>
+          <SelectContent className="dark:border-gray-600 dark:bg-[#080808] dark:text-white">
+            <SelectItem value="random">Random</SelectItem>
+            <SelectItem value="bot">
+              {isBotMode ? "Player First" : "Player 1"}
+            </SelectItem>
+            <SelectItem value="player">
+              {isBotMode ? "Bot First" : "Player 2"}
+            </SelectItem>
+          </SelectContent>
+        </Select>
+
+        {isBotMode && (
+          <Select
+            value={difficulty}
+            onValueChange={setDifficulty}
+            disabled={gameStarted}
+          >
+            <SelectTrigger
+              className={`w-full dark:border-gray-600 dark:bg-[#080808] dark:text-white ${isCompact ? "h-8 text-xs" : ""}`}
+            >
+              <SelectValue placeholder="Difficulty" />
+            </SelectTrigger>
+            <SelectContent className="dark:border-gray-600 dark:bg-[#080808] dark:text-white">
+              <SelectItem value="easy">Easy (brute force)</SelectItem>
+              <SelectItem value="medium">
+                Medium (simply knows where some are)
+              </SelectItem>
+              <SelectItem value="hard">Hard (actually intelligent)</SelectItem>
+            </SelectContent>
+          </Select>
+        )}
+      </div>
+    </div>
+  ),
+);
+
+GameControls.displayName = "GameControls";
+
 const ChatBox = ({
   gameStarted,
   activeBoard,
@@ -104,6 +200,18 @@ const ChatBox = ({
   const [vsPlayerMessages, setVsPlayerMessages] = useState<
     { text: string; sender: "player" | "bot" }[]
   >([]);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const toggleDrawer = useCallback(() => {
+    setDrawerOpen((prev) => !prev);
+  }, []);
+
+  // Close drawer when game starts
+  useEffect(() => {
+    if (gameStarted) {
+      setDrawerOpen(false);
+    }
+  }, [gameStarted]);
 
   const handleFirstMoveChange = useCallback(
     (value: "player" | "bot" | "random") => {
@@ -132,72 +240,53 @@ const ChatBox = ({
   );
 
   return (
-    <div className="flex w-full flex-col md:flex-row lg:flex-col items-center gap-4">
-      <div className={`space-y-4 ${gameStarted ? "hidden lg:block" : ""}`}>
-        <div className="grid grid-cols-2 gap-2">
-          <Button
-            variant={isBotMode ? "outline" : "default"}
-            onClick={() => !gameStarted && setIsBotMode(false)}
-            disabled={true}
-            className="w-full dark:bg-[#080808] dark:border-gray-600 border dark:text-white"
-            aria-label="coming soon"
-          >
-            <Users className="mr-2 h-4 w-4 dark:text-white" />
-            vs Player
-          </Button>
-          <Button
-            variant={isBotMode ? "default" : "outline"}
-            onClick={() => !gameStarted && setIsBotMode(true)}
-            disabled={gameStarted}
-            className="w-full"
-          >
-            <Bot className="mr-2 h-4 w-4" />
-            vs Bot
-          </Button>
-        </div>
-
-        <div className="flex flex-col space-y-2">
-          <Select
-            value={firstMove}
-            onValueChange={handleFirstMoveChange}
-            disabled={gameStarted}
-          >
-            <SelectTrigger className="w-full dark:bg-[#080808] dark:border-gray-600 dark:text-white">
-              <SelectValue placeholder="First Move" />
-            </SelectTrigger>
-            <SelectContent className="dark:bg-[#080808] dark:border-gray-600 dark:text-white">
-              <SelectItem value="random">Random</SelectItem>
-              <SelectItem value="bot">
-                {isBotMode ? "Player First" : "Player 1"}
-              </SelectItem>
-              <SelectItem value="player">
-                {isBotMode ? "Bot First" : "Player 2"}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-
-          {isBotMode && (
-            <Select
-              value={difficulty}
-              onValueChange={setDifficulty}
-              disabled={gameStarted}
-            >
-              <SelectTrigger className="w-full dark:bg-[#080808] dark:border-gray-600 dark:text-white">
-                <SelectValue placeholder="Difficulty" />
-              </SelectTrigger>
-              <SelectContent className="dark:bg-[#080808] dark:border-gray-600 dark:text-white">
-                <SelectItem value="easy">Easy (brute force)</SelectItem>
-                <SelectItem value="medium">
-                  Medium (simply knows where some are)
-                </SelectItem>
-                <SelectItem value="hard">
-                  Hard (actually intelligent)
-                </SelectItem>
-              </SelectContent>
-            </Select>
+    <div className="flex w-full flex-col items-center gap-4 md:flex-row lg:flex-col">
+      {/* Drawer toggle button - only visible on small screens when game hasn't started */}
+      {!gameStarted && (
+        <button
+          onClick={toggleDrawer}
+          className="fixed right-4 top-4 z-50 flex h-10 w-10 items-center justify-center rounded-full bg-white p-2 shadow-lg transition-colors md:hidden dark:bg-[#080808] dark:hover:bg-[#080808]"
+          aria-label="Toggle game settings"
+        >
+          {drawerOpen ? (
+            <X className="h-6 w-6 text-white dark:text-white" />
+          ) : (
+            <Menu className="h-6 w-6 text-white dark:text-white" />
           )}
-        </div>
+        </button>
+      )}
+
+      {/* Mobile drawer - only visible on small screens */}
+      <Drawer
+        isVisible={drawerOpen && !gameStarted}
+        onToggle={toggleDrawer}
+        title="Game Settings"
+      >
+        <GameControls
+          gameStarted={gameStarted}
+          isBotMode={isBotMode}
+          setIsBotMode={setIsBotMode}
+          firstMove={firstMove}
+          handleFirstMoveChange={handleFirstMoveChange}
+          difficulty={difficulty}
+          setDifficulty={setDifficulty}
+          isCompact={true}
+        />
+      </Drawer>
+
+      {/* Desktop controls - hidden on mobile, visible on medium and up */}
+      <div className="hidden space-y-4 md:block">
+        <GameControls
+          gameStarted={gameStarted}
+          isBotMode={isBotMode}
+          setIsBotMode={setIsBotMode}
+          firstMove={firstMove}
+          handleFirstMoveChange={handleFirstMoveChange}
+          difficulty={difficulty}
+          setDifficulty={setDifficulty}
+        />
       </div>
+
       {!isBotMode && (
         <Card className="h-[50vh] w-full shadow">
           <CardContent className="h-[40vh] overflow-y-auto p-4">
