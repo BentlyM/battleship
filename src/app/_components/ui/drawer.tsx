@@ -23,7 +23,7 @@ export function Drawer({ isVisible, onToggle, children, title }: DrawerProps) {
         <div className="rounded-b-xl bg-white shadow-lg dark:bg-[#080808]">
           <div className="border-b px-4 py-2 dark:border-gray-700">
             <h2 className="text-lg font-semibold dark:text-white">
-              {title || "Game Settings"}
+              {title ?? "Game Settings"}
             </h2>
           </div>
           <div className="max-h-[35vh] overflow-y-auto p-3">{children}</div>

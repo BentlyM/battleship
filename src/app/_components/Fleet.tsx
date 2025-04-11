@@ -84,11 +84,11 @@ const Fleet = (props: FleetProps) => {
 
   return (
     <div
-      className={`rounded-lg border-gray-200 p-4 ${!gameStarted && "md:border-2"} dark:border-gray-600 ${gameStarted && "md:mb-[176px]"}`}
+      className={`rounded-lg border-gray-200 p-4 ${!gameStarted && "lg:border-2"} dark:border-gray-600 ${gameStarted && "lg:mb-[176px]"}`}
     >
       <div className="flex flex-row justify-evenly flex-wrap gap-2 overflow-x-auto">
         {!gameStarted && (
-            <h4 className="mb-4 hidden text-lg font-semibold md:block dark:text-white">
+            <h4 className="mb-4 hidden text-lg font-semibold lg:block dark:text-white">
               Fleet
             </h4>
           )}
@@ -139,7 +139,7 @@ const Fleet = (props: FleetProps) => {
         )}
       </div>
       <div
-        className={`flex flex-wrap justify-center gap-4 overflow-y-auto transition-all duration-300 ${gameStarted ? "h-0 opacity-0" : "relative h-0 rounded opacity-100 md:h-[176px]"}`}
+        className={`flex flex-wrap justify-center gap-4 overflow-y-auto transition-all duration-300 ${gameStarted ? "h-0 opacity-0" : "relative h-0 rounded opacity-100 lg:h-[176px]"}`}
       >
         {!gameStarted &&
           Object.entries(shipProps).map(([type, props]) => (

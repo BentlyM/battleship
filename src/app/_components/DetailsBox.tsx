@@ -75,7 +75,7 @@ const DetailsBox = ({ props }: { props: StatsProps }) => {
   }, [gameStarted, isGameOver, startTime]);
 
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div className="flex flex-col items-center">
       <RadioGroup.Root
         value={selectedView}
         onValueChange={(value) =>
@@ -114,11 +114,11 @@ const DetailsBox = ({ props }: { props: StatsProps }) => {
       <Card className="w-full overflow-y-auto p-1 shadow dark:bg-[#080808] border-none">
         {selectedView === "current" && (
           <div className="flex flex-row lg:flex-col justify-between space-y-3">
-            <h3 className="hidden md:block text-lg font-bold dark:text-white">Current Match</h3>
+            <h3 className="hidden lg:block text-lg font-bold dark:text-white">Current Match</h3>
             <StatItem label="Accuracy" value={currentStats.accuracy} />
-            <StatItem label="Ships Sunk" value={currentStats.sunkShips} />
-            <StatItem label="Shots Fired" value={currentStats.shots} />
-            <StatItem label="Time Elapsed" value={elapsedTime} />
+            <StatItem label="Sunk" value={currentStats.sunkShips} />
+            <StatItem label="Fired" value={currentStats.shots} />
+            <StatItem label="Time" value={elapsedTime} />
             <span
               className={
                 currentStats.gameOutcome === "win"
@@ -133,10 +133,10 @@ const DetailsBox = ({ props }: { props: StatsProps }) => {
 
         {selectedView === "overall" && (
           <div className="flex flex-row lg:flex-col justify-between space-y-3">
-            <h3 className="hidden md:block text-lg font-bold dark:text-white">Career Stats</h3>
+            <h3 className="hidden lg:block text-lg font-bold dark:text-white">Career Stats</h3>
             <StatItem label="Accuracy" value={mockData.overall.accuracy} />
-            <StatItem label="Total Games" value={mockData.overall.totalGames} />
-            <StatItem label="Ships Sunk" value={mockData.overall.shipsSunk} />
+            <StatItem label="Games" value={mockData.overall.totalGames} />
+            <StatItem label="Ships" value={mockData.overall.shipsSunk} />
             <StatItem label="Fastest Win" value={mockData.overall.fastestWin} />
             <StatItem
               label="Avg. Shots/Win"
@@ -147,7 +147,7 @@ const DetailsBox = ({ props }: { props: StatsProps }) => {
 
         {selectedView === "previous" && (
           <div className="flex flex-row lg:flex-col justify-between space-y-3 overflow-scroll">
-            <h3 className="hidden md:block text-lg font-bold dark:text-white">Last 3 Matches</h3>
+            <h3 className="hidden lg:block text-lg font-bold dark:text-white">Last 3 Matches</h3>
             {mockData.previousMatches.map((match, i) => (
               <div key={i} className="rounded-lg bg-muted p-3 dark:bg-[#080808] dark:border-gray-600 dark:border">
                 <div className="flex justify-between">
@@ -172,7 +172,7 @@ const DetailsBox = ({ props }: { props: StatsProps }) => {
 
         {selectedView === "leaderboard" && (
           <div className="flex flex-row lg:flex-col justify-between space-y-3 overflow-x-scroll">
-            <h3 className="hidden md:block text-lg font-bold dark:text-white">Top Commanders</h3>
+            <h3 className="hidden lg:block text-lg font-bold dark:text-white">Top Commanders</h3>
             {mockData.leaderboard.map((entry) => (
               <div
                 key={entry.rank}
@@ -208,7 +208,7 @@ const StatItem = ({
     <div className={`dark:text-muted-foreground ${small ? "text-xs" : "text-sm"}`}>
       {label}
     </div>
-    <div className={`font-medium dark:text-white ${small ? "text-base" : "text-xl"}`}>
+    <div className={`flex items-center justify-center lg:justify-start font-medium dark:text-white ${small ? "text-base" : "text-xl"}`}>
       {value}
     </div>
   </div>

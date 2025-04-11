@@ -327,10 +327,10 @@ const Board: React.FC<BoardProps> = ({ board }) => {
       onDragStart={(e) => handleDragStart(e, setDraggedShip)}
       onDragEnd={() => handleDragEnd(setDraggedShip)}
     >
-      <h3 className="text-center text-xl font-semibold opacity-0 md:mb-6 dark:text-white">
+      <h3 className="text-center text-xl font-semibold opacity-0 lg:mb-6 dark:text-white">
         {id === "player-board" ? "Player Board" : "Bot Board"}
       </h3>
-      <div className="flex flex-col items-center justify-center md:flex-row lg:flex-col">
+      <div className="flex flex-col items-center justify-center">
         <div className="w-full">
           <div className="relative" ref={tableContainerRef}>
             {id === "player-board" && botTargeting && (
