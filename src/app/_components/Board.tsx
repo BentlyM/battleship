@@ -28,7 +28,7 @@ import type {
 import TargetPointer from "./TargetPointer";
 import { handlePlayerAttack } from "../helpers/attackHelpers";
 import { motion, stagger, animate, useInView } from "framer-motion";
-import Fleet from "./Fleet";
+import Fleet, { EndGameButton } from "./Fleet";
 import { createBoard } from "./BoardStack";
 interface BoardProps {
   board: {
@@ -500,6 +500,16 @@ const Board: React.FC<BoardProps> = ({ board }) => {
             isActive={isActive}
             setIsGameOver={setIsGameOver}
             isGameOver={isGameOver}
+          />
+        )}
+
+        {id === "bot-board" && (
+          <EndGameButton
+            gameStarted={gameStarted}
+            isGameOver={isGameOver}
+            isActive={isActive}
+            setGameStarted={setGameStarted}
+            setIsGameOver={setIsGameOver}
           />
         )}
       </div>

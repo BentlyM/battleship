@@ -31,6 +31,40 @@ interface FleetProps {
   isGameOver: boolean;
 }
 
+interface EndGameButtonProps {
+  gameStarted: boolean;
+  isGameOver: boolean;
+  isActive: boolean;
+  setGameStarted: (gameStarted: boolean) => void;
+  setIsGameOver: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export const EndGameButton = (props: EndGameButtonProps) => {
+  const { gameStarted, isGameOver, isActive, setGameStarted, setIsGameOver } =
+    props;
+
+  const handleEndGame = () => {
+    if (gameStarted && !isGameOver) {
+      setGameStarted(false);
+      setIsGameOver(true);
+    }
+  };
+
+  return (
+    gameStarted && (
+      <div className="mt-2 flex justify-center">
+        <Button
+          className="h-8 rounded-full bg-red-500 px-3 text-sm text-white hover:bg-red-600"
+          onClick={handleEndGame}
+          disabled={!gameStarted || isGameOver || !isActive}
+        >
+          End Game
+        </Button>
+      </div>
+    )
+  );
+};
+
 const Fleet = (props: FleetProps) => {
   const {
     handleAutoPlace,
@@ -86,12 +120,12 @@ const Fleet = (props: FleetProps) => {
     <div
       className={`rounded-lg border-gray-200 p-4 ${!gameStarted && "lg:border-2"} dark:border-gray-600 ${gameStarted && "lg:mb-[176px]"}`}
     >
-      <div className="flex flex-row justify-evenly flex-wrap gap-2 overflow-x-auto">
+      <div className="flex flex-row flex-wrap justify-evenly gap-2 overflow-x-auto">
         {!gameStarted && (
-            <h4 className="mb-4 hidden text-lg font-semibold lg:block dark:text-white">
-              Fleet
-            </h4>
-          )}
+          <h4 className="mb-4 hidden text-lg font-semibold lg:block dark:text-white">
+            Fleet
+          </h4>
+        )}
         {!gameStarted && (
           <Button
             variant="outline"
@@ -128,18 +162,9 @@ const Fleet = (props: FleetProps) => {
         >
           Start Game
         </Button>
-        {gameStarted && (
-          <Button
-            className="h-8 rounded-full bg-red-500 px-3 text-sm text-white hover:bg-red-600"
-            onClick={handleEndGame}
-            disabled={isActive}
-          >
-            End Game
-          </Button>
-        )}
       </div>
       <div
-        className={`flex flex-wrap justify-center gap-4 overflow-y-auto transition-all duration-300 ${gameStarted ? "h-0 opacity-0" : "relative h-0 rounded opacity-100 lg:h-[176px]"}`}
+        className={`flex flex-wrap justify-center gap-4 overflow-y-auto transition-all duration-300 ${gameStarted ? "h-0 opacity-0" : "relative h-0 rounded opacity-100 lg:h-[7vh]"}`}
       >
         {!gameStarted &&
           Object.entries(shipProps).map(([type, props]) => (
