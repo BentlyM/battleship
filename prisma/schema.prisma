@@ -1,3 +1,4 @@
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -8,89 +9,61 @@ generator client {
 }
 
 model User {
-  id             Int             @id @default(autoincrement())
-  username       String          @unique
-  email          String          @unique
-  passwordHash   String
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  gamesAsPlayer1 Game[]          @relation("Player1Games")
-  gamesAsPlayer2 Game[]          @relation("Player2Games")
-  statistics     UserStatistics?
-  achievements   Achievement[]
-  boards         Board[]
+  id            String    @id
+  name          String
+  email         String
+  emailVerified Boolean
+  image         String?
+  createdAt     DateTime
+  updatedAt     DateTime
+  sessions      Session[]
+  accounts      Account[]
 
-  LeaderboardEntry LeaderboardEntry[]
-
-  Move Move[]
+  @@unique([email])
+  @@map("user")
 }
 
-model Game {
-  id             Int       @id @default(autoincrement())
-  player1Id      Int
-  player2Id      Int
-  winnerId       Int?
-  currentTurn    Int       // 1 = player1, 2 = player2
-  status         String    // "waiting", "active", "completed"
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  player1        User      @relation("Player1Games", fields: [player1Id], references: [id])
-  player2        User      @relation("Player2Games", fields: [player2Id], references: [id])
-  boards         Board[]
-  moves          Move[]
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@map("session")
 }
 
-model Board {
-  id             Int       @id @default(autoincrement())
-  userId         Int
-  gameId         Int
-  ships          Json      // JSON array of ship positions/orientations
-  hits           String[]  // Array of hit positions (e.g., ["A1", "B2"])
-  misses         String[]  // Array of miss positions
-  user           User      @relation(fields: [userId], references: [id])
-  game           Game      @relation(fields: [gameId], references: [id])
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
+
+  @@map("account")
 }
 
-model Move {
-  id             Int       @id @default(autoincrement())
-  gameId         Int
-  playerId       Int
-  target         String    // Coordinate (e.g., "A1")
-  result         String    // "hit", "miss", "sunk"
-  shipType       String?   // Type of ship hit (e.g., "carrier")
-  createdAt      DateTime  @default(now())
-  game           Game      @relation(fields: [gameId], references: [id])
-  player         User      @relation(fields: [playerId], references: [id])
-}
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
 
-model UserStatistics {
-  id             Int     @id @default(autoincrement())
-  userId         Int     @unique
-  totalGames     Int     @default(0)
-  wins           Int     @default(0)
-  losses         Int     @default(0)
-  totalShots     Int     @default(0)
-  totalHits      Int     @default(0)
-  shipsSunk      Int     @default(0)
-  accuracy       Float   @default(0)
-  user           User    @relation(fields: [userId], references: [id])
-}
-
-model Achievement {
-  id             Int       @id @default(autoincrement())
-  userId         Int
-  title          String    // e.g., "First Blood", "Fleet Destroyer"
-  description    String
-  unlockedAt     DateTime  @default(now())
-  user           User      @relation(fields: [userId], references: [id])
-}
-
-model LeaderboardEntry {
-  id             Int       @id @default(autoincrement())
-  userId         Int
-  winRate        Float     // Wins/total games
-  totalWins      Int
-  totalSunk      Int
-  averageAccuracy Float
-  user           User      @relation(fields: [userId], references: [id])
+  @@map("verification")
 }
