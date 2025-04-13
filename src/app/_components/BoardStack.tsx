@@ -31,6 +31,9 @@ export const BoardStack = () => {
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
   const [currentGameEvent, setCurrentGameEvent] = useState(prologueMessages[0]);
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
+  const [firstMove, setFirstMove] = useState<"player" | "bot" | "random">(
+    "random",
+  );
   const [sunkShips, setSunkShips] = useState<Record<ShipType, boolean>>({
     carrier: false,
     battleship: false,
@@ -173,6 +176,7 @@ export const BoardStack = () => {
               setCurrentStats,
               isGameOver,
               initialScreenIsDesktop,
+              firstMove,
             }}
           />
         </div>
@@ -202,6 +206,7 @@ export const BoardStack = () => {
               setCurrentStats,
               isGameOver,
               initialScreenIsDesktop,
+              firstMove,
             }}
           />
         </div>
@@ -213,6 +218,7 @@ export const BoardStack = () => {
           setActiveBoard={setActiveBoard}
           currentEvent={currentGameEvent!}
           sunkShips={sunkShips}
+          setFirstMove={setFirstMove}
         />
       </div>
     </div>

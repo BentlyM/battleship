@@ -35,6 +35,7 @@ interface ChatBoxProps {
     trigger: "hit" | "miss" | "turn" | "prologue";
   };
   sunkShips: Record<ShipType, boolean>;
+  setFirstMove?: Dispatch<SetStateAction<"player" | "bot" | "random">>;
 }
 
 export const useTypewriter = (text: string, speed = 50, disabled = false) => {
@@ -234,39 +235,42 @@ const AuthForm = memo(() => {
       formData.append("password", password);
 
       if (isLogin) {
-        const {data,error} = await authClient.signIn.email({
+        const { data, error } = await authClient.signIn.email({
           email: formData.get("email") as string,
           password: formData.get("password") as string,
         });
-        if(data?.user){
+        if (data?.user) {
           toast({
             title: "Logged in",
             description: "You have been logged in successfully",
-          })
+          });
         }
-        if(error) {
+        if (error) {
           setError(error.message ?? "Something went wrong");
         }
       } else {
-        await authClient.signUp.email({
-          name: "test",
-          email: formData.get("email") as string,
-          password: formData.get("password") as string,
-        },{
-          onSuccess: () => {
-            toast({
-              title: "Signed up",
-              description: "You have been signed up successfully",
-            })
+        await authClient.signUp.email(
+          {
+            name: "test",
+            email: formData.get("email") as string,
+            password: formData.get("password") as string,
           },
-          onError: (error) => {
-            if(error instanceof Error){
-              setError(error.message || "Something went wrong");
-            } else {
-              setError("Something went wrong");
-            }
-          }
-        });
+          {
+            onSuccess: () => {
+              toast({
+                title: "Signed up",
+                description: "You have been signed up successfully",
+              });
+            },
+            onError: (error) => {
+              if (error instanceof Error) {
+                setError(error.message || "Something went wrong");
+              } else {
+                setError("Something went wrong");
+              }
+            },
+          },
+        );
       }
     } catch (err) {
       console.error("Authentication error:", err);
@@ -331,11 +335,7 @@ const AuthForm = memo(() => {
             />
           </div>
 
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isLoading}
-          >
+          <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? (
               "Processing..."
             ) : isLogin ? (
@@ -391,14 +391,14 @@ const MobileAuthForm = memo(() => {
 
       if (isLogin) {
         await authClient.signIn.email({
-            email: formData.get("email") as string,
-            password: formData.get("password") as string,
+          email: formData.get("email") as string,
+          password: formData.get("password") as string,
         });
       } else {
         await authClient.signUp.email({
-            name: "test",
-            email: formData.get("email") as string,
-            password: formData.get("password") as string,
+          name: "test",
+          email: formData.get("email") as string,
+          password: formData.get("password") as string,
         });
       }
     } catch (err) {
@@ -466,14 +466,11 @@ const MobileAuthForm = memo(() => {
             required
             disabled={isLoading}
             className="text-xs dark:border-gray-600 dark:bg-[#080808] dark:text-white"
-          />l
+          />
+          l
         </div>
 
-        <Button
-          type="submit"
-          className="w-full text-xs"
-          disabled={isLoading}
-        >
+        <Button type="submit" className="w-full text-xs" disabled={isLoading}>
           {isLoading ? (
             "Processing..."
           ) : isLogin ? (
@@ -515,14 +512,15 @@ const ChatBox = ({
   setActiveBoard,
   currentEvent,
   sunkShips,
+  setFirstMove,
 }: ChatBoxProps) => {
   const [inputValue, setInputValue] = useState("");
   const [isBotMode, setIsBotMode] = useState(true);
   const [isAuthMode, setIsAuthMode] = useState(false);
   const [difficulty, setDifficulty] = useState("easy");
-  const [firstMove, setFirstMove] = useState<"player" | "bot" | "random">(
-    "random",
-  );
+  const [firstMove, setInternalFirstMove] = useState<
+    "player" | "bot" | "random"
+  >("random");
   const [vsPlayerMessages, setVsPlayerMessages] = useState<
     { text: string; sender: "player" | "bot" }[]
   >([]);
@@ -541,14 +539,19 @@ const ChatBox = ({
 
   const handleFirstMoveChange = useCallback(
     (value: "player" | "bot" | "random") => {
-      setFirstMove(value);
+      setInternalFirstMove(value);
+      // Update parent component's firstMove state if provided
+      if (setFirstMove) {
+        setFirstMove(value);
+      }
+
       if (value === "random") {
         setActiveBoard(Math.random() > 0.5 ? "player" : "bot");
       } else {
         setActiveBoard(value);
       }
     },
-    [setActiveBoard],
+    [setActiveBoard, setFirstMove],
   );
 
   const handleSendMessage = useCallback(

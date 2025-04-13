@@ -28,8 +28,10 @@ import type {
 import TargetPointer from "./TargetPointer";
 import { handlePlayerAttack } from "../helpers/attackHelpers";
 import { motion, stagger, animate, useInView } from "framer-motion";
-import Fleet, { EndGameButton } from "./Fleet";
+import Fleet, { EndGameButton, StartGameButton } from "./Fleet";
 import { createBoard } from "./BoardStack";
+import { shipProps } from "./Ship";
+
 interface BoardProps {
   board: {
     id: string;
@@ -47,6 +49,7 @@ interface BoardProps {
     sunkShips: Record<ShipType, boolean>;
     isGameOver: boolean;
     initialScreenIsDesktop: boolean;
+    firstMove: "player" | "bot" | "random";
   };
 }
 
@@ -67,6 +70,7 @@ const Board: React.FC<BoardProps> = ({ board }) => {
     sunkShips,
     isGameOver,
     initialScreenIsDesktop,
+    firstMove,
   }: BoardProps["board"] = board;
   const [draggedShip, setDraggedShip] = React.useState<ShipStructure | null>(
     null,
@@ -321,6 +325,49 @@ const Board: React.FC<BoardProps> = ({ board }) => {
     }
   }, [isInView, initialScreenIsDesktop]);
 
+  // Check if all ships have been placed on this board
+  const allShipsPlaced = Object.values(shipCount).every(
+    (count) => count.count === 0,
+  );
+
+  // Determine if this board should show the start button
+  const shouldShowStartButton =
+    (firstMove === "player" && id === "player-board") ||
+    (firstMove === "bot" && id === "bot-board") ||
+    (firstMove === "random" && id === "player-board");
+
+  // Use a useEffect to share player's readiness via localStorage when ships are placed
+  React.useEffect(() => {
+    if (id === "player-board") {
+      // When player's ships are all placed, update a flag that the bot board can check
+      localStorage.setItem("playerShipsAllPlaced", allShipsPlaced.toString());
+    }
+  }, [id, allShipsPlaced]);
+
+  // Get player's readiness status from localStorage for the bot board
+  const [playerShipsReady, setPlayerShipsReady] = React.useState(false);
+
+  React.useEffect(() => {
+    if (id === "bot-board") {
+      // Set up an interval to check the localStorage flag
+      const checkPlayerReady = () => {
+        const playerReady =
+          localStorage.getItem("playerShipsAllPlaced") === "true";
+        setPlayerShipsReady(playerReady);
+      };
+
+      // Check immediately and then set up interval
+      checkPlayerReady();
+      const interval = setInterval(checkPlayerReady, 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [id]);
+
+  // Final readiness status based on which board this is
+  const readyToStartGame =
+    id === "player-board" ? allShipsPlaced : playerShipsReady;
+
   return (
     <div
       className="flex w-full flex-col items-center p-1 sm:p-4"
@@ -500,10 +547,11 @@ const Board: React.FC<BoardProps> = ({ board }) => {
             isActive={isActive}
             setIsGameOver={setIsGameOver}
             isGameOver={isGameOver}
+            shouldShowStartButton={shouldShowStartButton}
           />
         )}
 
-        {id === "bot-board" && (
+        {id === "bot-board" && gameStarted && (
           <EndGameButton
             gameStarted={gameStarted}
             isGameOver={isGameOver}
@@ -512,6 +560,27 @@ const Board: React.FC<BoardProps> = ({ board }) => {
             setIsGameOver={setIsGameOver}
           />
         )}
+
+        {id === "bot-board" && !gameStarted && shouldShowStartButton && (
+          <StartGameButton
+            gameStarted={gameStarted}
+            isGameOver={isGameOver}
+            isActive={isActive}
+            setGameStarted={setGameStarted}
+            setIsGameOver={setIsGameOver}
+            allShipsPlaced={readyToStartGame}
+          />
+        )}
+
+        {/* Show a status message if waiting for player to place ships */}
+        {id === "bot-board" &&
+          !gameStarted &&
+          shouldShowStartButton &&
+          !playerShipsReady && (
+            <div className="mt-1 text-center text-sm text-gray-500 dark:text-gray-400">
+              Waiting for player to place all ships...
+            </div>
+          )}
       </div>
     </div>
   );
