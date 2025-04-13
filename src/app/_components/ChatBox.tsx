@@ -18,7 +18,6 @@ import { type ShipType } from "~/types/game";
 import { Drawer } from "./ui/drawer";
 import { authClient } from "~/lib/client";
 import { toast } from "~/hooks/use-toast";
-import { useToast } from "~/hooks/use-toast"
 export interface Message {
   id: number;
   text: string;
@@ -249,20 +248,25 @@ const AuthForm = memo(() => {
           setError(error.message || "Something went wrong");
         }
       } else {
-        const {data , error} = await authClient.signUp.email({
+        await authClient.signUp.email({
           name: "test",
           email: formData.get("email") as string,
           password: formData.get("password") as string,
+        },{
+          onSuccess: () => {
+            toast({
+              title: "Signed up",
+              description: "You have been signed up successfully",
+            })
+          },
+          onError: (error) => {
+            if(error instanceof Error){
+              setError(error.message || "Something went wrong");
+            } else {
+              setError("Something went wrong");
+            }
+          }
         });
-        if(data?.user){
-          toast({
-            title: "Signed up",
-            description: "You have been signed up successfully",
-          })
-        }
-        if(error) {
-            setError(error.message || "Something went wrong");
-        }
       }
     } catch (err) {
       console.error("Authentication error:", err);

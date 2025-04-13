@@ -11,8 +11,6 @@ import type {
 import ChatBox from "./ChatBox";
 import DetailsBox from "./DetailsBox";
 import { gameEventMessages, prologueMessages } from "../helpers/chatHelpers";
-import { login } from "./_actions/login";
-
 export const BOARD_SIZE = 10;
 export const createBoard = (): BoardType =>
   Array.from(
