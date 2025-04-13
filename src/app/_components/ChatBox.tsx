@@ -245,7 +245,7 @@ const AuthForm = memo(() => {
           })
         }
         if(error) {
-          setError(error.message || "Something went wrong");
+          setError(error.message ?? "Something went wrong");
         }
       } else {
         await authClient.signUp.email({
