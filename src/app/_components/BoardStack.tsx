@@ -220,6 +220,7 @@ export const BoardStack = ({ session }: { session: Session | null }) => {
           currentEvent={currentGameEvent!}
           sunkShips={sunkShips}
           setFirstMove={setFirstMove}
+          session={session}
         />
       </div>
     </div>

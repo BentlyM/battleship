@@ -1,5 +1,15 @@
 "use client";
-import { Bot, Send, User, Users, Menu, X, UserPlus, LogIn } from "lucide-react";
+import {
+  Bot,
+  Send,
+  User,
+  Users,
+  Menu,
+  X,
+  UserPlus,
+  LogIn,
+  LogOut,
+} from "lucide-react";
 import type { Dispatch, SetStateAction } from "react";
 import { useState, useEffect, memo, useCallback } from "react";
 import { Button } from "~/components/ui/button";
@@ -19,6 +29,8 @@ import { Drawer } from "./ui/drawer";
 import { toast } from "~/hooks/use-toast";
 import { authClient } from "~/lib/auth-client";
 import { useRouter } from "next/navigation";
+import { Session } from "~/server/auth";
+
 export interface Message {
   id: number;
   text: string;
@@ -37,6 +49,7 @@ interface ChatBoxProps {
   };
   sunkShips: Record<ShipType, boolean>;
   setFirstMove?: Dispatch<SetStateAction<"player" | "bot" | "random">>;
+  session: Session | null;
 }
 
 export const useTypewriter = (text: string, speed = 50, disabled = false) => {
@@ -105,6 +118,7 @@ const GameControls = memo(
     difficulty,
     setDifficulty,
     isCompact = false,
+    session,
   }: {
     gameStarted: boolean;
     isBotMode: boolean;
@@ -116,104 +130,142 @@ const GameControls = memo(
     difficulty: string;
     setDifficulty: (value: string) => void;
     isCompact?: boolean;
-  }) => (
-    <div className={`space-y-${isCompact ? "3" : "4"}`}>
-      <div className="flex flex-row gap-2">
-        <Button
-          variant={isBotMode && !isAuthMode ? "outline" : "default"}
-          onClick={() => {
-            if (!gameStarted) {
-              setIsBotMode(true);
-              setIsAuthMode(false);
-            }
-          }}
-          disabled={gameStarted}
-          className={`w-full ${isCompact ? "h-8 text-xs" : ""}`}
-        >
-          <Bot className={`mr-2 ${isCompact ? "h-3 w-3" : "h-4 w-4"}`} />
-          vs Bot
-        </Button>
-        <Button
-          variant={!isBotMode && !isAuthMode ? "outline" : "default"}
-          onClick={() => {
-            if (!gameStarted) {
-              setIsBotMode(false);
-              setIsAuthMode(false);
-            }
-          }}
-          disabled={true}
-          className={`w-full border dark:border-gray-600 dark:bg-[#080808] dark:text-white ${isCompact ? "h-8 text-xs" : ""}`}
-          aria-label="coming soon"
-        >
-          <Users
-            className={`mr-2 ${isCompact ? "h-3 w-3" : "h-4 w-4"} dark:text-white`}
-          />
-          vs Player
-        </Button>
-      </div>
-      <Button
-        variant={isAuthMode ? "outline" : "default"}
-        onClick={() => {
-          if (!gameStarted) {
-            setIsAuthMode(true);
-            setIsBotMode(false);
-          }
-        }}
-        disabled={gameStarted} // TODO: add check for user
-        className={`w-full ${isCompact ? "h-8 text-xs" : ""}`}
-      >
-        <LogIn className={`mr-2 ${isCompact ? "h-3 w-3" : "h-4 w-4"}`} />
-        Login
-      </Button>
-      {!isAuthMode && (
-        <div className="flex flex-col space-y-2">
-          <Select
-            value={firstMove}
-            onValueChange={handleFirstMoveChange}
-            disabled={gameStarted}
-          >
-            <SelectTrigger
-              className={`w-full dark:border-gray-600 dark:bg-[#080808] dark:text-white ${isCompact ? "h-8 text-xs" : ""}`}
-            >
-              <SelectValue placeholder="First Move" />
-            </SelectTrigger>
-            <SelectContent className="dark:border-gray-600 dark:bg-[#080808] dark:text-white">
-              <SelectItem value="random">Random</SelectItem>
-              <SelectItem value="bot">
-                {isBotMode ? "Player First" : "Player 1"}
-              </SelectItem>
-              <SelectItem value="player">
-                {isBotMode ? "Bot First" : "Player 2"}
-              </SelectItem>
-            </SelectContent>
-          </Select>
+    session: Session | null;
+  }) => {
+    const router = useRouter();
 
-          {isBotMode && (
+    const handleLogout = async () => {
+      try {
+        await authClient.signOut();
+        toast({
+          title: "Logged out",
+          description: "You have been logged out successfully",
+        });
+        router.refresh();
+      } catch (error) {
+        console.error("Logout error:", error);
+        toast({
+          title: "Logout failed",
+          description: "Failed to log out. Please try again.",
+          variant: "destructive",
+        });
+      }
+    };
+
+    return (
+      <div className={`space-y-${isCompact ? "3" : "4"}`}>
+        <div className="flex flex-row gap-2">
+          <Button
+            variant={isBotMode && !isAuthMode ? "outline" : "default"}
+            onClick={() => {
+              if (!gameStarted) {
+                setIsBotMode(true);
+                setIsAuthMode(false);
+              }
+            }}
+            disabled={gameStarted}
+            className={`w-full ${isCompact ? "h-8 text-xs" : ""}`}
+          >
+            <Bot className={`mr-2 ${isCompact ? "h-3 w-3" : "h-4 w-4"}`} />
+            vs Bot
+          </Button>
+          <Button
+            variant={!isBotMode && !isAuthMode ? "outline" : "default"}
+            onClick={() => {
+              if (!gameStarted) {
+                setIsBotMode(false);
+                setIsAuthMode(false);
+              }
+            }}
+            disabled={true}
+            className={`w-full border dark:border-gray-600 dark:bg-[#080808] dark:text-white ${isCompact ? "h-8 text-xs" : ""}`}
+            aria-label="coming soon"
+          >
+            <Users
+              className={`mr-2 ${isCompact ? "h-3 w-3" : "h-4 w-4"} dark:text-white`}
+            />
+            vs Player
+          </Button>
+        </div>
+
+        {session ? (
+          // Show logout button when user is logged in
+          <Button
+            variant="default"
+            onClick={handleLogout}
+            className={`w-full ${isCompact ? "h-8 text-xs" : ""}`}
+          >
+            <LogOut className={`mr-2 ${isCompact ? "h-3 w-3" : "h-4 w-4"}`} />
+            Logout ({session.user.email})
+          </Button>
+        ) : (
+          // Show login button when no user is logged in
+          <Button
+            variant={isAuthMode ? "outline" : "default"}
+            onClick={() => {
+              if (!gameStarted) {
+                setIsAuthMode(true);
+                setIsBotMode(false);
+              }
+            }}
+            disabled={gameStarted}
+            className={`w-full ${isCompact ? "h-8 text-xs" : ""}`}
+          >
+            <LogIn className={`mr-2 ${isCompact ? "h-3 w-3" : "h-4 w-4"}`} />
+            Login
+          </Button>
+        )}
+
+        {!isAuthMode && (
+          <div className="flex flex-col space-y-2">
             <Select
-              value={difficulty}
-              onValueChange={setDifficulty}
+              value={firstMove}
+              onValueChange={handleFirstMoveChange}
               disabled={gameStarted}
             >
               <SelectTrigger
                 className={`w-full dark:border-gray-600 dark:bg-[#080808] dark:text-white ${isCompact ? "h-8 text-xs" : ""}`}
               >
-                <SelectValue placeholder="Difficulty" />
+                <SelectValue placeholder="First Move" />
               </SelectTrigger>
               <SelectContent className="dark:border-gray-600 dark:bg-[#080808] dark:text-white">
-                <SelectItem value="easy">Easy (brute force)</SelectItem>
-                <SelectItem value="medium">
-                  Medium (simply knows where some are)
+                <SelectItem value="random">Random</SelectItem>
+                <SelectItem value="bot">
+                  {isBotMode ? "Player First" : "Player 1"}
                 </SelectItem>
-                <SelectItem value="hard">
-                  Hard (actually intelligent)
+                <SelectItem value="player">
+                  {isBotMode ? "Bot First" : "Player 2"}
                 </SelectItem>
               </SelectContent>
             </Select>
-          )}
-        </div>
-      )}
-    </div>
-  ),
+
+            {isBotMode && (
+              <Select
+                value={difficulty}
+                onValueChange={setDifficulty}
+                disabled={gameStarted}
+              >
+                <SelectTrigger
+                  className={`w-full dark:border-gray-600 dark:bg-[#080808] dark:text-white ${isCompact ? "h-8 text-xs" : ""}`}
+                >
+                  <SelectValue placeholder="Difficulty" />
+                </SelectTrigger>
+                <SelectContent className="dark:border-gray-600 dark:bg-[#080808] dark:text-white">
+                  <SelectItem value="easy">Easy (brute force)</SelectItem>
+                  <SelectItem value="medium">
+                    Medium (simply knows where some are)
+                  </SelectItem>
+                  <SelectItem value="hard">
+                    Hard (actually intelligent)
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  },
 );
 
 GameControls.displayName = "GameControls";
@@ -395,6 +447,7 @@ const MobileAuthForm = memo(() => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -415,6 +468,7 @@ const MobileAuthForm = memo(() => {
                 title: "Logged in",
                 description: "You have been logged in successfully",
               });
+              router.refresh();
             },
             onError: (error) => {
               if (error instanceof Error) {
@@ -441,6 +495,7 @@ const MobileAuthForm = memo(() => {
                 title: "Signed up",
                 description: "You have been signed up successfully",
               });
+              router.refresh();
             },
             onError: (error) => {
               if (error instanceof Error) {
@@ -518,7 +573,6 @@ const MobileAuthForm = memo(() => {
             disabled={isLoading}
             className="text-xs dark:border-gray-600 dark:bg-[#080808] dark:text-white"
           />
-          l
         </div>
 
         <Button type="submit" className="w-full text-xs" disabled={isLoading}>
@@ -564,6 +618,7 @@ const ChatBox = ({
   currentEvent,
   sunkShips,
   setFirstMove,
+  session,
 }: ChatBoxProps) => {
   const [inputValue, setInputValue] = useState("");
   const [isBotMode, setIsBotMode] = useState(true);
@@ -587,6 +642,14 @@ const ChatBox = ({
       setDrawerOpen(false);
     }
   }, [gameStarted]);
+
+  // Automatically switch to Bot mode and disable Auth mode when user logs in
+  useEffect(() => {
+    if (session) {
+      setIsAuthMode(false);
+      setIsBotMode(true);
+    }
+  }, [session]);
 
   const handleFirstMoveChange = useCallback(
     (value: "player" | "bot" | "random") => {
@@ -653,9 +716,10 @@ const ChatBox = ({
           difficulty={difficulty}
           setDifficulty={setDifficulty}
           isCompact={true}
+          session={session}
         />
         {/* Show auth form directly in drawer on mobile */}
-        {isAuthMode && <MobileAuthForm />}
+        {isAuthMode && !session && <MobileAuthForm />}
       </Drawer>
 
       {/* Desktop controls - hidden on mobile, visible on medium and up */}
@@ -670,11 +734,12 @@ const ChatBox = ({
           handleFirstMoveChange={handleFirstMoveChange}
           difficulty={difficulty}
           setDifficulty={setDifficulty}
+          session={session}
         />
       </div>
 
       {/* Auth Form - only shown on desktop, mobile uses the drawer */}
-      {isAuthMode && (
+      {isAuthMode && !session && (
         <div className="hidden md:block">
           <AuthForm />
         </div>
@@ -705,7 +770,7 @@ const ChatBox = ({
         </Card>
       )}
 
-      {/* Bot Mode */}
+      {/* Bot Mode - displayed when not in auth mode and bot mode is selected */}
       {isBotMode && !isAuthMode && (
         <RecipientResponse
           currentEvent={currentEvent}
