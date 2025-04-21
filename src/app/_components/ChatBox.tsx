@@ -16,8 +16,9 @@ import { motion } from "framer-motion";
 import RecipientResponse from "./RecipientResponse";
 import { type ShipType } from "~/types/game";
 import { Drawer } from "./ui/drawer";
-import { authClient } from "~/lib/client";
 import { toast } from "~/hooks/use-toast";
+import { authClient } from "~/lib/auth-client";
+import { useRouter } from "next/navigation";
 export interface Message {
   id: number;
   text: string;
@@ -224,36 +225,47 @@ const AuthForm = memo(() => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
 
     try {
-      const formData = new FormData();
-      formData.append("email", email);
-      formData.append("password", password);
-
       if (isLogin) {
-        const { data, error } = await authClient.signIn.email({
-          email: formData.get("email") as string,
-          password: formData.get("password") as string,
-        });
-        if (data?.user) {
-          toast({
-            title: "Logged in",
-            description: "You have been logged in successfully",
-          });
-        }
-        if (error) {
-          setError(error.message ?? "Something went wrong");
-        }
+        await authClient.signIn.email(
+          {
+            email,
+            password,
+            rememberMe: true,
+          },
+          {
+            onSuccess: () => {
+              toast({
+                title: "Logged in",
+                description: "You have been logged in successfully",
+              });
+              router.refresh();
+            },
+            onError: (error) => {
+              if (error instanceof Error) {
+                setError(error.message || "Login failed");
+              } else {
+                setError("Login failed");
+              }
+            },
+            onRequest: () => {
+              setIsLoading(true);
+            },
+          },
+        );
       } else {
         await authClient.signUp.email(
           {
+            email,
+            password,
             name: "test",
-            email: formData.get("email") as string,
-            password: formData.get("password") as string,
           },
           {
             onSuccess: () => {
@@ -261,13 +273,17 @@ const AuthForm = memo(() => {
                 title: "Signed up",
                 description: "You have been signed up successfully",
               });
+              router.refresh();
             },
             onError: (error) => {
               if (error instanceof Error) {
-                setError(error.message || "Something went wrong");
+                setError(error.message || "Signup failed");
               } else {
-                setError("Something went wrong");
+                setError("Signup failed");
               }
+            },
+            onRequest: () => {
+              setIsLoading(true);
             },
           },
         );
@@ -379,27 +395,62 @@ const MobileAuthForm = memo(() => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
 
     try {
-      const formData = new FormData();
-      formData.append("email", email);
-      formData.append("password", password);
-
       if (isLogin) {
-        await authClient.signIn.email({
-          email: formData.get("email") as string,
-          password: formData.get("password") as string,
-        });
+        await authClient.signIn.email(
+          {
+            email,
+            password,
+            rememberMe: true,
+          },
+          {
+            onSuccess: () => {
+              toast({
+                title: "Logged in",
+                description: "You have been logged in successfully",
+              });
+            },
+            onError: (error) => {
+              if (error instanceof Error) {
+                setError(error.message || "Login failed");
+              } else {
+                setError("Login failed");
+              }
+            },
+            onRequest: () => {
+              setIsLoading(true);
+            },
+          },
+        );
       } else {
-        await authClient.signUp.email({
-          name: "test",
-          email: formData.get("email") as string,
-          password: formData.get("password") as string,
-        });
+        await authClient.signUp.email(
+          {
+            email,
+            password,
+            name: email.split("@")[0] || "johnDoe",
+          },
+          {
+            onSuccess: () => {
+              toast({
+                title: "Signed up",
+                description: "You have been signed up successfully",
+              });
+            },
+            onError: (error) => {
+              if (error instanceof Error) {
+                setError(error.message || "Signup failed");
+              } else {
+                setError("Signup failed");
+              }
+            },
+          },
+        );
       }
     } catch (err) {
       console.error("Authentication error:", err);

@@ -1,11 +1,15 @@
 import { HydrateClient } from "~/trpc/server";
 import { BoardStack } from "./_components/BoardStack";
-
-export default async function Home() {  
+import { getSession } from "~/server/auth";
+export default async function Home() {
+  const session = await getSession();
   return (
     <HydrateClient>
-      <main className="flex h-screen w-screen items-center justify-center dark:bg-[#080808] overflow-hidden">
-        <BoardStack />
+      <main className="flex h-screen w-screen items-center justify-center overflow-hidden dark:bg-[#080808]">
+        <BoardStack session={session} />
+        <div className="absolute right-2 top-2 rounded bg-green-100 px-2 py-1 text-xs text-green-800 dark:bg-green-900 dark:text-green-100">
+          Logged in as: {session?.user?.email || "no user"}
+        </div>
       </main>
     </HydrateClient>
   );

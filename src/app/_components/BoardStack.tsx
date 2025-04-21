@@ -11,6 +11,7 @@ import type {
 import ChatBox from "./ChatBox";
 import DetailsBox from "./DetailsBox";
 import { gameEventMessages, prologueMessages } from "../helpers/chatHelpers";
+import { Session } from "~/server/auth";
 export const BOARD_SIZE = 10;
 export const createBoard = (): BoardType =>
   Array.from(
@@ -18,7 +19,7 @@ export const createBoard = (): BoardType =>
     (): string[] => Array(BOARD_SIZE).fill("") as string[],
   ) as BoardType;
 
-export const BoardStack = () => {
+export const BoardStack = ({ session }: { session: Session | null }) => {
   const [initialScreenIsDesktop, setInitialScreenIsDesktop] = useState(
     () =>
       typeof window !== "undefined" &&

@@ -2,6 +2,8 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { PrismaClient } from "@prisma/client";
 import { nextCookies } from "better-auth/next-js";
+import { cache } from "react";
+import { headers } from "next/headers";
 
 const prisma = new PrismaClient();
 export const auth = betterAuth({
@@ -11,8 +13,14 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
-  session: {
-    expiresIn: 60 * 60 * 24, // 1 day
-  },
   plugins: [nextCookies()],
 });
+
+export const getSession = cache(async () => {
+  const headersList = await headers();
+  return await auth.api.getSession({
+    headers: headersList,
+  });
+});
+
+export type Session = Awaited<ReturnType<typeof getSession>>;
