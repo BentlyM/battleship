@@ -62,6 +62,13 @@ export const StartGameButton = (props: StartGameButtonProps) => {
     if (isGameOver) setIsGameOver(false);
     if (allShipsPlaced) {
       setGameStarted(true);
+
+      // Dispatch custom event to notify other components
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("gameStarted", { detail: { started: true } }),
+        );
+      }
     } else {
       alert("Please place all ships before starting the game");
     }
@@ -88,6 +95,13 @@ export const EndGameButton = (props: EndGameButtonProps) => {
     if (gameStarted && !isGameOver) {
       setGameStarted(false);
       setIsGameOver(true);
+
+      // Dispatch custom event to notify other components that the game has ended
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("gameStarted", { detail: { started: false } }),
+        );
+      }
     }
   };
 
@@ -136,6 +150,13 @@ const Fleet = (props: FleetProps) => {
     if (isGameOver) setIsGameOver(false);
     if (allShipsPlaced) {
       setGameStarted(true);
+
+      // Dispatch custom event to notify other components
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("gameStarted", { detail: { started: true } }),
+        );
+      }
     } else {
       alert("Please place all ships before starting the game");
       return;
@@ -147,6 +168,13 @@ const Fleet = (props: FleetProps) => {
       setGameStarted(false);
       setIsGameOver(true);
       handleRemoveShips();
+
+      // Dispatch custom event to notify other components that the game has ended
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("gameStarted", { detail: { started: false } }),
+        );
+      }
     }
   };
 

@@ -1,6 +1,6 @@
 // src/components/BoardStack.tsx
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Board } from "./Board";
 import type {
   Board as BoardType,
@@ -49,6 +49,17 @@ export const BoardStack = ({ session }: { session: Session | null }) => {
     time: "",
     gameOutcome: undefined,
   });
+
+  // Custom handler for starting the game that can be used by child components
+  const handleGameStart = useCallback((start: boolean) => {
+    setGameStarted(start);
+    // Dispatch a custom event to notify other components
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("gameStarted", { detail: { started: start } }),
+      );
+    }
+  }, []);
 
   useEffect(() => {
     if (!gameStarted) {
@@ -168,7 +179,7 @@ export const BoardStack = ({ session }: { session: Session | null }) => {
               setActiveBoard,
               setBoardData: setPlayerBoard,
               gameStarted,
-              setGameStarted,
+              setGameStarted: handleGameStart,
               onGameEvent: handleGameEvent,
               setIsGameOver: setIsGameOver,
               checkForWinner,
@@ -198,7 +209,7 @@ export const BoardStack = ({ session }: { session: Session | null }) => {
               setActiveBoard,
               setBoardData: setBotBoard,
               gameStarted,
-              setGameStarted,
+              setGameStarted: handleGameStart,
               onGameEvent: handleGameEvent,
               setIsGameOver: setIsGameOver,
               checkForWinner,

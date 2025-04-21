@@ -194,6 +194,7 @@ const GameControls = memo(
             variant="default"
             onClick={handleLogout}
             className={`w-full ${isCompact ? "h-8 text-xs" : ""}`}
+            disabled={gameStarted}
           >
             <LogOut className={`mr-2 ${isCompact ? "h-3 w-3" : "h-4 w-4"}`} />
             Logout ({session.user.email})
@@ -636,12 +637,51 @@ const ChatBox = ({
     setDrawerOpen((prev) => !prev);
   }, []);
 
-  // Close drawer when game starts
+  // Close drawer when game starts and switch to the appropriate mode
   useEffect(() => {
     if (gameStarted) {
       setDrawerOpen(false);
+      // Ensure we exit auth mode when game starts
+      setIsAuthMode(false);
+
+      // If we're on the login page/auth mode when the game starts,
+      // we need to ensure we switch to the current game mode
+      if (isAuthMode) {
+        // Default to bot mode when coming from auth mode
+        setIsBotMode(true);
+      }
+      // Otherwise, keep the current mode (bot or player) that the user selected
     }
-  }, [gameStarted]);
+  }, [gameStarted, isAuthMode]);
+
+  // Listen for the custom gameStarted event
+  useEffect(() => {
+    const handleGameStartEvent = (e: CustomEvent) => {
+      if (e.detail.started) {
+        // Game was started, ensure we're in the correct mode
+        if (isAuthMode) {
+          setIsAuthMode(false);
+          // Default to bot mode when coming from auth mode
+          setIsBotMode(true);
+        }
+        // Otherwise keep the current bot/player mode as that's what the user selected
+      }
+    };
+
+    // Add event listener for custom gameStarted event
+    window.addEventListener(
+      "gameStarted",
+      handleGameStartEvent as EventListener,
+    );
+
+    // Cleanup listener on component unmount
+    return () => {
+      window.removeEventListener(
+        "gameStarted",
+        handleGameStartEvent as EventListener,
+      );
+    };
+  }, [isAuthMode]);
 
   // Automatically switch to Bot mode and disable Auth mode when user logs in
   useEffect(() => {
