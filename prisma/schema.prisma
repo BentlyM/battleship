@@ -18,6 +18,8 @@ model User {
   updatedAt     DateTime
   sessions      Session[]
   accounts      Account[]
+  gameStats     GameStats?
+  gameMatches   GameMatch[]
 
   @@unique([email])
   @@map("user")
@@ -66,4 +68,48 @@ model Verification {
   updatedAt  DateTime?
 
   @@map("verification")
+}
+
+model GameStats {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  totalGames     Int      @default(0)
+  wins           Int      @default(0)
+  losses         Int      @default(0)
+  totalShots     Int      @default(0)
+  hits           Int      @default(0)
+  shipsSunk      Int      @default(0)
+  fastestWinTime Int?     // Stored in seconds
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("game_stats")
+}
+
+model GameMatch {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  result     String   // "Win" or "Loss"
+  shots      Int
+  hits       Int
+  accuracy   Float    // Stored as decimal (0.82 for 82%)
+  shipsSunk  Int
+  timeElapsed Int     // Stored in seconds
+  createdAt  DateTime @default(now())
+
+  @@map("game_matches")
+}
+
+model Leaderboard {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  userName  String
+  wins      Int      @default(0)
+  accuracy  Float    @default(0) // Stored as decimal
+  rank      Int?
+  updatedAt DateTime @updatedAt
+
+  @@map("leaderboard")
 }

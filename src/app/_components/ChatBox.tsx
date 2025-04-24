@@ -29,7 +29,7 @@ import { Drawer } from "./ui/drawer";
 import { toast } from "~/hooks/use-toast";
 import { authClient } from "~/lib/auth-client";
 import { useRouter } from "next/navigation";
-import { Session } from "~/server/auth";
+import { type Session } from "~/server/auth";
 
 export interface Message {
   id: number;
@@ -488,7 +488,7 @@ const MobileAuthForm = memo(() => {
           {
             email,
             password,
-            name: email.split("@")[0] || "johnDoe",
+            name: email.split("@")[0] ?? "johnDoe",
           },
           {
             onSuccess: () => {
@@ -657,7 +657,7 @@ const ChatBox = ({
   // Listen for the custom gameStarted event
   useEffect(() => {
     const handleGameStartEvent = (e: CustomEvent) => {
-      if (e.detail.started) {
+      if (e.detail) {
         // Game was started, ensure we're in the correct mode
         if (isAuthMode) {
           setIsAuthMode(false);
