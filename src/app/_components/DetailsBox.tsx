@@ -3,6 +3,10 @@ import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { RadioGroup } from "radix-ui";
 import type { Stats } from "~/types/game";
+import { Session } from "~/server/auth";
+import { api } from "~/trpc/react";
+import { GameMatch, GameStats } from "@prisma/client";
+import { toast } from "~/hooks/use-toast";
 
 const mockData = {
   overall: {
@@ -29,10 +33,12 @@ interface StatsProps {
   isGameOver: boolean;
   currentStats: Stats;
   setCurrentStats: Dispatch<SetStateAction<Stats>>;
+  session: Session | null;
 }
 
 const DetailsBox = ({ props }: { props: StatsProps }) => {
-  const { gameStarted, isGameOver, currentStats, setCurrentStats } = props;
+  const { gameStarted, isGameOver, currentStats, setCurrentStats, session } =
+    props;
 
   const [selectedView, setSelectedView] = React.useState<
     "current" | "overall" | "previous" | "leaderboard"
@@ -40,6 +46,38 @@ const DetailsBox = ({ props }: { props: StatsProps }) => {
 
   const [startTime, setStartTime] = React.useState<number | null>(null);
   const [elapsedTime, setElapsedTime] = React.useState<string>("0s");
+
+  const [userStats, setUserStats] = React.useState<GameStats | null>(null);
+  const [recentMatches, setRecentMatches] = React.useState<GameMatch[] | null>(
+    null,
+  );
+
+  const { data: gameStats } = api.gameStats.getUserStats.useQuery(undefined, {
+    enabled: !!session?.user.id,
+  });
+
+  const saveGameStats = api.gameStats.saveGame.useMutation({
+    onSuccess: () => {
+      toast({
+        title: "Game saved",
+        description: "Your game stats have been updated!",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error saving game",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  useEffect(() => {
+    if (gameStats) {
+      setUserStats(gameStats.stats);
+      setRecentMatches(gameStats.recentMatches);
+    }
+  }, [gameStats]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
@@ -63,8 +101,8 @@ const DetailsBox = ({ props }: { props: StatsProps }) => {
       clearInterval(interval);
       setCurrentStats((prev) => ({
         ...prev,
-        time: elapsedTime
-      }))
+        time: elapsedTime,
+      }));
     }
 
     return () => {
@@ -86,24 +124,36 @@ const DetailsBox = ({ props }: { props: StatsProps }) => {
         className="flex gap-1 overflow-x-auto dark:text-white"
       >
         <RadioGroup.Item value="current" asChild>
-            <Button variant={selectedView === "current" ? "default" : "outline"} className="dark:bg-[#080808] dark:border-gray-600" onClick={() => setSelectedView("current")}>
+          <Button
+            variant={selectedView === "current" ? "default" : "outline"}
+            className="dark:border-gray-600 dark:bg-[#080808]"
+            onClick={() => setSelectedView("current")}
+          >
             Current
           </Button>
         </RadioGroup.Item>
         <RadioGroup.Item value="overall" asChild>
-          <Button variant={selectedView === "overall" ? "default" : "outline"} className="dark:bg-[#080808] dark:border-gray-600" onClick={() => setSelectedView("overall")}>
+          <Button
+            variant={selectedView === "overall" ? "default" : "outline"}
+            className="dark:border-gray-600 dark:bg-[#080808]"
+            onClick={() => setSelectedView("overall")}
+          >
             Overall
           </Button>
         </RadioGroup.Item>
         <RadioGroup.Item value="previous" asChild>
-          <Button variant={selectedView === "previous" ? "default" : "outline"} className="dark:bg-[#080808] dark:border-gray-600" onClick={() => setSelectedView("previous")}>
+          <Button
+            variant={selectedView === "previous" ? "default" : "outline"}
+            className="dark:border-gray-600 dark:bg-[#080808]"
+            onClick={() => setSelectedView("previous")}
+          >
             Previous
           </Button>
         </RadioGroup.Item>
         <RadioGroup.Item value="leaderboard" asChild>
           <Button
             variant={selectedView === "leaderboard" ? "default" : "outline"}
-            className="dark:bg-[#080808] dark:border-gray-600"
+            className="dark:border-gray-600 dark:bg-[#080808]"
             onClick={() => setSelectedView("leaderboard")}
           >
             Leaderboard
@@ -111,10 +161,12 @@ const DetailsBox = ({ props }: { props: StatsProps }) => {
         </RadioGroup.Item>
       </RadioGroup.Root>
 
-      <Card className="w-full overflow-y-auto p-1 shadow dark:bg-[#080808] border-none">
+      <Card className="w-full overflow-y-auto border-none p-1 shadow dark:bg-[#080808]">
         {selectedView === "current" && (
-          <div className="flex flex-row lg:flex-col justify-between space-y-3">
-            <h3 className="hidden lg:block text-lg font-bold dark:text-white">Current Match</h3>
+          <div className="flex flex-row justify-between space-y-3 lg:flex-col">
+            <h3 className="hidden text-lg font-bold lg:block dark:text-white">
+              Current Match
+            </h3>
             <StatItem label="Accuracy" value={currentStats.accuracy} />
             <StatItem label="Sunk" value={currentStats.sunkShips} />
             <StatItem label="Fired" value={currentStats.shots} />
@@ -126,65 +178,135 @@ const DetailsBox = ({ props }: { props: StatsProps }) => {
                   : "text-red-500"
               }
             >
-              {currentStats.gameOutcome ?? "undetermined"}
+              {currentStats.gameOutcome}
             </span>
           </div>
         )}
 
         {selectedView === "overall" && (
-          <div className="flex flex-row lg:flex-col justify-between space-y-3">
-            <h3 className="hidden lg:block text-lg font-bold dark:text-white">Career Stats</h3>
-            <StatItem label="Accuracy" value={mockData.overall.accuracy} />
-            <StatItem label="Games" value={mockData.overall.totalGames} />
-            <StatItem label="Ships" value={mockData.overall.shipsSunk} />
-            <StatItem label="Fastest Win" value={mockData.overall.fastestWin} />
-            <StatItem
-              label="Avg. Shots/Win"
-              value={mockData.overall.avgShotsPerWin}
-            />
+          <div className="flex flex-row justify-between space-y-3 lg:flex-col">
+            <h3 className="hidden text-lg font-bold lg:block dark:text-white">
+              Career Stats
+            </h3>
+            {session ? (
+              <>
+                <StatItem
+                  label="Accuracy"
+                  value={
+                    userStats
+                      ? `${Math.round((userStats.hits / Math.max(userStats.totalShots, 1)) * 100)}%`
+                      : "-"
+                  }
+                />
+                <StatItem
+                  label="Games"
+                  value={userStats ? userStats.totalGames : "-"}
+                />
+                <StatItem
+                  label="Wins"
+                  value={userStats ? userStats.wins : "-"}
+                />
+                <StatItem
+                  label="Ships"
+                  value={userStats ? userStats.shipsSunk : "-"}
+                />
+                <StatItem
+                  label="Fastest Win"
+                  value={
+                    userStats && userStats.fastestWinTime
+                      ? `${Math.floor(userStats.fastestWinTime / 60)}m ${userStats.fastestWinTime % 60}s`
+                      : "-"
+                  }
+                />
+              </>
+            ) : (
+              <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+                Login to track your stats
+              </div>
+            )}
           </div>
         )}
 
         {selectedView === "previous" && (
-          <div className="flex flex-row lg:flex-col justify-between space-y-3 overflow-scroll">
-            <h3 className="hidden lg:block text-lg font-bold dark:text-white">Last 3 Matches</h3>
-            {mockData.previousMatches.map((match, i) => (
-              <div key={i} className="rounded-lg bg-muted p-3 dark:bg-[#080808] dark:border-gray-600 dark:border">
-                <div className="flex justify-between">
-                  <span className="font-medium dark:text-white">{match.date}</span>
-                  <span
-                    className={
-                      match.result === "Win" ? "text-green-500" : "text-red-500"
-                    }
+          <div className="flex flex-row justify-between space-y-3 overflow-scroll lg:flex-col">
+            <h3 className="hidden text-lg font-bold lg:block dark:text-white">
+              Previous Matches
+            </h3>
+            {session ? (
+              recentMatches && recentMatches.length > 0 ? (
+                recentMatches.map((match, i) => (
+                  <div
+                    key={i}
+                    className="rounded-lg bg-muted p-3 dark:border dark:border-gray-600 dark:bg-[#080808]"
                   >
-                    {match.result}
-                  </span>
+                    <div className="flex justify-between">
+                      <span className="font-medium dark:text-white">
+                        {new Date(match.createdAt).toLocaleDateString()}
+                      </span>
+                      <span
+                        className={
+                          match.result === "win"
+                            ? "text-green-500"
+                            : "text-red-500"
+                        }
+                      >
+                        {match.result === "win" ? "Win" : "Loss"}
+                      </span>
+                    </div>
+                    <div className="mt-2 grid grid-cols-2 gap-2">
+                      <StatItem label="Shots" value={match.shots} small />
+                      <StatItem
+                        label="Accuracy"
+                        value={`${Math.round(match.accuracy * 100)}%`}
+                        small
+                      />
+                      <StatItem
+                        label="Ships Sunk"
+                        value={match.shipsSunk}
+                        small
+                      />
+                      <StatItem
+                        label="Time"
+                        value={`${Math.floor(match.timeElapsed / 60)}m ${match.timeElapsed % 60}s`}
+                        small
+                      />
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+                  No previous matches
                 </div>
-                <div className="mt-2 grid grid-cols-2 gap-2">
-                  <StatItem label="Shots" value={match.shots} small />
-                  <StatItem label="Accuracy" value={match.accuracy} small />
-                  <StatItem label="Ships Sunk" value={match.sunk} small />
-                </div>
+              )
+            ) : (
+              <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+                Login to view match history
               </div>
-            ))}
+            )}
           </div>
         )}
 
         {selectedView === "leaderboard" && (
-          <div className="flex flex-row lg:flex-col justify-between space-y-3 overflow-x-scroll">
-            <h3 className="hidden lg:block text-lg font-bold dark:text-white">Top Commanders</h3>
+          <div className="flex flex-row justify-between space-y-3 overflow-x-scroll lg:flex-col">
+            <h3 className="hidden text-lg font-bold lg:block dark:text-white">
+              Top Commanders
+            </h3>
             {mockData.leaderboard.map((entry) => (
               <div
                 key={entry.rank}
-                className="flex items-center justify-between rounded-lg bg-muted p-2 dark:bg-[#080808] dark:border-gray-600 dark:border"
+                className="flex items-center justify-between rounded-lg bg-muted p-2 dark:border dark:border-gray-600 dark:bg-[#080808]"
               >
                 <div className="flex items-center gap-2">
-                  <span className="font-medium dark:text-white">#{entry.rank}</span>
+                  <span className="font-medium dark:text-white">
+                    #{entry.rank}
+                  </span>
                   <span className="dark:text-white">{entry.name}</span>
                 </div>
                 <div className="text-right">
                   <div className="dark:text-white">{entry.wins} Wins</div>
-                  <div className="text-sm dark:text-white">{entry.accuracy} Accuracy</div>
+                  <div className="text-sm dark:text-white">
+                    {entry.accuracy} Accuracy
+                  </div>
                 </div>
               </div>
             ))}
@@ -205,10 +327,14 @@ const StatItem = ({
   small?: boolean;
 }) => (
   <div className={`${small ? "space-y-0" : "space-y-1"}`}>
-    <div className={`dark:text-muted-foreground ${small ? "text-xs" : "text-sm"}`}>
+    <div
+      className={`dark:text-muted-foreground ${small ? "text-xs" : "text-sm"}`}
+    >
       {label}
     </div>
-    <div className={`flex items-center justify-center lg:justify-start font-medium dark:text-white ${small ? "text-base" : "text-xl"}`}>
+    <div
+      className={`flex items-center justify-center font-medium lg:justify-start dark:text-white ${small ? "text-base" : "text-xl"}`}
+    >
       {value}
     </div>
   </div>

@@ -160,6 +160,7 @@ export const BoardStack = ({ session }: { session: Session | null }) => {
           isGameOver,
           currentStats,
           setCurrentStats,
+          session,
         }}
       />
       <div className="relative flex h-full w-[90vw] max-w-[388px] justify-center sm:max-w-[545px]">
