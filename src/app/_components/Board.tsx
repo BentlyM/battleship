@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import ShipHead, { AttackedShipHead } from "./ship/ShipHead";
 import ShipBody, { AttackedShipBody } from "./ship/ShipBody";
@@ -30,7 +30,6 @@ import { handlePlayerAttack } from "../helpers/attackHelpers";
 import { motion, stagger, animate, useInView } from "framer-motion";
 import Fleet, { EndGameButton, StartGameButton } from "./Fleet";
 import { createBoard } from "./BoardStack";
-import { shipProps } from "./Ship";
 
 interface BoardProps {
   board: {
