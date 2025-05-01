@@ -103,7 +103,7 @@ const DetailsBox = ({ props }: { props: StatsProps }) => {
         ...prev,
         time: elapsedTime,
       }));
-    }
+    }  
 
     return () => {
       if (interval) {
@@ -257,7 +257,7 @@ const DetailsBox = ({ props }: { props: StatsProps }) => {
                       <StatItem label="Shots" value={match.shots} small />
                       <StatItem
                         label="Accuracy"
-                        value={`${Math.round(match.accuracy * 100)}%`}
+                        value={`${match.accuracy}%`}
                         small
                       />
                       <StatItem
