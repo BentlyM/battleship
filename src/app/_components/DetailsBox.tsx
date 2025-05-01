@@ -213,7 +213,7 @@ const DetailsBox = ({ props }: { props: StatsProps }) => {
                 <StatItem
                   label="Fastest Win"
                   value={
-                    userStats && userStats.fastestWinTime
+                    userStats?.fastestWinTime
                       ? `${Math.floor(userStats.fastestWinTime / 60)}m ${userStats.fastestWinTime % 60}s`
                       : "-"
                   }

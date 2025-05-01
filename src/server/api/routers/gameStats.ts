@@ -52,7 +52,7 @@ export const gameStatsRouter = createTRPCRouter({
       return {
         stats: gameStats,
         recentMatches,
-        leaderboardPosition: leaderboard?.rank || null,
+        leaderboardPosition: leaderboard?.rank ?? null,
       };
     } catch (error) {
       throw new TRPCError({
@@ -76,7 +76,7 @@ export const gameStatsRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session?.user.id;
-      const userName = ctx.session?.user.name || '';
+      const userName = ctx.session?.user.name ?? '';
 
       if (!userId) {
         throw new TRPCError({
